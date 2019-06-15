@@ -6,6 +6,8 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
+        parentNode:cc.Sprite,
+        buttonNode:cc.Node,
         desktopInfo:cc.Node,
         playerPrefab: cc.Prefab,
         ruleInfo:cc.Node,
@@ -15,11 +17,18 @@ cc.Class({
 
     onLoad () {
         var self = this
-        self.deskScript = self.desktopInfo.getComponent('desktopInfo');
-        self.ruleScript = self.ruleInfo.getComponent('ruleInfo');
+        self.m_deskScript = self.desktopInfo.getComponent('desktopInfo');
+        self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
         self.m_player = new Array();
         self.m_meChairID = config.INVALID_CHAIR;
         self.loadPrefab();
+        self.initZorder()
+    },
+
+    initZorder(){
+        var self = this
+        self.buttonNode.zIndex = config.sceneZOrder.buttonNode
+        self.m_moreNode.zIndex = config.sceneZOrder.moreNode
     },
 
     loadPrefab () {
@@ -32,7 +41,7 @@ cc.Class({
             player.setPosition(pos.x,pos.y)
             var playerScript = player.getComponent('player')
             self.m_player.push(playerScript)
-            self.node.addChild(player);
+            self.parentNode.node.addChild(player);
 
             playerScript.setChair(localtionID)
             playerScript.seatDown({
@@ -44,7 +53,33 @@ cc.Class({
 
         self.m_moreNode = cc.instantiate(self.morePrefab);
         self.m_moreNode.pointScene = self
-        self.node.addChild(self.m_moreNode);
+        self.parentNode.node.addChild(self.m_moreNode);
+    },
+
+    dealPoker(){
+        var self = this
+        var pokerInfo = {
+            [0]:{
+                pokers:[1,2,3,4,5,6,7,8,9,10,11,12,13,1,2,3,4,1,2,3,4]
+            },
+            [1]:{
+                pokers:[1,2,3,4,5,6,7,13,1,2,3,4,1,2,3,4]
+            },
+            [2]:{
+                pokers:[1,2,11,12,13,1,2,3,4,1,2,3,4]
+            },
+            [3]:{
+                pokers:[1,2,3,4,13,1,2,3,4,1,2,3,4]
+            },
+        }
+        for(var i = 0; i < self.m_player.length; i++){
+            var player = self.m_player[i]
+            var hand = player.getHandCardNode()
+            var chair = player.getChair()
+            var pokers = pokerInfo[chair].pokers
+            hand.clear()
+            hand.addCard(pokers,true)
+        }
     },
 
     //服务器id转换为本地椅子号
@@ -83,7 +118,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        
+        self.dealPoker()
     },
 
     onVoiceClickCallBack(event, customEventData){

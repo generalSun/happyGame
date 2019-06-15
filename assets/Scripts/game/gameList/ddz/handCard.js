@@ -1,4 +1,5 @@
 var config = require('./config')
+var handCardTouch = require('./handCardTouch')
 var Constants = require('./../../../config/Constants')
 cc.Class({
     ctor(){
@@ -38,171 +39,13 @@ cc.Class({
         }
         self.m_cardNode.height = height
         self.m_cardNode.y = nodeOffest.y
-        self.addCard([1,2,3,4,5,6,7,8,9,10,11,12,13,1,2,3,4,1,2,3,4],false)
         self.initEvent()
     },
 
     initEvent(){
         var self = this
         if(self.m_chair != 0)return
-        self.m_touchCardsInfo = new Array()
-        self.m_cardNode.on(cc.Node.EventType.TOUCH_START, function (event) {
-            cc.log("TOUCH_START event=", event.type);
-            var cardInfo = self.updateCardInfoInTouch(event)
-            self.updateCardsInfoInTouch(event,cardInfo)
-            self.updateCardsColorInTouch(event,cardInfo)
-        },self);
-
-        self.m_cardNode.on(cc.Node.EventType.TOUCH_MOVE, function (event) {
-            cc.log("TOUCH_MOVE event=", event.type);
-            var cardInfo = self.updateCardInfoInTouch(event)
-            self.updateCardsInfoInTouch(event,cardInfo)
-            self.updateCardsColorInTouch(event,cardInfo)
-        },self);
-
-        self.m_cardNode.on(cc.Node.EventType.TOUCH_END, function (event) {
-            cc.log("TOUCH_END event=", event.type);
-            var cardInfo = self.updateCardInfoInTouch(event)
-            self.updateCardsInfoInTouch(event,cardInfo)
-            self.updateCardsColorInTouch(event,cardInfo)
-            self.updateTouchCardsInfo(event)
-        },self);
-
-        self.m_cardNode.on(cc.Node.EventType.TOUCH_CANCEL, function (event) {
-            cc.log("TOUCH_CANCEL event=", event.type);
-            self.updateCardsInfoInTouch(event)
-            self.updateCardsColorInTouch()
-            self.updateCardsPosInTouch()
-            self.updateTouchCardsInfo(event)
-        },self);
-    },
-
-    updateTouchCardsInfo(event){
-        var self = this
-        if(event.type == 'touchend'){
-            for(var i = self.m_touchCardsInfo.length - 1; i >= 0; i--){
-                var cardInfo = self.m_touchCardsInfo[i]
-                var card = cardInfo.card
-                var status = card.getStatus()
-                if(status == Constants.CARD_STATUS.STATUS_NORMAL){
-                    self.m_touchCardsInfo.splice(i,1)
-                }
-            }
-        }else if(event.type == 'touchcancel'){
-            self.m_touchCardsInfo.splice(0,self.m_touchCardsInfo.length-1)
-        }
-    },
-
-    updateCardsInfoInTouch(event,cardInfo){
-        var self = this
-        if(event.type == 'touchmove'){
-            if(cardInfo){
-                var index = cardInfo.index
-                for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-                    var info = self.m_touchCardsInfo[i]
-                    var currentIndex = info.index
-                    var card = info.card
-                    var status = card.getStatus()
-                    if(!G.tools.isInBothNumber(currentIndex,index,)){
-                        if(status == Constants.CARD_STATUS.STATUS_NORMAL_SELECT){
-                            card.setStatus(Constants.CARD_STATUS.STATUS_NORMAL)
-                        }else if(status == Constants.CARD_STATUS.STATUS_POP_SELECT){
-                            card.setStatus(Constants.CARD_STATUS.STATUS_POP)
-                        }
-                    }
-                }
-            }
-        }else if(event.type == 'touchend'){
-            for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-                var cardInfo = self.m_touchCardsInfo[i]
-                var card = cardInfo.card
-                var status = card.getStatus()
-                if(status == Constants.CARD_STATUS.STATUS_NORMAL_SELECT){
-                    card.setStatus(Constants.CARD_STATUS.STATUS_POP)
-                }else if(status == Constants.CARD_STATUS.STATUS_POP_SELECT){
-                    card.setStatus(Constants.CARD_STATUS.STATUS_NORMAL)
-                }
-            }
-        }else if(event.type == 'touchcancel'){
-            for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-                var cardInfo = self.m_touchCardsInfo[i]
-                var card = cardInfo.card
-                card.setStatus(Constants.CARD_STATUS.STATUS_NORMAL)
-            }
-        }
-    },
-
-    updateCardsColorInTouch(event,cardInfo){
-        var self = this
-        if(event.type == 'touchstart' || event.type == 'touchmove'){
-            if(cardInfo){
-                var index = cardInfo.index
-                for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-                    var info = self.m_touchCardsInfo[i]
-                    var card = info.card
-                    var status = card.getStatus()
-                    if(i <= index && (status == Constants.CARD_STATUS.STATUS_NORMAL_SELECT || 
-                        status == Constants.CARD_STATUS.STATUS_POP_SELECT)
-                    ){
-                        card.setColor(cc.color(158, 198, 228))
-                    } else{
-                        card.setColor(cc.color(255, 255, 255))
-                    }
-                }
-            }
-        }else if(event.type == 'touchend' || event.type == 'touchcancel'){
-            for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-                var info = self.m_touchCardsInfo[i]
-                var card = info.card
-                card.setColor(cc.color(255, 255, 255))
-            }
-        }
-    },
-
-    updateCardsPosInTouch(){
-        var self = this
-        for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-            var cardInfo = self.m_touchCardsInfo[i]
-            var card = cardInfo.card
-            if(card.getStatus() == Constants.CARD_STATUS.STATUS_NORMAL){
-                card.node.y = card.node.y + config.cardPopHeight
-            }else{
-                card.setColor(cc.color(255, 255, 255))
-            } 
-        }
-    },
-
-    updateCardInfoInTouch(event){
-        var self = this
-        var cardInfo = self.getTouchedCardInfo(event.getLocation())
-        if(cardInfo){
-            var info = self.getTouchCardInfoByIndex(cardInfo.index)
-            if(!info){
-                self.m_touchCardsInfo.push(cardInfo)
-            }
-            var card = cardInfo.card
-            var status = card.getStatus()
-            if(event.type == 'touchstart' || event.type == 'touchmove'){
-                if(status == Constants.CARD_STATUS.STATUS_NORMAL){
-                    card.setStatus(Constants.CARD_STATUS.STATUS_NORMAL_SELECT)
-                }else if(status == Constants.CARD_STATUS.STATUS_POP){
-                    card.setStatus(Constants.CARD_STATUS.STATUS_POP_SELECT)
-                }
-            }
-            return cardInfo
-        }
-        return null
-    },
-
-    getTouchCardInfoByIndex(index){
-        var self = this
-        for(var i = 0; i < self.m_touchCardsInfo.length; i++){
-            var data = self.m_touchCardsInfo[i]
-            if(data.index == index){
-                return data
-            }
-        }
-        return null
+        self.m_handCardTouch = new handCardTouch(self.m_cardNode,self)
     },
 
     getTouchedCardInfo(pos){
@@ -256,11 +99,9 @@ cc.Class({
         var duation = 0.5
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
+            card.setPokerPos({x:startPos.x + i*space,y:startPos.y})
             if(ani){
-                card.node.runAction(cc.sequence(
-                    cc.delayTime(i*delay),
-                    cc.moveTo(duation,cc.Vec2(startPos.x + i*space,startPos.y))
-                ))
+                card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,startPos.x + i*space,startPos.y)))
             }else{
                 card.node.x = startPos.x + i*space
                 card.node.y = startPos.y
@@ -310,9 +151,9 @@ cc.Class({
         return currSpace
     },
 
-    onDestroy(){
+    clear(){
         var self = this
-        for(var i = 0; i < self.m_cards.length; i++){
+        for(var i = self.m_cards.length - 1; i >= 0; i--){
             var poker = self.m_cards[i]
             if(poker && poker.onDestroy){
                 poker.onDestroy()
@@ -320,5 +161,23 @@ cc.Class({
             self.m_cards.splice(i,1);
         }
         self.m_cardNode.removeAllChildren()
+        if(self.m_handCardTouch){
+            self.m_handCardTouch.clear()
+        }
+    },
+
+    onDestroy(){
+        var self = this
+        for(var i = self.m_cards.length - 1; i >= 0; i--){
+            var poker = self.m_cards[i]
+            if(poker && poker.onDestroy){
+                poker.onDestroy()
+            }
+            self.m_cards.splice(i,1);
+        }
+        self.m_cardNode.removeAllChildren()
+        if(self.m_handCardTouch){
+            self.m_handCardTouch.onDestory()
+        }
     }
 })

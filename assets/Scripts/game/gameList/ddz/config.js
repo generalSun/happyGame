@@ -9,7 +9,8 @@ var config = {
     ],
     sceneZOrder:{
         player:[1,2,3,4],
-
+        buttonNode:5,
+        moreNode:6,
     },
     handNodeOffset:[
         {x:0,y:-30},
@@ -33,7 +34,7 @@ var config = {
     handCardScale:[0.8,0.5,0.5,0.5],
     handCardSpace:[50,30,30,30],
     normalPokerSize:{width:118,height:160},
-    cardPopHeight:33
+    cardPopHeight:25
 }
 
 module.exports = config

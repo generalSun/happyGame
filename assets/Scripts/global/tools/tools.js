@@ -229,6 +229,9 @@ Tools.loadResPromise = function(path, type,args) {
 }
 
 Tools.isInBothNumber = function(num, num1,num2) {
+    if(typeof(num) != 'number' || typeof(num1) != 'number' || typeof(num2) != 'number'){
+        return false
+    }
     var max = Math.max(num1,num2)
     var min = Math.min(num1,num2)
     if(num >= min && num <= max){

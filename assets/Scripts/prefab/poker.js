@@ -12,7 +12,18 @@ cc.Class({
         self.m_status = Constants.CARD_STATUS.STATUS_NORMAL
         self.m_value = 0
         self.m_pokerAtlas = null
+        self.m_noramlPos = cc.Vec2(0,0)
         self.signSprite.node.active = false
+    },
+
+    setPokerPos(pos){
+        var self = this
+        self.m_noramlPos = pos
+    },
+
+    getPokerPos(){
+        var self = this
+        return self.m_noramlPos
     },
 
     setAtlas(pokerAtlas){
