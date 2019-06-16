@@ -45,7 +45,10 @@ cc.Class({
 
             playerScript.setChair(localtionID)
             playerScript.seatDown({
-                config:config
+                config:config,
+                headUrl:'https://www.baidu.com',
+                isOwner:false,
+                gold:10000
             })
             playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
             playerScript.setDisCardNode(true,new disCard(),self.pokerAtlas)
@@ -63,17 +66,22 @@ cc.Class({
                 pokers:[1,2,3,4,5,6,7,8,9,10,11,12,13,1,2,3,4,1,2,3,4]
             },
             [1]:{
-                pokers:[1,2,3,4,5,6,7,13,1,2,3,4,1,2,3,4]
+                pokers:[1,2,3,4,5,6,7,13,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4]
             },
             [2]:{
-                pokers:[1,2,11,12,13,1,2,3,4,1,2,3,4]
+                pokers:[1,2,11,12,13,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4]
             },
             [3]:{
-                pokers:[1,2,3,4,13,1,2,3,4,1,2,3,4]
+                pokers:[1,2,3,4,13,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4]
             },
         }
         for(var i = 0; i < self.m_player.length; i++){
             var player = self.m_player[i]
+            
+            var dis = player.getDisCardNode()
+            dis.clear()
+            player.setReadySprite(false)
+
             var hand = player.getHandCardNode()
             var chair = player.getChair()
             var pokers = pokerInfo[chair].pokers

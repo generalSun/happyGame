@@ -12,8 +12,14 @@ var config = {
         buttonNode:5,
         moreNode:6,
     },
-    handNodeOffset:[
-        {x:0,y:-30},
+    handNodeSize:[
+        {width:cc.winSize.width,height:cc.winSize.height},
+        {width:450,height:100},
+        {width:450,height:100},
+        {width:450,height:100},
+    ],
+    handNodeOffset:[//与playerNode的偏差
+        {x:0,y:0},
         {x:120,y:-30},
         {x:120,y:-30},
         {x:120,y:-30},
@@ -30,11 +36,37 @@ var config = {
         {x:0,y:0},
         {x:0,y:0},
     ],
-    handNodeHeight:[720,80,80,80],
     handCardScale:[0.8,0.5,0.5,0.5],
     handCardSpace:[50,30,30,30],
     normalPokerSize:{width:118,height:160},
-    cardPopHeight:25
+    cardPopHeight:25,
+
+    disNodeSize:[
+        {width:500,height:100},
+        {width:450,height:100},
+        {width:450,height:100},
+        {width:450,height:100},
+    ],
+    disNodeOffset:[
+        {x:0,y:120},
+        {x:120,y:-30},
+        {x:120,y:-30},
+        {x:120,y:-30},
+    ],
+    disCardOffset:[//改变节点的中心点
+        {x:0,y:0},
+        {x:0,y:0},
+        {x:0,y:0},
+        {x:0,y:0},
+    ],
+    disCardMinOffset:[//设定最小偏移
+        {x:0,y:0},
+        {x:0,y:0},
+        {x:0,y:0},
+        {x:0,y:0},
+    ],
+    disCardScale:[0.5,0.5,0.5,0.5],
+    disCardSpace:[30,30,30,30],
 }
 
 module.exports = config

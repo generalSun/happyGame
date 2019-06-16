@@ -45,5 +45,5 @@ G.RoomState = {
 
 G.gameInfo = {
     isLogined:true,
-    isInGame:true
+	isInGame:true
 }

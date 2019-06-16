@@ -67,16 +67,17 @@ cc.Class({
 
     init (args) {
         var self = this
-        self.setHeadSprite(true)
+        self.setHeadSprite(true,args.headUrl)
         self.setOffLineSprite(false)
         self.setResultSprite(false)
-        self.setSignSprite(true)
-        self.setBaodanSprite(true)
+        self.setSignSprite(false)
+        self.setBaodanSprite(false)
         self.setReadySprite(true)
-        self.setOwnerSprite(true)
-        self.setClock(true,30)
-        self.setGoldDescrible(true,100000)
-        self.setCardNumSprite(true,16)
+        self.setOwnerSprite(args.isOwner)
+        self.setClock(false,30)
+        self.setGoldDescrible(true,args.gold)
+        self.setCardNumSprite(false,16)
+        self.setJiabeiSprite(false)
         if(self.m_chair == 1){
             self.signSprite.node.x = -1*self.signSprite.node.x;
             self.baodanSprite.node.x = -1*self.baodanSprite.node.x;
@@ -144,6 +145,7 @@ cc.Class({
                     cc.log(err.message || err);
                     return;
                 }
+                if(!cc.isValid(self.resultSprite))return;
                 var frame = atlas.getSpriteFrame(win);
                 var sprite = self.resultSprite.node.getComponent(cc.Sprite)
                 if(sprite){
@@ -217,13 +219,24 @@ cc.Class({
         if(!self.isSeat())return;
         visible = visible || false
         self.clock.node.active = visible
-        if(!visible)return;
+        if(!visible){
+
+            return;
+        }
         var describle = self.clock.node.getChildByName('describle')
         if(!describle)return;
         var label = describle.getComponent(cc.Label)
         if(label){
             label.string = num
         }
+        self.schedule(function(){
+            if(cc.isValid(label)){
+                label.string = label.string - 1
+                if(label.string <= 3){
+
+                }
+            }
+        }, 1)
     },
 
     getClock () {
@@ -233,7 +246,7 @@ cc.Class({
         if(!describle)return;
         var label = describle.getComponent(cc.Label)
         if(label){
-            return label.string
+            return self.clock.node.active,label.string
         }
     },
 

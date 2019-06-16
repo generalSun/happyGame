@@ -17,28 +17,23 @@ cc.Class({
         self.m_cardNode = handCardNode
         self.m_pokerAtlas = atlas
         self.m_object = object
-        var winWidth = cc.winSize.width
-        var height = config.handNodeHeight[self.m_chair]
         var nodeOffest = config.handNodeOffset[self.m_chair]
+        var handNodeSize = config.handNodeSize[self.m_chair]
+        self.m_cardNode.width = handNodeSize.width || cc.winSize.width
+        self.m_cardNode.height = handNodeSize.height || cc.winSize.height
         if(self.m_chair == 0){
-            self.m_cardNode.width = winWidth
-            nodeOffest.y = -1*self.m_object.node.y
             self.m_cardNode.x = nodeOffest.x + (-1 * self.m_object.node.x)
+            self.m_cardNode.y = nodeOffest.x + (-1 * self.m_object.node.y)
         }else if(self.m_chair == 1){
-            var width = self.m_object.node.x - nodeOffest.x
-            self.m_cardNode.width = width
-            self.m_cardNode.x = -1*(nodeOffest.x + width/2)
+            self.m_cardNode.x = -1 * (nodeOffest.x + self.m_cardNode.width/2)
+            self.m_cardNode.y = -1 * nodeOffest.y
         }else if(self.m_chair == 2){
-            var width = -1*self.m_object.node.x - nodeOffest.x + winWidth/3
-            self.m_cardNode.width = width
-            self.m_cardNode.x = nodeOffest.x + width/2
+            self.m_cardNode.x = nodeOffest.x + self.m_cardNode.width/2
+            self.m_cardNode.y = -1 * nodeOffest.y
         }else if(self.m_chair == 3){
-            var width = -1*self.m_object.node.x - nodeOffest.x
-            self.m_cardNode.width = width
-            self.m_cardNode.x = nodeOffest.x + width/2
+            self.m_cardNode.x = nodeOffest.x + self.m_cardNode.width/2
+            self.m_cardNode.y = -1 * nodeOffest.y
         }
-        self.m_cardNode.height = height
-        self.m_cardNode.y = nodeOffest.y
         self.initEvent()
     },
 
@@ -77,6 +72,17 @@ cc.Class({
                 var scale = config.handCardScale[self.m_chair]
                 node.scale = scale
                 self.m_cardNode.addChild(node);
+                if(self.m_chair == 0){
+                    node.y = -1 * self.m_cardNode.height/2 + config.normalPokerSize.height*scale/2
+                }else{
+                    node.y = 0
+                }
+
+                if(self.m_chair == 1){
+                    node.x = config.normalPokerSize.width*scale/2 - self.m_cardNode.width/2
+                }else{
+                    node.x = self.m_cardNode.width/2 - config.normalPokerSize.width*scale/2
+                }
 
                 var cardScript = node.getComponent('poker')
                 self.m_cards.push(cardScript)
@@ -95,16 +101,22 @@ cc.Class({
         var self = this
         var space = self.getSpace()
         var startPos = self.getStartPos(space)
-        var delay = 0.1
-        var duation = 0.5
+        var delay = 0.05
+        var duation = 0.2
+        var scale = config.handCardScale[self.m_chair]
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             card.setPokerPos({x:startPos.x + i*space,y:startPos.y})
+            card.node.y = startPos.y 
+            if(self.m_chair == 1){
+                card.node.x = config.normalPokerSize.width*scale/2 - self.m_cardNode.width/2
+            }else{
+                card.node.x = self.m_cardNode.width/2 - config.normalPokerSize.width*scale/2
+            }
             if(ani){
                 card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,startPos.x + i*space,startPos.y)))
             }else{
                 card.node.x = startPos.x + i*space
-                card.node.y = startPos.y
             }
         }
     },
@@ -125,8 +137,7 @@ cc.Class({
             pos.x = x < minx?(minx + config.normalPokerSize.width*scale/2):(x + config.normalPokerSize.width*scale/2)
         }
         if(self.m_chair == 0){
-            var height = self.m_cardNode.height
-            pos.y = -1 * height/2 + config.normalPokerSize.height*scale/2
+            pos.y = -1 * self.m_cardNode.height/2 + config.normalPokerSize.height*scale/2
         }
         return pos
     },
