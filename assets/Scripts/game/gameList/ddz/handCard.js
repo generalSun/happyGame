@@ -89,14 +89,22 @@ cc.Class({
                 cardScript.setAtlas(self.m_pokerAtlas)
                 cardScript.setCard(value)
             }
-            self.refreshCardsPos(ani)
+            if(self.m_handCardTouch){
+                self.m_handCardTouch.canTouched(false)
+            }
+            if(self.m_chair == 0){
+                self.addCardTypeOne(ani)
+            }else{
+                self.m_object.setCardNumSprite(true)
+                self.addCardTypeTwo(ani)
+            }
         })
         .catch(function(err){
             cc.log(err.message || err);
         })
     },
 
-    refreshCardsPos(ani){
+    addCardTypeOne(ani){
         ani = ani || false
         var self = this
         var space = self.getSpace()
@@ -108,16 +116,60 @@ cc.Class({
             var card = self.m_cards[i]
             card.setPokerPos({x:startPos.x + i*space,y:startPos.y})
             card.node.y = startPos.y 
+            card.node.x = self.m_cardNode.width/2 - config.normalPokerSize.width*scale/2
+            if(ani){
+                card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,startPos.x + i*space,startPos.y),cc.callFunc(self.dealPokerEnd,self,{index:i})))
+            }else{
+                card.node.x = startPos.x + i*space
+                self.dealPokerEnd(self,{index:i})
+            }
+        }
+    },
+
+    addCardTypeTwo(ani){
+        ani = ani || false
+        var self = this
+        var delay = 0.05
+        var duation = 0.2
+        var scale = config.handCardScale[self.m_chair]
+        var cardObject = self.m_object.getCardNum()
+        var worldPos = cardObject.object.node.convertToWorldSpace(cc.v2(0,0))
+        var endPos = self.m_cardNode.convertToNodeSpaceAR(worldPos)
+
+        var callBack = function(target,data){
+            var index = data.index
+            self.m_object.setCardNumSprite(true,index+1)
+            target.active = false
+        }
+
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            card.setPokerPos({x:endPos.x,y:endPos.y})
+            card.node.y = endPos.y 
             if(self.m_chair == 1){
                 card.node.x = config.normalPokerSize.width*scale/2 - self.m_cardNode.width/2
             }else{
                 card.node.x = self.m_cardNode.width/2 - config.normalPokerSize.width*scale/2
             }
             if(ani){
-                card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,startPos.x + i*space,startPos.y)))
+                card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,endPos.x,endPos.y),cc.callFunc(callBack,card,{index:i})))
             }else{
-                card.node.x = startPos.x + i*space
+                card.node.x = endPos.x
+                callBack(card,{index:i})
             }
+        }
+    },
+
+    dealPokerEnd(target,args){
+        args = args || {}
+        var self = this
+        var index = args.index
+        if(index + 1 < self.m_cards.length){
+            return;
+        }
+        //自己发牌结束
+        if(self.m_handCardTouch){
+            self.m_handCardTouch.canTouched(true)
         }
     },
 

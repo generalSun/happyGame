@@ -246,7 +246,7 @@ cc.Class({
         if(!describle)return;
         var label = describle.getComponent(cc.Label)
         if(label){
-            return self.clock.node.active,label.string
+            return {object:self.clock,describle:label.string}
         }
     },
 
@@ -271,7 +271,7 @@ cc.Class({
         if(!describle)return;
         var label = describle.getComponent(cc.Label)
         if(label){
-            return label.string
+            return {object:self.cardNumSprite,describle:label.string}
         }
     },
 

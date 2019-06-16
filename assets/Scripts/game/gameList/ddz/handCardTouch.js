@@ -7,6 +7,7 @@ var touch = class{
         self.m_cardNode = cardNode
         self.m_touchCardsInfo = new Array()
         self.m_touchBeginIndex = null
+        self.m_canTouch = false
         self.m_cardNode.on(cc.Node.EventType.TOUCH_START,self.touchBegin,self);
  
         self.m_cardNode.on(cc.Node.EventType.TOUCH_MOVE,self.touchMove,self);
@@ -14,6 +15,11 @@ var touch = class{
         self.m_cardNode.on(cc.Node.EventType.TOUCH_END,self.touchEnd,self);
 
         self.m_cardNode.on(cc.Node.EventType.TOUCH_CANCEL,self.touchCanael,self);
+    }
+
+    canTouched(flag){
+        var self = this
+        self.m_canTouch = flag
     }
 
     getTouchCardsInfo(){
@@ -24,6 +30,9 @@ var touch = class{
     touchBegin(event){
         cc.log("TOUCH_START event=", event.type);
         var self = this
+        if(!self.m_canTouch){
+            return;
+        }
         var cardInfo = self.updateCardInfoInTouch(event)
         if(cardInfo){
             self.m_touchBeginIndex = cardInfo.index
