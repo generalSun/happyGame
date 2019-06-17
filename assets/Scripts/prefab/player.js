@@ -17,12 +17,14 @@ cc.Class({
         goldDescrible:cc.Label,
         handCardNode:cc.Node,
         disCardNode:cc.Node,
+        operateNode:cc.Node,
     },
 
     onLoad () {
         var self = this
         self.m_chair = 0
         self.m_config = null
+        self.m_playerEventScript = self.node.getComponent('playerEvent')
         self.seatUp()
     },
 
@@ -78,6 +80,8 @@ cc.Class({
         self.setGoldDescrible(true,args.gold)
         self.setCardNumSprite(false,16)
         self.setJiabeiSprite(false)
+        self.setOperateNode(false)
+        self.m_playerEventScript.setChair(self.m_chair)
         if(self.m_chair == 1){
             self.signSprite.node.x = -1*self.signSprite.node.x;
             self.baodanSprite.node.x = -1*self.baodanSprite.node.x;
@@ -303,7 +307,7 @@ cc.Class({
         self.handCardNode.active = visible
         if(!instance)return;
         if(instance.initWidget){
-            instance.initWidget(self.handCardNode,self.m_chair,atlas,self)
+            instance.initWidget(self.handCardNode,self.m_chair,atlas,self.m_playerEventScript,self)
         }
         self.handCardNode.bindInstance = instance
     },
@@ -331,4 +335,17 @@ cc.Class({
         if(!self.isSeat())return false;
         return self.disCardNode.bindInstance
     },
+
+    setOperateNode(visible){
+        var self = this
+        if(!self.isSeat())return;
+        visible = visible || false
+        self.operateNode.active = visible
+    },
+
+    getOperateNode(){
+        var self = this
+        if(!self.isSeat())return;
+        return self.operateNode
+    }
 })

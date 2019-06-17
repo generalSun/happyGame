@@ -27,9 +27,9 @@ cc.Class({
         this.node.active = visible;
 
         if (visible) {
-            this.m_animLoading.getComponent('animLoading').playAnim();
+            this.m_animLoading.getComponent('animationOperate').playAnim();
         } else {
-            this.m_animLoading.getComponent('animLoading').stopAnim();
+            this.m_animLoading.getComponent('animationOperate').stopAnim();
         }
     },
 });

@@ -29,10 +29,16 @@
     "_components": [
       {
         "__id__": 8
+      },
+      {
+        "__id__": 9
+      },
+      {
+        "__id__": 10
       }
     ],
     "_prefab": {
-      "__id__": 9
+      "__id__": 11
     },
     "_opacity": 255,
     "_color": {
@@ -105,8 +111,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 40,
-      "height": 36
+      "width": 118,
+      "height": 160
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -152,7 +158,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "8cdb44ac-a3f6-449f-b354-7cd48cf84061"
+      "__uuid__": "1df5a3f8-f60b-4c42-b053-f822c4219bd2"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -165,7 +171,9 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_atlas": null,
+    "_atlas": {
+      "__uuid__": "63b2c6a0-53da-48b8-a865-b9526dde7626"
+    },
     "_id": ""
   },
   {
@@ -207,8 +215,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 40,
-      "height": 36
+      "width": 56,
+      "height": 56
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -217,8 +225,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
+      "x": 30,
+      "y": 50,
       "z": 0
     },
     "_scale": {
@@ -254,7 +262,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "8cdb44ac-a3f6-449f-b354-7cd48cf84061"
+      "__uuid__": "210275ea-52a8-464c-88d8-886fb8a2e3bb"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -267,7 +275,9 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_atlas": null,
+    "_atlas": {
+      "__uuid__": "81992539-a25a-4c64-8200-ed37eff85663"
+    },
     "_id": ""
   },
   {
@@ -294,6 +304,38 @@
     },
     "signSprite": {
       "__id__": 6
+    },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Animation",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_defaultClip": {
+      "__uuid__": "cf087fa2-0bc7-4780-894b-975ccec33ac7"
+    },
+    "_clips": [
+      {
+        "__uuid__": "cf087fa2-0bc7-4780-894b-975ccec33ac7"
+      }
+    ],
+    "playOnLoad": false,
+    "_id": ""
+  },
+  {
+    "__type__": "a28bdeDON9LNKruMusu7cUz",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "anim": {
+      "__id__": 9
     },
     "_id": ""
   },

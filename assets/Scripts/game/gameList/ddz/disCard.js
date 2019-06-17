@@ -19,13 +19,13 @@ cc.Class({
         self.m_cardNode.width = disNodeSize.width
         self.m_cardNode.height = disNodeSize.height
         var nodeOffest = config.disNodeOffset[self.m_chair]
-        if(self.m_chair == 0){
+        if(self.m_chair == config.chair.home){
             self.m_cardNode.x = nodeOffest.x + (-1 * self.m_object.node.x)
-        }else if(self.m_chair == 1){
+        }else if(self.m_chair == config.chair.nextDoor){
             self.m_cardNode.x = -1 * (nodeOffest.x + self.m_cardNode.width/2)
-        }else if(self.m_chair == 2){
+        }else if(self.m_chair == config.chair.rightHome){
             self.m_cardNode.x = nodeOffest.x + self.m_cardNode.width/2
-        }else if(self.m_chair == 3){
+        }else if(self.m_chair == config.chair.upperHouse){
             self.m_cardNode.x = nodeOffest.x + self.m_cardNode.width/2
         }
         self.m_cardNode.y = nodeOffest.y
@@ -46,39 +46,19 @@ cc.Class({
                 var value = arg.parameter
                 var node = cc.instantiate(prefab);
                 node.active = true;
-                var scale = config.disCardScale[self.m_chair]
-                node.scale = scale
                 self.m_cardNode.addChild(node);
 
                 var cardScript = node.getComponent('poker')
                 self.m_cards.push(cardScript)
+                var scale = config.disCardScale[self.m_chair]
+                cardScript.setPokerScale(scale)
                 cardScript.setAtlas(self.m_pokerAtlas)
                 cardScript.setCard(value)
             }
-            self.refreshCardsPos(ani)
         })
         .catch(function(err){
             cc.log(err.message || err);
         })
-    },
-
-    refreshCardsPos(ani){
-        ani = ani || false
-        var self = this
-        var space = self.getSpace()
-        var startPos = self.getStartPos(space)
-        var delay = 0.1
-        var duation = 0.5
-        for(var i = 0; i < self.m_cards.length; i++){
-            var card = self.m_cards[i]
-            card.setPokerPos({x:startPos.x + i*space,y:startPos.y})
-            if(ani){
-                card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,startPos.x + i*space,startPos.y)))
-            }else{
-                card.node.x = startPos.x + i*space
-                card.node.y = startPos.y
-            }
-        }
     },
 
     getStartPos(space){
@@ -89,16 +69,12 @@ cc.Class({
         var cardMinOffest = config.disCardMinOffset[self.m_chair]
         var scale = config.disCardScale[self.m_chair]
         var cardsNum = self.m_cards.length
-        var pos = {x:0,y:0}
+        var pos = cc.v2(0,0)
         if(cardsNum > 0){
-            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale
+            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale.x
             var minx = cardMinOffest.x - width/2
             var x = cardOffest.x - cardsWidth/2
-            pos.x = x < minx?(minx + config.normalPokerSize.width*scale/2):(x + config.normalPokerSize.width*scale/2)
-        }
-        if(self.m_chair == 0){
-            var height = self.m_cardNode.height
-            pos.y = -1 * height/2 + config.normalPokerSize.height*scale/2
+            pos.x = x < minx?(minx + config.normalPokerSize.width*scale.x/2):(x + config.normalPokerSize.width*scale.x/2)
         }
         return pos
     },
@@ -113,11 +89,11 @@ cc.Class({
         var cardsNum = self.m_cards.length
         var currSpace = space
         if(cardsNum > 0){
-            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale
+            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale.x
             var maxw = width - cardMinOffest.x 
             var w = cardsWidth + cardOffest.x
             if(w > maxw){
-                currSpace = (maxw - config.normalPokerSize.width*scale)/((cardsNum - 1) == 0?1:(cardsNum - 1))
+                currSpace = (maxw - config.normalPokerSize.width*scale.x)/((cardsNum - 1) == 0?1:(cardsNum - 1))
             }
         }
         return currSpace
@@ -127,8 +103,8 @@ cc.Class({
         var self = this
         for(var i = self.m_cards.length - 1; i >= 0; i--){
             var poker = self.m_cards[i]
-            if(poker && poker.onDestroy){
-                poker.onDestroy()
+            if(cc.isValid(poker) && poker.clear){
+                poker.clear()
             }
             self.m_cards.splice(i,1);
         }
@@ -139,7 +115,7 @@ cc.Class({
         var self = this
         for(var i = self.m_cards.length - 1; i >= 0; i--){
             var poker = self.m_cards[i]
-            if(poker && poker.onDestroy){
+            if(cc.isValid(poker) && poker.onDestroy){
                 poker.onDestroy()
             }
             self.m_cards.splice(i,1);

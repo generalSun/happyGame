@@ -62,16 +62,16 @@ cc.Class({
     dealPoker(){
         var self = this
         var pokerInfo = {
-            [0]:{
-                pokers:[1,2,3,4,5,6,7,8,9,10,11,12,13,1,2,3,4,1,2,3,4]
+            [config.chair.home]:{
+                pokers:[10,12,13,6,5,6,6,10,9,10,11,12,13,1,2,3,4,1,2,3,4]
             },
-            [1]:{
+            [config.chair.nextDoor]:{
                 pokers:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             },
-            [2]:{
+            [config.chair.rightHome]:{
                 pokers:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             },
-            [3]:{
+            [config.chair.upperHouse]:{
                 pokers:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             },
         }

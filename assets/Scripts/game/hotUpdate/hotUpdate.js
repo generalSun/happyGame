@@ -70,6 +70,8 @@ cc.Class({
 
         G.msgBoxMgr = cc.find('msgBoxNode').getComponent('msgBoxMgr')
 
+        G.eventManager = cc.find('systemEventNode').getComponent('systemEvent')
+
         G.ioUtil = require('../../global/tools/ioUtil')
         G.tools = require('../../global/tools/tools');
         G.uiFactory = require('../../global/tools/uiFactory');

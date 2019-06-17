@@ -164,9 +164,9 @@ var touch = class{
             var card = info.card
             var status = card.getStatus()
             if(status == Constants.CARD_STATUS.STATUS_POP){
-                card.node.y = card.getPokerPos().y + config.cardPopHeight
+                card.node.y = card.getPokerNormalPosition().y + config.cardPopHeight
             } else{
-                card.node.y = card.getPokerPos().y
+                card.node.y = card.getPokerNormalPosition().y
             }
         }
     }
@@ -174,7 +174,6 @@ var touch = class{
     updateCardInfoInTouch(event){
         var self = this
         var cardInfo = self.m_bindObject.getTouchedCardInfo(event.getLocation())
-        console.log(cardInfo == null)
         if(cardInfo){
             var info = self.getTouchCardInfoByIndex(cardInfo.index)
             if(!info){

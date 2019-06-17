@@ -1,11 +1,17 @@
 var config = {
     INVALID_CHAIR:0xFFFF,							//非法座位号
     maxPlayerNum:4,
+    chair:{
+        home:0,//自家
+        nextDoor:1,//下家
+        rightHome:2,//对家
+        upperHouse:3,//上家
+    },
     playerPos:[
-        {x:-570,y:-255},
-        {x:570,y:30},
-        {x:-310,y:245},
-        {x:-570,y:30},
+        cc.v2(-570,-255),
+        cc.v2(570,30),
+        cc.v2(-310,245),
+        cc.v2(-570,30)
     ],
     sceneZOrder:{
         player:[1,2,3,4],
@@ -13,59 +19,70 @@ var config = {
         moreNode:6,
     },
     handNodeSize:[
-        {width:cc.winSize.width,height:cc.winSize.height},
-        {width:450,height:100},
-        {width:450,height:100},
-        {width:450,height:100},
+        cc.size(cc.winSize.width,cc.winSize.height),
+        cc.size(450,100),
+        cc.size(450,100),
+        cc.size(450,100),
     ],
     handNodeOffset:[//与playerNode的偏差
-        {x:0,y:0},
-        {x:120,y:-30},
-        {x:120,y:-30},
-        {x:120,y:-30},
+        cc.v2(0,0),
+        cc.v2(120,-30),
+        cc.v2(120,-30),
+        cc.v2(120,-30),
     ],
     handCardOffset:[//改变节点的中心点
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
     ],
     handCardMinOffset:[//设定最小偏移
-        {x:180,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
+        cc.v2(180,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
+
     ],
-    handCardScale:[0.8,0.5,0.5,0.5],
+    handCardScale:[
+        cc.v2(0.8,0.8),
+        cc.v2(0.5,0.5),
+        cc.v2(0.5,0.5),
+        cc.v2(0.5,0.5),
+    ],
     handCardSpace:[50,30,30,30],
-    normalPokerSize:{width:118,height:160},
+    normalPokerSize:cc.size(118,160),
     cardPopHeight:25,
 
     disNodeSize:[
-        {width:500,height:100},
-        {width:450,height:100},
-        {width:450,height:100},
-        {width:450,height:100},
+        cc.size(500,100),
+        cc.size(450,100),
+        cc.size(450,100),
+        cc.size(450,100),
     ],
     disNodeOffset:[
-        {x:0,y:120},
-        {x:120,y:-30},
-        {x:120,y:-30},
-        {x:120,y:-30},
+        cc.v2(0,120),
+        cc.v2(120,-30),
+        cc.v2(120,-30),
+        cc.v2(120,-30),
     ],
     disCardOffset:[//改变节点的中心点
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
     ],
     disCardMinOffset:[//设定最小偏移
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
-        {x:0,y:0},
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
+        cc.v2(0,0),
     ],
-    disCardScale:[0.5,0.5,0.5,0.5],
+    disCardScale:[
+        cc.v2(0.5,0.5),
+        cc.v2(0.5,0.5),
+        cc.v2(0.5,0.5),
+        cc.v2(0.5,0.5),
+    ],
     disCardSpace:[30,30,30,30],
 }
 
