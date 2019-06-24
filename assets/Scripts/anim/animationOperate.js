@@ -1,4 +1,3 @@
-var Constants = require('./../config/Constants')
 cc.Class({
     extends: cc.Component,
 

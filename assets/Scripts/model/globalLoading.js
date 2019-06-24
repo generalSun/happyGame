@@ -3,12 +3,16 @@ cc.Class({
 
     properties: {
         animLoadingPrefab: cc.Prefab,
+        bg:cc.Sprite,
+        describle:cc.Label
     },
 
     onLoad () {
-        cc.game.addPersistRootNode(this.node)
-        this.initAnimLoading();
-        this.initTouchEvent();
+        var self = this;
+        cc.game.addPersistRootNode(self.node)
+        self.initAnimLoading();
+        self.initTouchEvent();
+        self.node.active = false;
     },
 
     initTouchEvent () {
@@ -17,19 +21,25 @@ cc.Class({
     },
 
     initAnimLoading () {
-        this.m_animLoading = cc.instantiate(this.animLoadingPrefab);
-        this.node.addChild(this.m_animLoading);
-        this.m_animLoading.setPosition(0, 0);
+        var self = this
+        self.m_animLoading = cc.instantiate(self.animLoadingPrefab);
+        self.bg.node.addChild(self.m_animLoading);
+        self.m_animLoading.setPosition(0, 0);
     },
 
-    setLoadingVisible (visible) {
+    setLoadingVisible (visible,desc) {
+        var self = this;
         visible = visible || false;
-        this.node.active = visible;
-
+        self.node.active = visible;
+        self.describle.node.active = false
         if (visible) {
-            this.m_animLoading.getComponent('animationOperate').playAnim();
+            self.m_animLoading.getComponent('animationOperate').playAnim();
+            if(desc){
+                self.describle.node.active = true
+                self.describle.string = desc
+            }
         } else {
-            this.m_animLoading.getComponent('animationOperate').stopAnim();
+            self.m_animLoading.getComponent('animationOperate').stopAnim();
         }
     },
 });

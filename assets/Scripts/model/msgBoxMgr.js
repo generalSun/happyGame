@@ -5,6 +5,7 @@ cc.Class({
         m_spTitle: cc.Label,
         m_lbContent: cc.Label,
         m_btnSure: cc.Button,
+        m_btnCancel: cc.Button,
     },
 
     onLoad () {
@@ -13,8 +14,13 @@ cc.Class({
 
         self.node.on(cc.Node.EventType.TOUCH_START, function (event) {}, self);
 
-        var clickHandler = G.tools.createClickEventHandler(self.node, "msgBoxMgr", "btnSureClickEvent")
-        self.m_btnSure.clickEvents.push(clickHandler);
+        var sureClickHandler = G.tools.createClickEventHandler(self.node, "msgBoxMgr", "btnSureClickEvent")
+        self.m_btnSure.clickEvents.push(sureClickHandler);
+
+        var cancelClickHandler = G.tools.createClickEventHandler(self.node, "msgBoxMgr", "btnCancelClickEvent")
+        self.m_btnCancel.clickEvents.push(cancelClickHandler);
+
+        self.node.active = false;
     },
 
     //显示提示框
@@ -28,8 +34,26 @@ cc.Class({
         var content = param.content || "";
         self.m_lbContent.string = content;
 
-        self.clickEventCallBack = param.clickEventCallBack;
-
+        self.sureClickEventCallBack = param.sureClickEventCallBack;
+        self.cancelClickEventCallBack = param.cancelClickEventCallBack;
+        if(self.sureClickEventCallBack && self.cancelClickEventCallBack){
+            self.m_btnSure.node.x = -150
+            self.m_btnCancel.node.x = 150
+            self.m_btnSure.node.active = true
+            self.m_btnCancel.node.active = true
+        }else if(self.sureClickEventCallBack){
+            self.m_btnSure.node.x = 0
+            self.m_btnSure.node.active = true
+            self.m_btnCancel.node.active = false
+        }else if(self.cancelClickEventCallBack){
+            self.m_btnCancel.node.x = 0
+            self.m_btnSure.node.active = false
+            self.m_btnCancel.node.active = true
+        }else{
+            self.m_btnSure.node.x = 0
+            self.m_btnSure.node.active = true
+            self.m_btnCancel.node.active = false
+        }
         self.node.active = true;
     },
 
@@ -41,9 +65,19 @@ cc.Class({
     btnSureClickEvent () {
         var self = this;
 
-        if (!!self.clickEventCallBack) {
-            self.clickEventCallBack();
-            self.clickEventCallBack = null;
+        if (!!self.sureClickEventCallBack) {
+            self.sureClickEventCallBack();
+            self.sureClickEventCallBack = null;
+        }
+        self.closeMsgBox();
+    },
+
+    btnCancelClickEvent () {
+        var self = this;
+
+        if (!!self.cancelClickEventCallBack) {
+            self.cancelClickEventCallBack();
+            self.cancelClickEventCallBack = null;
         }
         self.closeMsgBox();
     },

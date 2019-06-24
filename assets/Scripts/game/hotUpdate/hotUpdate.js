@@ -21,47 +21,20 @@ cc.Class({
     },
 
     onLoad() {
-        this.initGlobalVaribal();
-        if(!this.isHotUpdate){
-            this.requestServerConfig()
+        var self = this;
+        self.initGlobalVaribal();
+        if(!self.isHotUpdate){
+            self.hotUpdateEnd()
             return
         }
-        if (!cc.sys.isNative) {
-            return;
-        }
-        this.loginNode.active = false
-        this.updateNode.active = true
-        this.byteProgress.active = false
-        this.fileProgress.active = false
-        this.byteProgress.progress = 0;
-        this.fileProgress.progress = 0;
-        var self = this;
-        this._storagePath = jsb.fileUtils.getWritablePath();
-        this._am = new jsb.AssetsManager('', this._storagePath, this.versionCompareHandle);
-        if (!cc.sys.ENABLE_GC_FOR_NATIVE_OBJECTS) {
-            this._am.retain();
-        }
-        this._am.setVerifyCallback(function (path, asset) {
-            var compressed = asset.compressed;
-            var expectedMD5 = asset.md5;
-            var relativePath = asset.path;
-            var size = asset.size;
-            if (compressed) {
-                self.label.string = "Verification passed : " + relativePath;
-                return true;
-            }
-            else {
-                self.label.string = "Verification passed : " + relativePath + ' (' + expectedMD5 + ')';
-                return true;
-            }
-        });
-        this.checkUpdata()
+        if (!cc.sys.isNative) return;
+        self.initHotUpdate()
     },
 
     initGlobalVaribal(){
         var self = this
         G.javaManage = require('../../global/java/javaManage')
-        G.javaCallBackManage = new javaCallBackManage(this)
+        G.javaCallBackManage = new javaCallBackManage(self)
 
         G.httpManage = require('../../global/net/httpManage')
         G.globalSocket = cc.find('nonControlNode').getComponent('socketManage')
@@ -76,38 +49,36 @@ cc.Class({
         G.tools = require('../../global/tools/tools');
         G.uiFactory = require('../../global/tools/uiFactory');
 
-        G.SelfUserData = new UserData();
+        G.selfUserData = new UserData();
 
         G.gameInfo.isLogined = false
         G.gameInfo.isInGame = false
         G.ioUtil.clear()
     },
 
-    socketConnected(){
-        this.node.emit(constants.EVENTNAME.Login)
+    hotUpdateEnd(){
+        var self = this
+        self.loginNode.active = true
+        self.updateNode.active = false
+        if(self.node.getComponent('login').hotUpdateEnd){
+            self.node.getComponent('login').hotUpdateEnd()
+        }
     },
 
-    //拉取配置成功
-    requestSuccess(){
-        this.loginNode.active = true
-        this.updateNode.active = false
-        G.globalSocket.setMsgHandler(this)
-        G.globalSocket.connectSocket()
-    },
-
-    //拉取配置失败
-    requestError(){
+    hotUpdateError(){
         var self = this
         G.msgBoxMgr.showMsgBox({
-            content:'请求数据出错，再次请求！',
-            clickEventCallBack:self.requestServerConfig.bind(self)
+            content:'更新文件出错，点击确认将继续更新，取消将退出游戏！',
+            sureClickEventCallBack:function(){
+                if (!self._updating) {
+                    self.label.string = 'Retry failed Assets...';
+                    self._am.downloadFailedAssets();
+                }
+            },
+            cancelClickEventCallBack:function(){
+                cc.game.end();//退出游戏
+            }
         })
-    },
-
-    requestServerConfig(){
-        cc.director.loadScene('DdzGameScene')
-        // var self = this
-        // G.globalSocket.requestServerConfig(self.requestSuccess.bind(self),self.requestError.bind(self))
     },
 
     /*
@@ -117,15 +88,72 @@ cc.Class({
 
     ----------------------------------------------------------------------------------------------------------
     */
+    initHotUpdate(){
+        var self = this;
+        self.loginNode.active = false
+        self.updateNode.active = true
+        self.byteProgress.active = false
+        self.fileProgress.active = false
+        self.byteProgress.progress = 0;
+        self.fileProgress.progress = 0;
+        
+        self._storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'remote-assets');
+        self._am = new jsb.AssetsManager('', self._storagePath, self.versionCompareHandle);
+
+        self._am.setVerifyCallback(function (filePath, asset) {
+            var compressed = asset.compressed;
+            var expectedMD5 = asset.md5;
+            var relativePath = asset.path;
+            var size = asset.size;
+            var downloadState = asset.downloadState;
+            if (compressed) {
+                self.label.string = "Verification passed : " + relativePath;
+            }else {
+                self.label.string = "Verification passed : " + relativePath + ' (' + expectedMD5 + ')';
+            }
+            return true;
+        });
+        self.label.string = 'Hot update is ready, please check or directly update.';
+        if (cc.sys.os === cc.sys.OS_ANDROID) {
+            this._am.setMaxConcurrentTask(2);
+        }
+
+        self.checkUpdata()
+    },
+
+    versionCompareHandle(versionA, versionB){
+        var vA = versionA.split('.');
+        var vB = versionB.split('.');
+        for (var i = 0; i < vA.length; ++i) {
+            var a = parseInt(vA[i]);
+            var b = parseInt(vB[i] || 0);
+            if (a === b) {
+                continue;
+            }
+            else {
+                return a - b;
+            }
+        }
+        if (vB.length > vA.length) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    },
+
     hotUpdate() {
         if (this._am && !this._updating) {
             this.byteProgress.active = true
             this.fileProgress.active = true
-            this._updateListener = new jsb.EventListenerAssetsManager(this._am, this.updateCb.bind(this));
-            cc.eventManager.addListener(this._updateListener, 1);
-
+            this._am.setEventCallback(this.updateCb.bind(this));
             if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
-                this._am.loadLocalManifest(this.manifestUrl);
+                // Resolve md5 url
+                var url = this.manifestUrl.nativeUrl;
+                if (cc.loader.md5Pipe) {
+                    url = cc.loader.md5Pipe.transformURL(url);
+                }
+                this._am.loadLocalManifest(url);
             }
 
             this._am.update();
@@ -142,16 +170,18 @@ cc.Class({
             return;
         }
         if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
-            this._am.loadLocalManifest(this.manifestUrl);
+            var url = this.manifestUrl.nativeUrl;
+            if (cc.loader.md5Pipe) {
+                url = cc.loader.md5Pipe.transformURL(url);
+            }
+            this._am.loadLocalManifest(url);
         }
         if (!this._am.getLocalManifest() || !this._am.getLocalManifest().isLoaded()) {
             this.label.string = 'Failed to load local manifest ...';
-            this.requestServerConfig()
+            this.hotUpdateEnd()
             return;
         }
-        this._checkListener = new jsb.EventListenerAssetsManager(this._am, this.checkCb.bind(this));
-        cc.eventManager.addListener(this._checkListener, 1);
-
+        this._am.setEventCallback(this.checkCb.bind(this));
         this._am.checkUpdate();
         this._updating = true;
     },
@@ -160,16 +190,16 @@ cc.Class({
         switch (event.getEventCode()) {
             case jsb.EventAssetsManager.ERROR_NO_LOCAL_MANIFEST:
                 this.label.string = "No local manifest file found, hot update skipped.";
-                this.requestServerConfig()
+                this.hotUpdateEnd()
                 break;
             case jsb.EventAssetsManager.ERROR_DOWNLOAD_MANIFEST:
             case jsb.EventAssetsManager.ERROR_PARSE_MANIFEST:
                 this.label.string = "Fail to download manifest file, hot update skipped.";
-                this.requestServerConfig()
+                this.hotUpdateEnd()
                 break;
             case jsb.EventAssetsManager.ALREADY_UP_TO_DATE:
                 this.label.string = "Already up to date with the latest remote version.";
-                this.requestServerConfig()
+                this.hotUpdateEnd()
                 break;
             case jsb.EventAssetsManager.NEW_VERSION_FOUND:
                 this.label.string = 'New version found, start try to update.';
@@ -178,8 +208,7 @@ cc.Class({
             default:
                 return;
         }
-
-        cc.eventManager.removeListener(this._checkListener);
+        this._am.setEventCallback(null);
         this._checkListener = null;
         this._updating = false;
     },
@@ -233,23 +262,30 @@ cc.Class({
         }
 
         if (failed) {
-            cc.eventManager.removeListener(this._updateListener);
+            this._am.setEventCallback(null);
             this._updateListener = null;
             this._updating = false;
-            this.requestServerConfig()
+            this.hotUpdateError()
         }
 
         if (needRestart) {
-            cc.eventManager.removeListener(this._updateListener);
+            this._am.setEventCallback(null);
             this._updateListener = null;
             var searchPaths = jsb.fileUtils.getSearchPaths();
             var newPaths = this._am.getLocalManifest().getSearchPaths();
 
-            Array.prototype.unshift(searchPaths, newPaths);
-            cc.sys.localStorage.setItem('HotUpdateSearchPaths', JSON.stringify(searchPaths));
+            Array.prototype.unshift.apply(searchPaths, newPaths);
+            G.ioUtil.set(constants.LOCALLSTORAGEKEY.HOTUPDATESEARCHPATHS,JSON.stringify(searchPaths))
             jsb.fileUtils.setSearchPaths(searchPaths);
-
+            cc.audioEngine.stopAll();
             cc.game.restart();
         }
     },
+
+    onDestroy: function () {
+        if (this._updateListener) {
+            this._am.setEventCallback(null);
+            this._updateListener = null;
+        }
+    }
 });

@@ -1,93 +1,88 @@
-
+var constants = require('./../../config/Constants')
 /**
  * Http 请求封装
  */
-const httpManage ={
-    httpGet: function (url , success , error) {
-        G.globalLoading.setLoadingVisible(true)
-        var errorFun = function(){
+var httpManage ={
+    HTTPROOTURL:"http://127.0.0.1:9000",
+    accountServerUrl:"http://127.0.0.1:9000",
+    sendRequest:function (path, data, successHandler, errorHandler, extraUrl,desc) {
+        G.globalLoading.setLoadingVisible(true,desc)
+        var xhr = cc.loader.getXMLHttpRequest();
+        xhr.timeout = 5000;
+        data = data || {}
+        var userInfo = G.ioUtil.get(constants.LOCALLSTORAGEKEY.USERINFO)
+        if(userInfo && userInfo.token){
+            data.token = userInfo.token
+        }
+        if (extraUrl == null) {
+            extraUrl = httpManage.HTTPROOTURL
+        }
+        //解析请求路由以及格式化请求参数
+        var sendpath = path;
+        var sendtext = '?';
+        for (var k in data) {
+            if (sendtext != "?") {
+                sendtext += "&";
+            }
+            sendtext += (k + "=" + data[k]);
+        }
+        //组装完整的URL
+        var requestURL = extraUrl + sendpath + encodeURI(sendtext);
+        //发送请求
+        console.log("RequestURL:" + requestURL);
+        xhr.open("GET", requestURL, true);
+        if (cc.sys.isNative) {
+            xhr.setRequestHeader("Accept-Encoding", "gzip,deflate", "text/html;charset=UTF-8");
+        }
+        
+        var success = function(event){
             G.globalLoading.setLoadingVisible(false)
-            if(error){
-                error()
+            if(successHandler){
+                successHandler(event)
             }
         }
 
-        var successFun = function(respone){
+        var error = function(msg){
             G.globalLoading.setLoadingVisible(false)
-            if(success){
-                success(respone)
+            xhr.abort();
+            if(errorHandler){
+                errorHandler({
+                    errcode: -10001,
+                    errmsg: msg
+                })
             }
-        }
-        var xhr = cc.loader.getXMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if(xhr.status >= 200 && xhr.status < 300){
-                    var respone = JSON.parse(xhr.responseText);
-                    successFun(respone);
-                }else{
-                    errorFun()
-                }
-            }
-        };
-        xhr.open("GET", url, true);
-        if (cc.sys.isNative) {
-            xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
         }
         //超时回调
         xhr.ontimeout = function(event){
-            errorFun();
+            error('连接超时！')
         };
         xhr.onerror = function(event){
-            errorFun();
+            error('连接出错！')
         };
-        // note: In Internet Explorer, the timeout property may be set only after calling the open()
-        // method and before calling the send() method.
-        xhr.timeout = 3000;// 3 seconds for timeout
-
-        xhr.send();
-    },
-
-    encodeFormData : function(data){  
-        var pairs = [];  
-        var regexp = /%20/g;  
-      
-        for (var name in data){  
-            var value = data[name].toString();  
-            var pair = encodeURIComponent(name).replace(regexp, "+") + "=" +  
-                encodeURIComponent(value).replace(regexp, "+");  
-            pairs.push(pair);  
-        }  
-        return pairs.join("&");  
-    },
-
-    httpPost: function (url, params, success , error) {
-        var xhr = cc.loader.getXMLHttpRequest();
-
+    
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if(xhr.status >= 200 && xhr.status < 300){
-                    var respone = xhr.responseText;
-                    if(success){
-                        success(respone);
-                    }
-                }else{
-                    if(error){
-                        error();
+            console.log("onreadystatechange");
+            if (xhr.readyState === 4){
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    cc.log("request from [" + xhr.responseURL + "] data [", ret, "]");
+                    var respText = xhr.responseText;
+                    var ret = null;
+                    try {
+                        ret = JSON.parse(respText);
+                        success(ret);
+                    } catch (e) {
+                        console.log("err:" + e);
+                        error(e);
                     }
                 }
             }
         };
-        xhr.open("POST", url, true);
-        if (cc.sys.isNative) {
-            xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
+    
+        try {
+            xhr.send();
+        }catch (e) {
+            error(e);
         }
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-
-        // note: In Internet Explorer, the timeout property may be set only after calling the open()
-        // method and before calling the send() method.
-        xhr.timeout = 5000;// 5 seconds for timeout
-        
-        xhr.send( httpManage.encodeFormData(params));
     }
 }
 

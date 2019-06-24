@@ -20,8 +20,8 @@ cc.Class({
 
     onKeyUp (event) {
         switch(event.keyCode) {
-            case cc.macro.KEY.l:
-                
+            case cc.macro.KEY.a:
+                console.log('a键')
                 break;
         }
     },

@@ -1,5 +1,5 @@
 
-var constants = require('./config/Constants')
+var constants = require('./../../config/Constants')
 cc.Class({
     extends: cc.Component,
 
@@ -22,34 +22,10 @@ cc.Class({
         this.isAgress = true
         this.fillNameNode.active = false
         this.interfaceNode.active = false
-        this.registerEvents()
-    },
-
-    //注册事件
-    registerEvents(){
-        var self = this
-        self.node.on(constants.EVENTNAME.Login,self.connectSuccess.bind(self))
-        self.msgProcessor = {
-            [G.SocketCmd.LOGIN]:self.responseLogin.bind(self)
-        }
     },
 
     onDestroy(){
-        this.node.off(constants.EVENTNAME.Login)
-    },
-
-    connectSuccess(){
         var self = this
-        G.globalSocket.setMsgHandler(self)
-        var userInfo = G.ioUtil.get(constants.LOCALLSTORAGEKEY.USERINFO)
-        if(userInfo){
-            G.globalSocket.login({
-                loginType:'account',
-                token:userInfo.token,
-                username:userInfo.username,
-                password:userInfo.password
-            });   
-        }
     },
 
     //更换场景
@@ -74,26 +50,27 @@ cc.Class({
 
     //显示界面
     displayInterface : function(name,identifier){
+        var self = this
         if(name=='fillName'){
-            this.fillNameNode.active = true
-            this.interfaceNode.active = false
-            this.loginNode.active = false
+            self.fillNameNode.active = true
+            self.interfaceNode.active = false
+            self.loginNode.active = false
         }else if(name=='interface'){
-            this.fillNameNode.active = false
-            this.interfaceNode.active = true
-            this.loginNode.active = true
+            self.fillNameNode.active = false
+            self.interfaceNode.active = true
+            self.loginNode.active = true
         }else if(name=='login'){
-            this.fillNameNode.active = false
-            this.interfaceNode.active = false
-            this.loginNode.active = true
+            self.fillNameNode.active = false
+            self.interfaceNode.active = false
+            self.loginNode.active = true
         }
         
         if(!identifier)return;
-        var title = cc.find('bg/title',this.interfaceNode)
+        var title = cc.find('bg/title',self.interfaceNode)
         if(!title)return;
         var label = title.getComponent(cc.Label)
         if(!label)return;
-        var buttonDesc = cc.find('bg/intoGameButton/Background/Label',this.interfaceNode)
+        var buttonDesc = cc.find('bg/intoGameButton/Background/Label',self.interfaceNode)
         if(!buttonDesc)return;
         var desc = buttonDesc.getComponent(cc.Label)
         if(!desc)return;
@@ -106,17 +83,12 @@ cc.Class({
             desc.string = '注册游戏'
             desc.customData = 0
         }
-    },
-
-     /*
-    ---------------------------------------------------------------------------------------------------------
-
-                                            服务器回调
-
-    ----------------------------------------------------------------------------------------------------------
-    */
-    responseLogin(event){
-        var self = this
+        var phone = cc.find('bg/accountName/nameEditBox',self.interfaceNode)
+        if(!phone)return;
+        var code = cc.find('bg/authenticationCode/codeEditBox',self.interfaceNode)
+        if(!code)return;
+        phone.getComponent(cc.EditBox).string = ''
+        code.getComponent(cc.EditBox).string = ''
     },
     /*
     ---------------------------------------------------------------------------------------------------------
@@ -127,10 +99,11 @@ cc.Class({
     */
     //创建角色
     createAvatar(event,customEventData){
+        var self = this
         var node = event.target;
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        var nameEditBox = this.fillNameNode.getChildByName('nameEditBox')
+        var nameEditBox = self.fillNameNode.getChildByName('nameEditBox')
         if(!nameEditBox){
             console.log('no nameEditBox')
             return
@@ -145,7 +118,17 @@ cc.Class({
             console.log('角色名长度为3~12')
             return
         }
-        G.globalSocket.getPlayer().reqCreateAvatar(1, str);
+        var data = {
+            account:G.selfUserData.getUserAccount(),
+            sign:G.selfUserData.getUserSign(),
+            name:str
+        };
+        G.httpManage.sendRequest(constants.NET_EVENT.CREATE_USER,data,function(event){
+            if(event.errcode == 0){
+                console.log('角色创建成功！')
+                self.login()
+            }
+        },null,null,'准备进入游戏...')
     },
 
     //检查是否同意用户使用协议
@@ -193,12 +176,13 @@ cc.Class({
         });
     },
 
-    //创建角色
+    //随机取名
     randName(event,customEventData){
+        var self = this
         var node = event.target;
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        var nameEditBox = this.fillNameNode.getChildByName('nameEditBox')
+        var nameEditBox = self.fillNameNode.getChildByName('nameEditBox')
         if(!nameEditBox){
             console.log('no nameEditBox')
             return
@@ -208,7 +192,7 @@ cc.Class({
             console.log('no editBox')
             return
         }
-        var name = this.getRandName()
+        var name = G.tools.getRandName()
         editBox.string = name
     },
 
@@ -227,15 +211,52 @@ cc.Class({
 
     //游客登陆
     guestLogin (event, customEventData) {
+        var self = this
         //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
         var node = event.target;
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        if(!this.isAgress){
+        if(!self.isAgress){
             console.log('请先同意用户使用协议！')
             return;
         }
-        G.globalSocket.login({});    
+        
+        G.httpManage.sendRequest(constants.NET_EVENT.GUEST_LOGIN,{account:G.tools.getUdid()},function(event){
+            if(event.errcode == 0){
+                console.log('游客登陆成功！')
+                G.httpManage.HTTPROOTURL = "http://" + event.halladdr
+                G.selfUserData.setUserSign(event.sign)
+                G.selfUserData.setUserPassword(event.sign)
+                G.selfUserData.setUserAccount(event.account)
+                self.login()
+            }
+        },null,null,'游客登陆...')  
+    },
+
+    login:function(){
+        var self = this;
+        var onLogin = function(ret){
+            if(!ret.userid){
+                //jump to register user info.
+                self.displayInterface('fillName')
+            }else{
+                console.log(ret);
+                G.selfUserData.setUserAccount(ret.account)
+                G.selfUserData.setUserId(ret.userid)
+                G.selfUserData.setUserName(ret.name)
+                G.selfUserData.setUserLV(ret.lv)
+                G.selfUserData.setUserExp(ret.exp)
+                G.selfUserData.setUserCoins(ret.coins)
+                G.selfUserData.setUserGems(ret.gems)
+                G.selfUserData.setUserSex(ret.sex)
+                G.selfUserData.setUserIP(ret.ip)
+                G.selfUserData.setUserRoomData(ret.roomid)
+                self.changeScene()
+            }
+        };
+        var account =  G.selfUserData.getUserAccount()
+        var sign = G.selfUserData.getUserSign()
+        G.httpManage.sendRequest(constants.NET_EVENT.HALLLOGIN,{account:account,sign:sign},onLogin);
     },
 
     //进入注册界面
@@ -253,23 +274,58 @@ cc.Class({
 
     //注册、登陆
     operate (event, customEventData) {
+        var self = this
         //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
         var node = event.target;
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         var buttonDesc = cc.find('Background/Label',node)
         if(!buttonDesc)return;
-        var phone = cc.find('bg/accountName/nameEditBox',this.interfaceNode)
+        var phone = cc.find('bg/accountName/nameEditBox',self.interfaceNode)
         if(!phone)return;
-        var code = cc.find('bg/authenticationCode/codeEditBox',this.interfaceNode)
+        var code = cc.find('bg/authenticationCode/codeEditBox',self.interfaceNode)
         if(!code)return;
         var customData = buttonDesc.getComponent(cc.Label).customData
         var phoneNum = phone.getComponent(cc.EditBox).string
         var codeNum = code.getComponent(cc.EditBox).string
-        if(!G.tools.isPoneAvailable(phoneNum))return;
+        if(!G.tools.isPoneAvailable(phoneNum)){
+            G.msgBoxMgr.showMsgBox({content:'手机号码输入有误，请检查手机号码！'})
+            return;
+        }
+        var account = phoneNum
+        var password = codeNum
         if(customData == 0){//0注册  1登陆
-            G.globalSocket.register({mobile:phoneNum,password:codeNum});         
+            G.httpManage.sendRequest(constants.NET_EVENT.REGISTER,{account:account,password:password},function(event){
+                if(event.errcode == 0){
+                    console.log('注册成功！')
+                    G.httpManage.sendRequest(constants.NET_EVENT.LOGIN,{account:account,password:password},function(event){
+                        if(event.errcode == 0){
+                            console.log('登陆成功！')
+                            G.httpManage.HTTPROOTURL = "http://" + event.halladdr
+                            G.selfUserData.setUserSign(event.sign)
+                            G.selfUserData.setUserPassword(password)
+                            G.selfUserData.setUserAccount(event.account)
+                            self.login()
+                        }else{
+                            G.msgBoxMgr.showMsgBox({content:'无效的账号!'})
+                        }
+                    }) 
+                }else{
+                    G.msgBoxMgr.showMsgBox({content:'账号已经被使用!'})
+                }
+            },null,null,'账号注册...')       
         }else if(customData == 1){
-            G.globalSocket.login({mobile:phoneNum,password:codeNum});      
+            G.httpManage.sendRequest(constants.NET_EVENT.LOGIN,{account:account,password:password},function(event){
+                if(event.errcode == 0){
+                    console.log('登陆成功！')
+                    G.httpManage.HTTPROOTURL = "http://" + event.halladdr
+                    G.selfUserData.setUserSign(event.sign)
+                    G.selfUserData.setUserPassword(password)
+                    G.selfUserData.setUserAccount(event.account)
+                    self.login()
+                }else{
+                    G.msgBoxMgr.showMsgBox({content:'账号错误，登陆失败！'})
+                }
+            },null,null,'账号登陆...')    
         }
     },
 

@@ -105,6 +105,7 @@ cc.Class({
     },
     
     onDestroy(){
+        var self = this
         self.unscheduleAllCallbacks()
     }
 })

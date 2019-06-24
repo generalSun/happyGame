@@ -58,7 +58,7 @@ Tools.isSelf = function (mid) {
     if (!mid) {
         return false;
     }
-    var selfMid = G.SelfUserData.mid?G.SelfUserData.mid:-1
+    var selfMid = G.selfUserData.mid?G.selfUserData.mid:-1
     return selfMid == mid;
 }
 
@@ -238,4 +238,55 @@ Tools.isInBothNumber = function(num, num1,num2) {
         return true
     }
     return false
+}
+
+Tools.dispatchEvent = function(event, args) {
+    var self = this
+    event = event || {}
+    var target = event.target || 0
+    var name = event.name
+    if(target == 0){
+        console.log(self.name + '  dispatchEvent:' + name)
+        self.node.emit(name,args)
+    }else{
+        console.log(G.eventManager.name + '  dispatchEvent:' + name)
+        G.eventManager.emitEvent(name,args)
+    }
+}
+
+Tools.listenEvent = function(event, fun, once) {
+    var self = this
+    once = once || false
+    event = event || {}
+    var target = event.target || 0
+    var name = event.name
+    if(target == 0){
+        console.log(self.name + '  listenEvent:' + name)
+        if(once){
+            self.node.once(name,fun)
+        }else{
+            self.node.on(name,fun)
+        }
+    }else{
+        console.log(G.eventManager.name + '  listenEvent:' + name)
+        if(once){
+            G.eventManager.listenEventOnce(name,fun)
+        }else{
+            G.eventManager.listenEvent(name,fun)
+        }
+    }
+}
+
+Tools.cancelEvent = function(event, fun) {
+    var self = this
+    event = event || {}
+    var target = event.target || 0
+    var name = event.name
+    if(target == 0){
+        console.log(self.name + '  cancelEvent:' + name)
+        self.node.off(name,fun)
+    }else{
+        onsole.log(G.eventManager.name + '  cancelEvent:' + name)
+        G.eventManager.cancelEvent(name,fun)
+    }
 }

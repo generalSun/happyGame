@@ -224,7 +224,7 @@ cc.Class({
                     poker.speedUpAnimation(5)
                 }
             }
-            G.eventManager.listenEventOnce(Constants.FRAMEEVENT.POKERFLIPEND.name,self.pokerFilpEnd.bind(self))
+            G.tools.listenEvent.call(self,constants.FRAMEEVENT.POKERFLIPEND,self.pokerFilpEnd.bind(self),true)
         }else{
             if(self.m_handCardTouch){
                 self.m_handCardTouch.canTouched(true)
@@ -318,12 +318,12 @@ cc.Class({
         if(self.m_handCardTouch){
             self.m_handCardTouch.clear()
         }
-        G.eventManager.cancelEvent(Constants.FRAMEEVENT.POKERFLIPEND.name,self.pokerFilpEnd.bind(self))
+        G.tools.cancelEvent.call(self,constants.FRAMEEVENT.POKERFLIPEND,self.pokerFilpEnd.bind(self))
     },
 
     onDestroy(){
         var self = this
-        G.eventManager.cancelEvent(Constants.FRAMEEVENT.POKERFLIPEND.name,self.pokerFilpEnd.bind(self))
+        G.tools.cancelEvent.call(self,constants.FRAMEEVENT.POKERFLIPEND,self.pokerFilpEnd.bind(self))
         for(var i = self.m_cards.length - 1; i >= 0; i--){
             var poker = self.m_cards[i]
             if(cc.isValid(poker) && poker.clear){
