@@ -34,7 +34,9 @@ const NET_EVENT = {//http网络事件名
     LOGIN:'/auth',//登陆
     CREATE_USER:'/create_user',
     BASE_INFO:'/base_info',
-    CREATE_PRIVATE_ROOM:'create_private_room',
+    GET_GAMELIST:'/get_gameList',
+    CREATE_PRIVATE_ROOM:'/create_private_room',
+    ENTER_PRIVATE_ROOM:'/enter_private_room'
 }
 
 module.exports = {

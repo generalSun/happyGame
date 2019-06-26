@@ -11,8 +11,9 @@ cc.Class({
 
     onLoad () {
         var self = this
-        self.setGameRoundNum(8)
-        self.setRoomNum(30000)
+        var info = G.selfUserData.getUserRoomInfo()
+        self.setGameRoundNum(info.numOfGames,info.conf.maxGames)
+        self.setRoomNum(info.roomid)
         self.scheduleCallBack()
         self.schedule(self.scheduleCallBack.bind(self), 5)
     },
@@ -37,7 +38,7 @@ cc.Class({
         var wifi = self.wifi.getComponent(cc.Sprite)
         if(wifi){
             var value = G.javaManage.getWifi()
-            cc.loader.loadRes("image/ddzGame01Res", cc.SpriteAtlas, function (err, atlas) {
+            cc.loader.loadRes("image/ddzGameRes", cc.SpriteAtlas, function (err, atlas) {
                 var frame = atlas.getSpriteFrame('wifi'+value);
                 wifi.spriteFrame = frame;
             });

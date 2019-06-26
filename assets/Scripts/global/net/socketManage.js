@@ -67,7 +67,17 @@ cc.Class({
         }
     },
 
-    connectSocket () {
+    setIp(ip){
+        var self = this
+        self.ip = ip
+    },
+
+    setPort(port){
+        var self = this
+        self.port = port
+    },
+
+    connectSocket (data) {
         var self = this;
         var opts = {
             'force new connection': true,
@@ -79,7 +89,7 @@ cc.Class({
         }
         var url = 'http://' + self.ip + ':' + self.port
         self.m_socket = io.connect(url,opts);
-        G.globalLoading.setLoadingVisible(true)
+        G.globalLoading.setLoadingVisible(true,'正在进入房间...')
         self.m_socket.on('connect',function(){
             console.log('connect');
             G.globalLoading.setLoadingVisible(false)
@@ -87,7 +97,7 @@ cc.Class({
             if(self.socketConnected){
                 self.socketConnected()
             }
-            self.msgHandlerDealMsg('connectSuccess')
+            self.msgHandlerDealMsg('connectSuccess',data)
         });
 
         self.m_socket.on('reconnecting',function(num){
@@ -136,6 +146,15 @@ cc.Class({
         self.m_socket.on('reconnect_failed',function (){
             console.log('reconnect_failed');
         });
+    },
+
+    listenMsg(event){
+        var self = this
+        if(self.m_socket){
+            self.m_socket.on(event,function(data){
+                self.msgHandlerDealMsg(event,data)
+            })
+        }
     },
     
     send: function (event,data) {

@@ -250,8 +250,18 @@ cc.Class({
                 G.selfUserData.setUserGems(ret.gems)
                 G.selfUserData.setUserSex(ret.sex)
                 G.selfUserData.setUserIP(ret.ip)
-                G.selfUserData.setUserRoomData(ret.roomid)
-                self.changeScene()
+                G.selfUserData.setUserRoomID(ret.roomid)
+                G.gameInfo.isLogined = true
+                G.gameInfo.isInGame = false
+                G.httpManage.sendRequest(constants.NET_EVENT.GET_GAMELIST,
+                    {account:ret.account,sign:G.selfUserData.getUserSign()},function(event){
+                        if(event.errcode == 0){
+                            console.log('请求游戏列表！')
+                            console.log(event)
+                            G.gameListInfo = event.data
+                            self.changeScene()
+                        }
+                    })
             }
         };
         var account =  G.selfUserData.getUserAccount()

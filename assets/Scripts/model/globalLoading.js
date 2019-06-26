@@ -3,7 +3,7 @@ cc.Class({
 
     properties: {
         animLoadingPrefab: cc.Prefab,
-        bg:cc.Sprite,
+        bg:cc.Node,
         describle:cc.Label
     },
 
@@ -23,7 +23,7 @@ cc.Class({
     initAnimLoading () {
         var self = this
         self.m_animLoading = cc.instantiate(self.animLoadingPrefab);
-        self.bg.node.addChild(self.m_animLoading);
+        self.bg.addChild(self.m_animLoading);
         self.m_animLoading.setPosition(0, 0);
     },
 

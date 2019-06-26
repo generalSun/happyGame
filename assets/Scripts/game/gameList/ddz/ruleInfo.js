@@ -8,11 +8,17 @@ cc.Class({
 
     onLoad () {
         var self = this
-        self.setDescrible({
-            a:'三带一',
-            b:'没有王炸'
-        })
-        self.setAdditional(4,3)
+        var info = G.selfUserData.getUserRoomInfo()
+        var rule = info.conf.rule
+        var str = {}
+        if(bit.bor(rule , 0x00000008) > 0){
+            str.mode = '癞子模式'
+        }else{
+            str.mode = '经典模式'
+        }
+
+        self.setDescrible(str)
+        self.setAdditional(info.conf.playerMaxNum,info.conf.baseScore)
     },
 
     setDescrible(rules){

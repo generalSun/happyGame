@@ -12,9 +12,20 @@ cc.Class({
 		sign:0,
         ip:"",
 		sex:0,
-		roomData:null,
-        oldRoomId:null,
-    },
+		roomID:null,
+		oldRoomId:null,
+		roomInfo:null
+	},
+	
+	setUserRoomInfo (roomInfo) {
+		var self = this
+    	self.roomInfo = roomInfo;
+	},
+
+	getUserRoomInfo () {
+		var self = this
+    	return self.roomInfo
+	},
 	
 	setUserDiamond (diamond) {
 		var self = this
@@ -136,14 +147,14 @@ cc.Class({
     	return self.sex
 	},
 
-	setUserRoomData (roomData) {
+	setUserRoomID (roomID) {
 		var self = this
-    	self.roomData = roomData
+    	self.roomID = roomID
 	},
 
-	getUserRoomData () {
+	getUserRoomID () {
 		var self = this
-    	return self.roomData
+    	return self.roomID
 	},
 
 	setUserOldRoomId (oldRoomId) {

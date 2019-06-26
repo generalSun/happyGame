@@ -21,6 +21,8 @@ cc.Class({
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
         self.m_player = new Array();
         self.m_meChairID = config.INVALID_CHAIR;
+        var info = G.selfUserData.getUserRoomInfo()
+        config.maxPlayerNum = info.conf.playerMaxNum
         self.loadPrefab();
         self.initZorder()
     },

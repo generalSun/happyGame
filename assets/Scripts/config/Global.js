@@ -8,3 +8,5 @@ G.gameInfo = {
     isLogined:true,
 	isInGame:true
 }
+
+G.gameListInfo = {}
