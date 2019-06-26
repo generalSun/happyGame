@@ -34,16 +34,18 @@ cc.Class({
     },
 
     onLoad(){
-        this.loginInGameNode.active = false
-        this.loginOutGameNode.active = false
-        this.outGameNode.active = false
+        this.loginInGameNode.active = false//登陆并且进入游戏
+        this.loginOutGameNode.active = false//登陆但是未进入游戏
+        this.outGameNode.active = false//
+        console.log('G.gameInfo.isLogined : '+G.gameInfo.isLogined)
+        console.log('G.gameInfo.isInGame : '+G.gameInfo.isInGame)
         if(!G.gameInfo.isLogined){
             this.outGameNode.active = true
         }else{
             if(G.gameInfo.isInGame){
                 this.loginInGameNode.active = true
             }else{
-                this.loginOutGameNode.active = false
+                this.loginOutGameNode.active = true
             }
         }
         

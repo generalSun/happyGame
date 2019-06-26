@@ -31,6 +31,8 @@ cc.Class({
 
     //更换场景
     changeScene(){
+        G.gameInfo.isLogined = true
+        G.gameInfo.isInGame = false
         if(cc.director.getScene().name != 'HallScene'){
             cc.director.loadScene('HallScene')
         }

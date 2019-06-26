@@ -82,7 +82,11 @@ cc.Class({
                         self.enterRoom(roomId,callBack);
                     },5000);
                 }else{
-                    G.msgBoxMgr.showMsgBox({content:'房间号对应的房间不存在！'})
+                    var content = "房间["+ roomId +"]不存在，请重新输入!";
+                    if(ret.errcode == 4){
+                        content = "房间["+ roomId + "]已满!";
+                    }
+                    G.msgBoxMgr.showMsgBox({content:content})
                     if(callBack){
                         callBack(event)
                     }
@@ -150,5 +154,29 @@ cc.Class({
         }else{
             self.m_checkHasGame = true
         }
+    },
+
+    setButtonCallBack(event, customEventData){
+        var self = this
+        //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
+        var node = event.target;
+        var button = node.getComponent(cc.Button);
+        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
+        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        var setNode = self.node.getChildByName('setNode')
+        if(setNode){
+            setNode.active = true;
+            return;
+        }
+        console.log('thert is not the node set')
+        cc.loader.loadRes('prefabs/setNode', cc.Prefab, function(err, prefab) {
+            if (err) {
+                cc.log(err.message || err);
+                return;
+            }
+            var node = cc.instantiate(prefab);
+            node.active = true;
+            self.node.addChild(node);
+        });
     }
 });

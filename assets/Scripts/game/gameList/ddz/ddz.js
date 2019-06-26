@@ -33,6 +33,7 @@ cc.Class({
 
         G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH)
         G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_SYNC_PUSH)
+        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH)
     },
 
     setMyServerID(arr){
@@ -88,6 +89,7 @@ cc.Class({
 
     [constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH]:function(event){
         var self = this
+        console.log('游戏开始')
         console.log(event);
         /**
         numOfGames:roomInfo.numOfGames,
@@ -97,6 +99,33 @@ cc.Class({
         */
        self.m_deskScript.setGameRoundNum(event.numOfGames)
 
+    },
+
+    [constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH]:function(event){
+        var self = this
+        console.log('有新玩家进入')
+        console.log(event);
+        /**
+        ip: "::ffff:127.0.0.1"
+        name: "李国贤"
+        online: true
+        ready: false
+        score: 0
+        seatindex: 1
+        userId: 237744
+        */
+        var player = self.getPlayerByServerChair(event.seatindex)
+        if(player){
+            var info = G.selfUserData.getUserRoomInfo()
+            player.seatDown({
+                config:config,
+                headUrl:event.headUrl,
+                isOwner:event.userId == info.conf.creator,
+                gold:event.score,
+                isOffLine:!event.online,
+                isReady:event.ready,
+            })
+        }
     },
 
     dealPoker(){
@@ -157,6 +186,12 @@ cc.Class({
                 return self.m_player[key]
             }
         }
+    },
+
+    getPlayerByServerChair(serverChair){
+        var self = this
+        var localChair = self.convertServerIDtoLocalID(serverChair)
+        return self.getPlayerByLocalChair(localChair)
     },
 
     onChatClickCallBack(event, customEventData){
