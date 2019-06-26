@@ -1,6 +1,7 @@
 var config = require('./config')
 var handCard = require('./handCard')
 var disCard = require('./disCard')
+var constants = require('./../../../config/Constants')
 
 cc.Class({
     extends: cc.Component,
@@ -17,14 +18,32 @@ cc.Class({
 
     onLoad () {
         var self = this
+        G.globalSocket.removeAllMsgHandler()
+        G.globalSocket.addMsgHandler(self)
+
         self.m_deskScript = self.desktopInfo.getComponent('desktopInfo');
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
         self.m_player = new Array();
         self.m_meChairID = config.INVALID_CHAIR;
         var info = G.selfUserData.getUserRoomInfo()
         config.maxPlayerNum = info.conf.playerMaxNum
-        self.loadPrefab();
+        self.setMyServerID(info.seats)
+        self.loadPrefab(info);
         self.initZorder()
+
+        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH)
+        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_SYNC_PUSH)
+    },
+
+    setMyServerID(arr){
+        var selfId = G.selfUserData.getUserId()
+        for(var i = 0; i < arr.length; i++){
+            var user = arr[i]
+            if(user.userId == selfId){
+                self.m_meChairID = i
+                return
+            }
+        }
     },
 
     initZorder(){
@@ -33,10 +52,11 @@ cc.Class({
         self.m_moreNode.zIndex = config.sceneZOrder.moreNode
     },
 
-    loadPrefab () {
+    loadPrefab (info) {
         var self = this
-        self.m_meChairID = 1
-        for(var i = 0; i < config.maxPlayerNum; i++){
+        var arr = info.seats
+        for(var i = 0; i < arr.length; i++){
+            var user = arr[i]
             var localtionID = self.convertServerIDtoLocalID(i)
             var pos = config.playerPos[localtionID]
             var player = cc.instantiate(self.playerPrefab);
@@ -46,12 +66,17 @@ cc.Class({
             self.parentNode.node.addChild(player);
 
             playerScript.setChair(localtionID)
-            playerScript.seatDown({
-                config:config,
-                headUrl:'https://www.baidu.com',
-                isOwner:false,
-                gold:10000
-            })
+
+            if(user.userId > 0){
+                playerScript.seatDown({
+                    config:config,
+                    headUrl:user.headUrl,
+                    isOwner:user.userId == info.conf.creator,
+                    gold:user.score,
+                    isOffLine:!user.online,
+                    isReady:user.ready,
+                })
+            }
             playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
             playerScript.setDisCardNode(true,new disCard(),self.pokerAtlas)
         }
@@ -59,6 +84,19 @@ cc.Class({
         self.m_moreNode = cc.instantiate(self.morePrefab);
         self.m_moreNode.pointScene = self
         self.parentNode.node.addChild(self.m_moreNode);
+    },
+
+    [constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH]:function(event){
+        var self = this
+        console.log(event);
+        /**
+        numOfGames:roomInfo.numOfGames,
+        yuCards:game.yuCards,
+        currentPlayingIndex:game.currentPlayingIndex,
+        seatsInfo:new Array()
+        */
+       self.m_deskScript.setGameRoundNum(event.numOfGames)
+
     },
 
     dealPoker(){

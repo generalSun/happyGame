@@ -7,6 +7,7 @@ cc.Class({
         nickName:cc.Label,
         gold:cc.Label,
         creatRoomNode:cc.Node,
+        enterRoomNode:cc.Node,
     },
 
     onLoad () {
@@ -16,11 +17,12 @@ cc.Class({
         G.globalSocket.addMsgHandler(self)
 
         self.creatRoomNode.active = false
+        self.enterRoomNode.active = false
         self.nickName.string = G.selfUserData.getUserName()
         self.gold.string = G.selfUserData.getUserCoins()
-        var userid = G.selfUserData.getUserId()
-        if(userid){
-            G.httpManage.sendRequest(constants.NET_EVENT.BASE_INFO,{userid:userid},function(event){
+        var userId = G.selfUserData.getUserId()
+        if(userId){
+            G.httpManage.sendRequest(constants.HTTP_NET_EVENT.BASE_INFO,{userId:userId},function(event){
                 if(event.errcode == 0){
                     G.selfUserData.setUserName(event.name)
                     G.selfUserData.setUserSex(event.sex)
@@ -59,32 +61,33 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        self.enterRoomNode.active = true
+        self.enterRoomNode.getComponent('enterRoom').init(self.enterRoom.bind(self))
     },
 
-    enterRoom:function(roomId,callback){
+    enterRoom:function(roomId,callBack){
         var self = this;
         var data = {
             account: G.selfUserData.getUserAccount(),
             sign: G.selfUserData.getUserSign(),
             roomid: roomId
         }
-        G.httpManage.sendRequest(constants.NET_EVENT.ENTER_PRIVATE_ROOM,data,function(event){
-            console.log('ENTER_PRIVATE_ROOM :'+event)
+        G.httpManage.sendRequest(constants.HTTP_NET_EVENT.ENTER_PRIVATE_ROOM,data,function(event){
+            console.log('ENTER_PRIVATE_ROOM :')
+            console.log(event)
             if (event.errcode !== 0) {
                 if(event.errcode == -1){
                     G.globalLoading.setLoadingVisible(true,'正在进入房间...')
                     setTimeout(function(){
-                        self.enterRoom(roomId,callback);
+                        self.enterRoom(roomId,callBack);
                     },5000);
                 }else{
-                    if(callback != null){
-                        callback(event);
+                    G.msgBoxMgr.showMsgBox({content:'房间号对应的房间不存在！'})
+                    if(callBack){
+                        callBack(event)
                     }
                 }
             }else {
-                if(callback != null){
-                    callback(event);
-                }
                 G.globalSocket.setIp(event.ip)
                 G.globalSocket.setPort(event.port)
                 G.globalSocket.connectSocket(event)
@@ -102,9 +105,9 @@ cc.Class({
             time:data.time,
             sign:data.sign,
         };
-        G.globalSocket.send("login",sd)
-        G.globalSocket.listenMsg("login_result")
-        G.globalSocket.listenMsg("login_finished")
+        G.globalSocket.send(constants.SOCKET_NET_EVENT.LOGIN,sd)
+        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.LOGIN_RESULT)
+        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.LOGIN_FINISHED)
     },
 
     login_result(data){
@@ -114,8 +117,7 @@ cc.Class({
             var data = data.data;
             G.selfUserData.setUserRoomID(data.roomid)
             G.selfUserData.setUserRoomInfo(data)
-        }
-        else{
+        }else{
             console.log(data.errmsg);   
         }
     },
@@ -132,6 +134,8 @@ cc.Class({
         if(!info)return;
         var type = info.conf.type
         var gameScene = type+'GameScene'
+        G.gameInfo.isLogined = true
+        G.gameInfo.isInGame = true
         if(cc.director.getScene().name != gameScene){
             cc.director.loadScene(gameScene)
         }

@@ -26,7 +26,7 @@ const FRAMEEVENT = {//帧事件名 target 0为发送给自己的节点   1为发
     POKERFLIPEND:{name:'POKERFILPEND',target:1},
 }
 
-const NET_EVENT = {//http网络事件名
+const HTTP_NET_EVENT = {//http网络事件名
 	GET_SERVERINFO:'/get_serverinfo',
 	GUEST_LOGIN:'/guest',
     HALLLOGIN:'/login',//大厅登陆
@@ -39,10 +39,19 @@ const NET_EVENT = {//http网络事件名
     ENTER_PRIVATE_ROOM:'/enter_private_room'
 }
 
+const SOCKET_NET_EVENT = {//socket网络事件名
+    LOGIN:'login',
+    LOGIN_RESULT:'login_result',
+    LOGIN_FINISHED:'login_finished',
+    GAME_BEGIN_PUSH:'game_begin_push',//游戏开始
+    GAME_SYNC_PUSH:'game_sync_push',//玩家重连
+}
+
 module.exports = {
     LOCALLSTORAGEKEY:LOCALLSTORAGEKEY,
     THIRTINFO:THIRTINFO,
     CARD_STATUS:CARD_STATUS,
     FRAMEEVENT:FRAMEEVENT,
-    NET_EVENT:NET_EVENT
+    HTTP_NET_EVENT:HTTP_NET_EVENT,
+    SOCKET_NET_EVENT:SOCKET_NET_EVENT
 };

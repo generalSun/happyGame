@@ -55,7 +55,7 @@ cc.Class({
     },
 
     setGameRoundNum(round,total){
-        round = round || 1
+        round = round || 0
         var self = this
         var gameRoundNum = self.gameRoundNum.getComponent(cc.Label)
         if(gameRoundNum){

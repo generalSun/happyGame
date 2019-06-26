@@ -8,10 +8,9 @@ cc.Class({
         m_btnCancel: cc.Button,
     },
 
-    onLoad () {
-        cc.game.addPersistRootNode(this.node)
+    init(){
         var self = this;
-
+        cc.game.addPersistRootNode(self.node)
         self.node.on(cc.Node.EventType.TOUCH_START, function (event) {}, self);
 
         var sureClickHandler = G.tools.createClickEventHandler(self.node, "msgBoxMgr", "btnSureClickEvent")
@@ -19,7 +18,7 @@ cc.Class({
 
         var cancelClickHandler = G.tools.createClickEventHandler(self.node, "msgBoxMgr", "btnCancelClickEvent")
         self.m_btnCancel.clickEvents.push(cancelClickHandler);
-
+        
         self.node.active = false;
     },
 
@@ -81,4 +80,8 @@ cc.Class({
         }
         self.closeMsgBox();
     },
+
+    onDestroy(){
+        console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   常驻节点msgBoxMgr has destory')
+    }
 });

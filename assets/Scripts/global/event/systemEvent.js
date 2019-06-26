@@ -5,7 +5,7 @@ cc.Class({
         
     },
 
-    onLoad () {
+    init(){
         var self = this
         cc.game.addPersistRootNode(self.node)
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, self.onKeyUp, self);

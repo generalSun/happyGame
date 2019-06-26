@@ -7,7 +7,7 @@ cc.Class({
         describle:cc.Label
     },
 
-    onLoad () {
+    init(){
         var self = this;
         cc.game.addPersistRootNode(self.node)
         self.initAnimLoading();

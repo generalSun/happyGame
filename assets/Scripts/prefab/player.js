@@ -70,11 +70,11 @@ cc.Class({
     init (args) {
         var self = this
         self.setHeadSprite(true,args.headUrl)
-        self.setOffLineSprite(false)
+        self.setOffLineSprite(args.isOffLine)
         self.setResultSprite(false)
         self.setSignSprite(false)
         self.setBaodanSprite(false)
-        self.setReadySprite(true)
+        self.setReadySprite(args.isReady)
         self.setOwnerSprite(args.isOwner)
         self.setClock(false,30)
         self.setGoldDescrible(true,args.gold)
@@ -166,7 +166,7 @@ cc.Class({
         return self.resultSprite.node.active && self.resultSprite.result
     },
 
-    setSignSprite (visible) {
+    setSignSprite (visible) {//地主
         var self = this
         if(!self.isSeat())return;
         visible = visible || false
@@ -205,7 +205,7 @@ cc.Class({
         return self.readySprite.node.active
     },
 
-    setOwnerSprite (visible) {
+    setOwnerSprite (visible) {//房主
         var self = this
         if(!self.isSeat())return;
         visible = visible || false

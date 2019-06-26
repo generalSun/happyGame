@@ -7110,7 +7110,7 @@
   {
     "__type__": "cc.Node",
     "_name": "msgBoxNode",
-    "_objFlags": 512,
+    "_objFlags": 0,
     "_parent": {
       "__id__": 1
     },
@@ -8173,28 +8173,6 @@
     "_id": "51gG2n1G1OPZ6lJkykHz9M"
   },
   {
-    "__type__": "f5a4fAG1nlJdJ9Zd3ZZpx26",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 158
-    },
-    "_enabled": true,
-    "m_spTitle": {
-      "__id__": 161
-    },
-    "m_lbContent": {
-      "__id__": 163
-    },
-    "m_btnSure": {
-      "__id__": 170
-    },
-    "m_btnCancel": {
-      "__id__": 177
-    },
-    "_id": "35BPyP5mxCTrd++SfUL8dL"
-  },
-  {
     "__type__": "cc.Button",
     "_name": "",
     "_objFlags": 0,
@@ -8288,6 +8266,28 @@
     "_originalWidth": 1280,
     "_originalHeight": 720,
     "_id": "e5NfijnOVGg6VnpQTTmME1"
+  },
+  {
+    "__type__": "f5a4fAG1nlJdJ9Zd3ZZpx26",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 158
+    },
+    "_enabled": true,
+    "m_spTitle": {
+      "__id__": 161
+    },
+    "m_lbContent": {
+      "__id__": 163
+    },
+    "m_btnSure": {
+      "__id__": 170
+    },
+    "m_btnCancel": {
+      "__id__": 177
+    },
+    "_id": "35BPyP5mxCTrd++SfUL8dL"
   },
   {
     "__type__": "cc.Node",

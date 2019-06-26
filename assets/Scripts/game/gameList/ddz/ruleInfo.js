@@ -11,7 +11,7 @@ cc.Class({
         var info = G.selfUserData.getUserRoomInfo()
         var rule = info.conf.rule
         var str = {}
-        if(bit.bor(rule , 0x00000008) > 0){
+        if((rule & 0x00000008) > 0){
             str.mode = '癞子模式'
         }else{
             str.mode = '经典模式'

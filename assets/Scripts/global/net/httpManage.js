@@ -64,11 +64,10 @@ var httpManage ={
             console.log("onreadystatechange");
             if (xhr.readyState === 4){
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    cc.log("request from [" + xhr.responseURL + "] data [", ret, "]");
                     var respText = xhr.responseText;
-                    var ret = null;
                     try {
-                        ret = JSON.parse(respText);
+                        var ret = JSON.parse(respText);
+                        cc.log("request from [" + xhr.responseURL + "] data [", ret, "]");
                         success(ret);
                     } catch (e) {
                         console.log("err:" + e);

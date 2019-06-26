@@ -36,18 +36,23 @@ cc.Class({
         G.javaManage = require('../../global/java/javaManage')
         G.javaCallBackManage = new javaCallBackManage(self)
 
-        G.httpManage = require('../../global/net/httpManage')
-        G.globalSocket = cc.find('nonControlNode').getComponent('socketManage')
-
-        G.globalLoading = cc.find('loadingNode').getComponent('globalLoading')
-
-        G.msgBoxMgr = cc.find('msgBoxNode').getComponent('msgBoxMgr')
-
-        G.eventManager = cc.find('systemEventNode').getComponent('systemEvent')
-
         G.ioUtil = require('../../global/tools/ioUtil')
         G.tools = require('../../global/tools/tools');
         G.uiFactory = require('../../global/tools/uiFactory');
+
+        G.httpManage = require('../../global/net/httpManage')
+
+        G.globalSocket = cc.find('nonControlNode').getComponent('socketManage')
+        G.globalSocket.init()
+
+        G.globalLoading = cc.find('loadingNode').getComponent('globalLoading')
+        G.globalLoading.init()
+
+        G.msgBoxMgr = cc.find('msgBoxNode').getComponent('msgBoxMgr')
+        G.msgBoxMgr.init()
+
+        G.eventManager = cc.find('systemEventNode').getComponent('systemEvent')
+        G.eventManager.init()
 
         G.selfUserData = new UserData();
 

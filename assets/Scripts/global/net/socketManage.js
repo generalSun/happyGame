@@ -16,7 +16,7 @@ cc.Class({
         }
     },
 
-    onLoad:function(){
+    init(){
         var self = this
         cc.game.addPersistRootNode(self.node)
         self.m_connectFlag = false                          //socket连接是否成功
