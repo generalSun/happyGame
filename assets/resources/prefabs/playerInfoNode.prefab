@@ -917,8 +917,8 @@
     "_enabled": true,
     "_materials": [],
     "_useOriginalSize": false,
-    "_string": "玩家名：",
-    "_N$string": "玩家名：",
+    "_string": "游戏名：",
+    "_N$string": "游戏名：",
     "_fontSize": 40,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -1265,6 +1265,15 @@
       "__id__": 1
     },
     "_enabled": true,
+    "m_nickName": {
+      "__id__": 21
+    },
+    "m_gold": {
+      "__id__": 27
+    },
+    "m_head": {
+      "__id__": 16
+    },
     "_id": ""
   },
   {

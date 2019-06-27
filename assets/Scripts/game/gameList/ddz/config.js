@@ -1,6 +1,9 @@
 var config = {
     INVALID_CHAIR:0xFFFF,							//非法座位号
     maxPlayerNum:4,
+    gameState:{
+        
+    },
     chair:{
         home:0,//自家
         nextDoor:1,//下家

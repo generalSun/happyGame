@@ -70,7 +70,7 @@ cc.Class({
         var data = {
             account: G.selfUserData.getUserAccount(),
             sign: G.selfUserData.getUserSign(),
-            roomid: roomId
+            roomId: roomId
         }
         G.httpManage.sendRequest(constants.HTTP_NET_EVENT.ENTER_PRIVATE_ROOM,data,function(event){
             console.log('ENTER_PRIVATE_ROOM :')
@@ -83,7 +83,7 @@ cc.Class({
                     },5000);
                 }else{
                     var content = "房间["+ roomId +"]不存在，请重新输入!";
-                    if(ret.errcode == 4){
+                    if(event.errcode == 4){
                         content = "房间["+ roomId + "]已满!";
                     }
                     G.msgBoxMgr.showMsgBox({content:content})
@@ -105,7 +105,7 @@ cc.Class({
         console.log('connectSuccess')
         var sd = {
             token:data.token,
-            roomid:data.roomid,
+            roomId:data.roomId,
             time:data.time,
             sign:data.sign,
         };
@@ -119,7 +119,7 @@ cc.Class({
         console.log(data);
         if(data.errcode === 0){
             var data = data.data;
-            G.selfUserData.setUserRoomID(data.roomid)
+            G.selfUserData.setUserRoomID(data.roomId)
             G.selfUserData.setUserRoomInfo(data)
         }else{
             console.log(data.errmsg);   

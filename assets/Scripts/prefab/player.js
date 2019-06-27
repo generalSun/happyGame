@@ -23,9 +23,42 @@ cc.Class({
     onLoad () {
         var self = this
         self.m_chair = 0
+        self.m_nickname = null
         self.m_config = null
+        self.m_ip = null
+        self.m_userId = null
         self.m_playerEventScript = self.node.getComponent('playerEvent')
         self.seatUp()
+    },
+
+    setUserId(id){
+        var self = this
+        self.m_userId = id
+    },
+
+    getUserId(){
+        var self = this
+        return self.m_userId
+    },
+
+    setIP(ip){
+        var self = this
+        self.m_ip = ip
+    },
+
+    getIP(){
+        var self = this
+        return self.m_ip
+    },
+
+    setNickName(name){
+        var self = this
+        self.m_nickname = name
+    },
+
+    getNickName(){
+        var self = this
+        return self.m_nickname
     },
 
     onDestroy(){
@@ -81,6 +114,9 @@ cc.Class({
         self.setCardNumSprite(false,16)
         self.setJiabeiSprite(false)
         self.setOperateNode(false)
+        self.setNickName(args.name)
+        self.setIP(args.ip)
+        self.setUserId(args.userId)
         self.m_playerEventScript.setChair(self.m_chair)
         if(self.m_chair == 1){
             self.signSprite.node.x = -1*self.signSprite.node.x;

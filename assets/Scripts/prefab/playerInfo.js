@@ -3,12 +3,22 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        
+        m_nickName:cc.Label,
+        m_gold:cc.Label,
+        m_head:cc.Sprite
     },
 
     onLoad () {
         var self = this
         
+    },
+
+    show(info){
+        info = info || {}
+        var self = this
+        self.m_nickName.string = info.name || ""
+        self.m_gold.string = info.gold || ""
+        self.m_head.spriteFrame = info.headSprite.spriteFrame
     },
 
     closeButtonCallBack(event,customEventData){

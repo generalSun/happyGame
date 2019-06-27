@@ -25,6 +25,7 @@ cc.Class({
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
         self.m_player = new Array();
         self.m_meChairID = config.INVALID_CHAIR;
+        // self.m_gameState = 
         var info = G.selfUserData.getUserRoomInfo()
         config.maxPlayerNum = info.conf.playerMaxNum
         self.setMyServerID(info.seats)
@@ -34,9 +35,11 @@ cc.Class({
         G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH)
         G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_SYNC_PUSH)
         G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH)
+        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.USER_STATE_PUSH)
     },
 
     setMyServerID(arr){
+        var self = this
         var selfId = G.selfUserData.getUserId()
         for(var i = 0; i < arr.length; i++){
             var user = arr[i]
@@ -56,6 +59,7 @@ cc.Class({
     loadPrefab (info) {
         var self = this
         var arr = info.seats
+        console.log('我自己的服务器位置：'+self.m_meChairID)
         for(var i = 0; i < arr.length; i++){
             var user = arr[i]
             var localtionID = self.convertServerIDtoLocalID(i)
@@ -76,6 +80,9 @@ cc.Class({
                     gold:user.score,
                     isOffLine:!user.online,
                     isReady:user.ready,
+                    name:user.name,
+                    ip:user.ip,
+                    userId:user.userId
                 })
             }
             playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
@@ -85,47 +92,6 @@ cc.Class({
         self.m_moreNode = cc.instantiate(self.morePrefab);
         self.m_moreNode.pointScene = self
         self.parentNode.node.addChild(self.m_moreNode);
-    },
-
-    [constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH]:function(event){
-        var self = this
-        console.log('游戏开始')
-        console.log(event);
-        /**
-        numOfGames:roomInfo.numOfGames,
-        yuCards:game.yuCards,
-        currentPlayingIndex:game.currentPlayingIndex,
-        seatsInfo:new Array()
-        */
-       self.m_deskScript.setGameRoundNum(event.numOfGames)
-
-    },
-
-    [constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH]:function(event){
-        var self = this
-        console.log('有新玩家进入')
-        console.log(event);
-        /**
-        ip: "::ffff:127.0.0.1"
-        name: "李国贤"
-        online: true
-        ready: false
-        score: 0
-        seatindex: 1
-        userId: 237744
-        */
-        var player = self.getPlayerByServerChair(event.seatindex)
-        if(player){
-            var info = G.selfUserData.getUserRoomInfo()
-            player.seatDown({
-                config:config,
-                headUrl:event.headUrl,
-                isOwner:event.userId == info.conf.creator,
-                gold:event.score,
-                isOffLine:!event.online,
-                isReady:event.ready,
-            })
-        }
     },
 
     dealPoker(){
@@ -175,7 +141,18 @@ cc.Class({
                 localtionID = 3
             }
         }
+        console.log('玩家数量：' + config.maxPlayerNum + ',服务端位置：' + wChairId+',对应本地位置：' + localtionID)
         return localtionID
+    },
+
+    getPlayerByUserId(userId){
+        var self = this
+        for(var key in self.m_player){
+            var id = self.m_player[key].getUserId()
+            if(id == userId){
+                return self.m_player[key]
+            }
+        }
     },
     
     getPlayerByLocalChair(localChair){
@@ -231,5 +208,52 @@ cc.Class({
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         if(self.m_moreNode.active)return;
         self.m_moreNode.active = true
+    },
+    /**
+    --------------------------------------socket事件处理--------------------------------------------------------------
+    */
+    [constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH]:function(event){
+        var self = this
+        console.log('游戏开始')
+        console.log(event);
+        /**
+        num_of_turns:roomInfo.num_of_turns,
+        yuCards:game.yuCards,
+        currentPlayingIndex:game.currentPlayingIndex,
+        seatsInfo:new Array()
+        */
+       self.m_deskScript.setGameRoundNum(event.num_of_turns)
+
+    },
+
+    [constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH]:function(event){
+        var self = this
+        console.log('有新玩家进入')
+        console.log(event);
+        var player = self.getPlayerByServerChair(event.seatindex)
+        if(player){
+            var info = G.selfUserData.getUserRoomInfo()
+            player.seatDown({
+                config:config,
+                headUrl:event.headUrl,
+                isOwner:event.userId == info.conf.creator,
+                gold:event.score,
+                isOffLine:!event.online,
+                isReady:event.ready,
+                name:event.name,
+                ip:event.ip,
+                userId:event.userId
+            })
+        }
+    },
+
+    [constants.SOCKET_NET_EVENT.USER_STATE_PUSH]:function(event){
+        var self = this
+        console.log('有玩家状态发生改变')
+        console.log(event);
+        var player = self.getPlayerByUserId(event.userId)
+        if(player){
+            player.setOffLineSprite(!event.online)
+        }
     },
 });

@@ -253,7 +253,7 @@ cc.Class({
                 G.selfUserData.setUserGems(ret.gems)
                 G.selfUserData.setUserSex(ret.sex)
                 G.selfUserData.setUserIP(ret.ip)
-                G.selfUserData.setUserRoomID(ret.roomid)
+                G.selfUserData.setUserRoomID(ret.roomId)
                 G.gameInfo.isLogined = true
                 G.gameInfo.isInGame = false
                 G.httpManage.sendRequest(constants.HTTP_NET_EVENT.GET_GAMELIST,

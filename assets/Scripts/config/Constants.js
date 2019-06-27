@@ -46,6 +46,7 @@ const SOCKET_NET_EVENT = {//socket网络事件名
     GAME_BEGIN_PUSH:'game_begin_push',//游戏开始
     GAME_SYNC_PUSH:'game_sync_push',//玩家重连
     NEW_USER_COMES_PUSH:'new_user_comes_push',//新玩家进入
+    USER_STATE_PUSH:'user_state_push'
 }
 
 module.exports = {

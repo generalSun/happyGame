@@ -69,6 +69,12 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        
+        if(G.gameInfo.isInGame){
+            G.msgBoxMgr.showMsgBox({content:'游戏已经开始了，无法退出'})
+        }else{
+            if(cc.director.getScene().name != 'HallScene'){
+                cc.director.loadScene('HallScene')
+            }
+        }
     },
 })

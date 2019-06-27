@@ -93,6 +93,13 @@ cc.Class({
         var playerInfoNode = scene.getChildByName('playerInfoNode')
         if(playerInfoNode){
             playerInfoNode.active = true;
+            var playerInfoScript = playerInfoNode.getComponent('playerInfo')
+            var data = {
+                name:self.m_playerScript.getNickName(),
+                headSprite:self.m_playerScript.getHeadSprite(),
+                gold:self.m_playerScript.getGold(),
+            }
+            playerInfoScript.show(data)
             return;
         }
         console.log('thert is not the node set')
@@ -104,6 +111,13 @@ cc.Class({
             var node = cc.instantiate(prefab);
             node.active = true;
             scene.addChild(node);
+            var playerInfoScript = node.getComponent('playerInfo')
+            var data = {
+                name:self.m_playerScript.getNickName(),
+                headSprite:self.m_playerScript.getHeadSprite(),
+                gold:self.m_playerScript.getGold(),
+            }
+            playerInfoScript.show(data)
         });
     },
 
