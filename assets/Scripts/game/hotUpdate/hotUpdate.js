@@ -40,6 +40,9 @@ cc.Class({
         G.tools = require('../../global/tools/tools');
         G.uiFactory = require('../../global/tools/uiFactory');
 
+        G.eventManager = cc.find('systemEventNode').getComponent('systemEvent')
+        G.eventManager.init()
+
         G.httpManage = require('../../global/net/httpManage')
 
         G.globalSocket = cc.find('nonControlNode').getComponent('socketManage')
@@ -50,9 +53,6 @@ cc.Class({
 
         G.msgBoxMgr = cc.find('msgBoxNode').getComponent('msgBoxMgr')
         G.msgBoxMgr.init()
-
-        G.eventManager = cc.find('systemEventNode').getComponent('systemEvent')
-        G.eventManager.init()
 
         G.selfUserData = new UserData();
 

@@ -1,3 +1,4 @@
+var notification = require('./../tools/notification')
 cc.Class({
     extends: cc.Component,
 
@@ -34,23 +35,34 @@ cc.Class({
         console.log('游戏进入前台')
     },
 
-    listenEvent(name,callBack){
+    listenEvent(name,callBack,target){
         var self = this
-        self.node.on(name,callBack)
+        notification.on(name,function(data){
+            console.log('[本地]接收到了事件 '+name)
+            console.log(data)
+            if(callBack){
+                callBack.call(target,data)
+            }
+        },self)
     },
 
-    cancelEvent(name,callBack){
+    cancelEvent(name,callBack,target){
         var self = this
-        self.node.off(name,callBack)
+        notification.off(name,callBack,target)
     },
 
-    listenEventOnce(name,callBack){
+    listenEventOnce(name,callBack,target){
         var self = this
-        self.node.once(name,callBack)
+        notification.on(name,function(data){
+            if(callBack){
+                callBack.call(target,data)
+            }
+            notification.off(name,callBack,self)
+        },self)
     },
 
     emitEvent(name,msg){
         var self = this
-        self.node.emit(name,msg)
+        notification.emit(name,msg)
     }
 });

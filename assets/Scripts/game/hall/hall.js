@@ -1,4 +1,6 @@
 var constants = require('./../../config/Constants')
+var socketProcess = require('./hall_socketProcess')
+
 cc.Class({
     extends: cc.Component,
 
@@ -13,8 +15,8 @@ cc.Class({
     onLoad () {
         var self = this
         self.m_checkHasGame = false
-        G.globalSocket.removeAllMsgHandler()
-        G.globalSocket.addMsgHandler(self)
+        self.m_socketProcess = new socketProcess()
+        self.m_socketProcess.init(self)
 
         self.creatRoomNode.active = false
         self.enterRoomNode.active = false
@@ -83,8 +85,10 @@ cc.Class({
                     },5000);
                 }else{
                     var content = "房间["+ roomId +"]不存在，请重新输入!";
-                    if(event.errcode == 4){
+                    if(event.errcode == 1){
                         content = "房间["+ roomId + "]已满!";
+                    }else if(event.errcode == 2){
+                        content = "已在房间中!";
                     }
                     G.msgBoxMgr.showMsgBox({content:content})
                     if(callBack){
@@ -99,37 +103,6 @@ cc.Class({
         },function(msg){
             console.log('ENTER_PRIVATE_ROOM :'+msg.errmsg)
         },null,'正在进入房间...');
-    },
-
-    connectSuccess(data){
-        console.log('connectSuccess')
-        var sd = {
-            token:data.token,
-            roomId:data.roomId,
-            time:data.time,
-            sign:data.sign,
-        };
-        G.globalSocket.send(constants.SOCKET_NET_EVENT.LOGIN,sd)
-        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.LOGIN_RESULT)
-        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.LOGIN_FINISHED)
-    },
-
-    login_result(data){
-        console.log('login_result')
-        console.log(data);
-        if(data.errcode === 0){
-            var data = data.data;
-            G.selfUserData.setUserRoomID(data.roomId)
-            G.selfUserData.setUserRoomInfo(data)
-        }else{
-            console.log(data.errmsg);   
-        }
-    },
-            
-    login_finished(data){
-        console.log('login_finished');
-        var self = this
-        self.changeScene()
     },
 
     //更换场景
@@ -178,5 +151,10 @@ cc.Class({
             node.active = true;
             self.node.addChild(node);
         });
+    },
+
+    onDestroy(){
+        var self = this
+        self.m_socketProcess.onDestroy()
     }
 });

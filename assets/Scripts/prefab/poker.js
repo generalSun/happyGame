@@ -14,14 +14,12 @@ cc.Class({
         self.m_pokerAtlas = null
         self.m_noramlPos = cc.v2(0,0)
         self.signSprite.node.active = false
-
-        G.tools.listenEvent.call(self,constants.FRAMEEVENT.POKERFLIP,self.pokerFilp.bind(self))
+        G.eventManager.listenEvent(constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
     },
 
     frameEvent(eventName){
         var self = this
-        var object = Constants.FRAMEEVENT[eventName]
-        G.tools.dispatchEvent.call(self,object,{})
+        G.eventManager.emitEvent(Constants.FRAMEEVENT[eventName],{})
     },
 
     pokerFilp(){
@@ -192,6 +190,6 @@ cc.Class({
     onDestroy(){
         var self = this
         self.node.getComponent('animationOperate').stopAnim()
-        G.tools.cancelEvent.call(self,constants.FRAMEEVENT.POKERFLIP,self.pokerFilp.bind(self))
+        G.eventManager.cancelEvent(constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
     }
 })

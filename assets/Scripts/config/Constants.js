@@ -22,8 +22,8 @@ const CARD_STATUS = {//扑克状态
 }
 
 const FRAMEEVENT = {//帧事件名 target 0为发送给自己的节点   1为发送给别人的
-    POKERFLIP:{name:'POKERFILP',target:0},
-    POKERFLIPEND:{name:'POKERFILPEND',target:1},
+    POKERFLIP:'POKERFILP',
+    POKERFLIPEND:'POKERFILPEND',
 }
 
 const HTTP_NET_EVENT = {//http网络事件名
@@ -39,14 +39,24 @@ const HTTP_NET_EVENT = {//http网络事件名
     ENTER_PRIVATE_ROOM:'/enter_private_room'
 }
 
-const SOCKET_NET_EVENT = {//socket网络事件名
+const SOCKET_EVENT_c2s = {//socket网络事件名
     LOGIN:'login',
-    LOGIN_RESULT:'login_result',
-    LOGIN_FINISHED:'login_finished',
-    GAME_BEGIN_PUSH:'game_begin_push',//游戏开始
-    GAME_SYNC_PUSH:'game_sync_push',//玩家重连
-    NEW_USER_COMES_PUSH:'new_user_comes_push',//新玩家进入
-    USER_STATE_PUSH:'user_state_push'
+}
+
+const SOCKET_EVENT_s2c = {//socket网络事件名
+    RECONNECTING:           'reconnecting',
+    RECONNECT:              'reconnect',
+    // CONNECT_ERROR:          'connect_error',
+    // CONNECT_TIMEOUT:        'connect_timeout',
+    // RECONNECT_ATTEMPT:      'reconnect_attempt',
+    // RECONNECT_ERROR:        'reconnect_error',
+    // RECONNECT_FAILED:       'reconnect_failed',
+    LOGIN_RESULT:           'login_result',
+    LOGIN_FINISHED:         'login_finished',
+    GAME_BEGIN_PUSH:        'game_begin_push',//游戏开始
+    GAME_SYNC_PUSH:         'game_sync_push',//玩家重连
+    NEW_USER_COMES_PUSH:    'new_user_comes_push',//新玩家进入
+    USER_STATE_PUSH:        'user_state_push',
 }
 
 module.exports = {
@@ -55,5 +65,6 @@ module.exports = {
     CARD_STATUS:CARD_STATUS,
     FRAMEEVENT:FRAMEEVENT,
     HTTP_NET_EVENT:HTTP_NET_EVENT,
-    SOCKET_NET_EVENT:SOCKET_NET_EVENT
+    SOCKET_EVENT_c2s:SOCKET_EVENT_c2s,
+    SOCKET_EVENT_s2c:SOCKET_EVENT_s2c,
 };

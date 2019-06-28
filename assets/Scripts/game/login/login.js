@@ -19,9 +19,10 @@ cc.Class({
     },
 
     onLoad(){
-        this.isAgress = true
-        this.fillNameNode.active = false
-        this.interfaceNode.active = false
+        var self = this
+        self.isAgress = true
+        self.fillNameNode.active = false
+        self.interfaceNode.active = false
     },
 
     onDestroy(){

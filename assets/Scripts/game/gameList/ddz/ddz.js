@@ -2,6 +2,7 @@ var config = require('./config')
 var handCard = require('./handCard')
 var disCard = require('./disCard')
 var constants = require('./../../../config/Constants')
+var socketProcess = require('./ddz_socketProcess')
 
 cc.Class({
     extends: cc.Component,
@@ -16,11 +17,15 @@ cc.Class({
         pokerAtlas:[cc.SpriteAtlas]
     },
 
+    onDestroy(){
+        var self = this
+        self.m_socketProcess.onDestroy()
+    },
+
     onLoad () {
         var self = this
-        G.globalSocket.removeAllMsgHandler()
-        G.globalSocket.addMsgHandler(self)
-
+        self.m_socketProcess = new socketProcess()
+        self.m_socketProcess.init(self)
         self.m_deskScript = self.desktopInfo.getComponent('desktopInfo');
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
         self.m_player = new Array();
@@ -31,11 +36,7 @@ cc.Class({
         self.setMyServerID(info.seats)
         self.loadPrefab(info);
         self.initZorder()
-
-        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH)
-        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.GAME_SYNC_PUSH)
-        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH)
-        G.globalSocket.listenMsg(constants.SOCKET_NET_EVENT.USER_STATE_PUSH)
+        G.eventManager.emitEvent('dispatcherSocketMsg',{})
     },
 
     setMyServerID(arr){
@@ -208,52 +209,5 @@ cc.Class({
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         if(self.m_moreNode.active)return;
         self.m_moreNode.active = true
-    },
-    /**
-    --------------------------------------socket事件处理--------------------------------------------------------------
-    */
-    [constants.SOCKET_NET_EVENT.GAME_BEGIN_PUSH]:function(event){
-        var self = this
-        console.log('游戏开始')
-        console.log(event);
-        /**
-        num_of_turns:roomInfo.num_of_turns,
-        yuCards:game.yuCards,
-        currentPlayingIndex:game.currentPlayingIndex,
-        seatsInfo:new Array()
-        */
-       self.m_deskScript.setGameRoundNum(event.num_of_turns)
-
-    },
-
-    [constants.SOCKET_NET_EVENT.NEW_USER_COMES_PUSH]:function(event){
-        var self = this
-        console.log('有新玩家进入')
-        console.log(event);
-        var player = self.getPlayerByServerChair(event.seatindex)
-        if(player){
-            var info = G.selfUserData.getUserRoomInfo()
-            player.seatDown({
-                config:config,
-                headUrl:event.headUrl,
-                isOwner:event.userId == info.conf.creator,
-                gold:event.score,
-                isOffLine:!event.online,
-                isReady:event.ready,
-                name:event.name,
-                ip:event.ip,
-                userId:event.userId
-            })
-        }
-    },
-
-    [constants.SOCKET_NET_EVENT.USER_STATE_PUSH]:function(event){
-        var self = this
-        console.log('有玩家状态发生改变')
-        console.log(event);
-        var player = self.getPlayerByUserId(event.userId)
-        if(player){
-            player.setOffLineSprite(!event.online)
-        }
     },
 });
