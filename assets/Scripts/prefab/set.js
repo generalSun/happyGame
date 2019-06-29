@@ -1,4 +1,4 @@
-var constants = require('./config/Constants')
+var Constants = require('./config/Constants')
 cc.Class({
     extends: cc.Component,
 
@@ -52,10 +52,10 @@ cc.Class({
         this.soundVolume = 1
         this.effectVolume = 1
         this.toggle = 1
-        var audio = G.ioUtil.get(constants.LOCALLSTORAGEKEY.AUDIO)
+        var audio = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.AUDIO)
         if(audio){
-            this.soundVolume = audio.soundVolume
-            this.effectVolume = audio.effectVolume
+            this.soundVolume = parseFloat(audio.soundVolume)
+            this.effectVolume = parseFloat(audio.effectVolume)
             this.toggle = audio.toggle
         }
         this.onSprite.node.active = this.toggle==1?true:false
@@ -71,6 +71,8 @@ cc.Class({
             this.soundSlider.progress = 0
             this.effectSlider.progress = 0
         }
+        G.audioManager.setBGMVolume(this.soundSlider.progress,true)
+        G.audioManager.setSFXVolume(this.effectSlider.progress)
         this.slider(this.soundSlider,'sound',true)
         this.slider(this.effectSlider,'effect',true)
     },
@@ -97,8 +99,10 @@ cc.Class({
         if(isToggle){return}
         if(customEventData == 'sound'){
             this.soundVolume = progress
+            G.audioManager.setBGMVolume(progress,true)
         }else if(customEventData == 'effect'){
             this.effectVolume = progress
+            G.audioManager.setSFXVolume(progress)
         }
         var active = false
         this.onSprite.node.active = !active
@@ -130,7 +134,7 @@ cc.Class({
             effectVolume:this.effectVolume,
             toggle:this.toggle
         }
-        G.ioUtil.set(constants.LOCALLSTORAGEKEY.AUDIO,audio)
+        G.ioUtil.set(Constants.LOCALLSTORAGEKEY.AUDIO,audio)
     },
 
     onDestroy(){

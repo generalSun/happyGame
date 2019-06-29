@@ -1,5 +1,5 @@
 require('./../../global/tools/stringExtra')
-var constants = require('../../config/Constants')
+var Constants = require('../../config/Constants')
 var javaCallBackManage = require('../../global/java/javaCallBackManage')
 var UserData = require('./../../model/userData')
 cc.Class({
@@ -38,8 +38,11 @@ cc.Class({
 
         G.ioUtil = require('../../global/tools/ioUtil')
         G.tools = require('../../global/tools/tools');
-        G.uiFactory = require('../../global/tools/uiFactory');
 
+        G.audioManager = cc.find('audioNode').getComponent('AudioMgr')
+        G.audioManager.init()
+        G.audioManager.playBGM('bgMain.mp3')
+        
         G.eventManager = cc.find('systemEventNode').getComponent('systemEvent')
         G.eventManager.init()
 
@@ -47,6 +50,8 @@ cc.Class({
 
         G.globalSocket = cc.find('nonControlNode').getComponent('socketManage')
         G.globalSocket.init()
+        
+        G.uiFactory = require('../../global/tools/uiFactory');
 
         G.globalLoading = cc.find('loadingNode').getComponent('globalLoading')
         G.globalLoading.init()
@@ -58,7 +63,7 @@ cc.Class({
 
         G.gameInfo.isLogined = false
         G.gameInfo.isInGame = false
-        G.ioUtil.clear()
+        // G.ioUtil.clear()
     },
 
     hotUpdateEnd(){
@@ -280,7 +285,7 @@ cc.Class({
             var newPaths = this._am.getLocalManifest().getSearchPaths();
 
             Array.prototype.unshift.apply(searchPaths, newPaths);
-            G.ioUtil.set(constants.LOCALLSTORAGEKEY.HOTUPDATESEARCHPATHS,JSON.stringify(searchPaths))
+            G.ioUtil.set(Constants.LOCALLSTORAGEKEY.HOTUPDATESEARCHPATHS,JSON.stringify(searchPaths))
             jsb.fileUtils.setSearchPaths(searchPaths);
             cc.audioEngine.stopAll();
             cc.game.restart();

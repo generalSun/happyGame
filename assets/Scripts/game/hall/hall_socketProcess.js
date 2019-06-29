@@ -1,12 +1,12 @@
-var constants = require('../../../config/Constants')
+var Constants = require('../../../config/Constants')
 cc.Class({
     
     init:function(handler){
         var self = this
         self.m_handler = handler
 
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
     },
     
     login_result:function(data){
@@ -28,8 +28,8 @@ cc.Class({
     },
 
     onDestroy(){
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
     }
 })
 

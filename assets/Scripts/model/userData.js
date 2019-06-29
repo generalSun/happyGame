@@ -5,6 +5,7 @@ cc.Class({
 		password:null,
 	    userId:null,//可以获取头像地址
 		userName:null,
+		token:null,
 		lv:0,
 		exp:0,
 		coins:0,//金币
@@ -15,6 +16,16 @@ cc.Class({
 		roomID:null,
 		oldRoomId:null,
 		roomInfo:null
+	},
+
+	setUserToken (token) {
+		var self = this
+    	self.token = token;
+	},
+
+	getUserToken () {
+		var self = this
+    	return self.token
 	},
 	
 	setUserRoomInfo (roomInfo) {

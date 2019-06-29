@@ -1,6 +1,6 @@
 
 /** !#en
-The main namespace of Cocos2d-JS, all engine core classes, functions, properties and constants are defined in this namespace.
+The main namespace of Cocos2d-JS, all engine core classes, functions, properties and Constants are defined in this namespace.
 !#zh
 Cocos 引擎的主要命名空间，引擎代码中所有的类，函数，属性和常量都在这个命名空间中定义。 */
 declare namespace cc {	
@@ -6337,7 +6337,7 @@ declare namespace cc {
 		currentTarget: any;		
 		/** !#en
 		Indicates which phase of the event flow is currently being evaluated.
-		Returns an integer value represented by 4 constants:
+		Returns an integer value represented by 4 Constants:
 		 - Event.NONE = 0
 		 - Event.CAPTURING_PHASE = 1
 		 - Event.AT_TARGET = 2
@@ -9863,7 +9863,7 @@ declare namespace cc {
 		*/
 		setAccelerometerInterval(interval: number): void;	
 	}	
-	/** Predefined constants */
+	/** Predefined Constants */
 	export class macro {		
 		/** PI / 180 */
 		static RAD: number;		
@@ -16631,7 +16631,7 @@ declare namespace anysdk {
 
 /** !#en
 The global main namespace of DragonBones, all classes, functions,
-properties and constants of DragonBones are defined in this namespace
+properties and Constants of DragonBones are defined in this namespace
 !#zh
 DragonBones 的全局的命名空间，
 与 DragonBones 相关的所有的类，函数，属性，常量都在这个命名空间中定义。 */
@@ -16880,7 +16880,7 @@ declare namespace dragonBones {
 
 /** !#en
 The global main namespace of Spine, all classes, functions,
-properties and constants of Spine are defined in this namespace
+properties and Constants of Spine are defined in this namespace
 !#zh
 Spine 的全局的命名空间，
 与 Spine 相关的所有的类，函数，属性，常量都在这个命名空间中定义。 */

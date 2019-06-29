@@ -96,7 +96,7 @@ cc.Class({
             var playerInfoScript = playerInfoNode.getComponent('playerInfo')
             var data = {
                 name:self.m_playerScript.getNickName(),
-                headSprite:self.m_playerScript.getHeadSprite(),
+                userId:G.selfUserData.getUserId(),
                 gold:self.m_playerScript.getGold(),
             }
             playerInfoScript.show(data)
@@ -114,7 +114,7 @@ cc.Class({
             var playerInfoScript = node.getComponent('playerInfo')
             var data = {
                 name:self.m_playerScript.getNickName(),
-                headSprite:self.m_playerScript.getHeadSprite(),
+                userId:G.selfUserData.getUserId(),
                 gold:self.m_playerScript.getGold(),
             }
             playerInfoScript.show(data)

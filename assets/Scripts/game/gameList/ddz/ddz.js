@@ -1,7 +1,7 @@
 var config = require('./config')
 var handCard = require('./handCard')
 var disCard = require('./disCard')
-var constants = require('./../../../config/Constants')
+var Constants = require('./../../../config/Constants')
 var socketProcess = require('./ddz_socketProcess')
 
 cc.Class({
@@ -23,6 +23,7 @@ cc.Class({
     },
 
     onLoad () {
+        G.audioManager.playBGM('bgFight.mp3')
         var self = this
         self.m_socketProcess = new socketProcess()
         self.m_socketProcess.init(self)

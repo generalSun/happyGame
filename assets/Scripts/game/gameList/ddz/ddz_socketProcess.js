@@ -1,18 +1,18 @@
-var constants = require('../../../config/Constants')
+var Constants = require('../../../config/Constants')
 var config = require('./config')
 cc.Class({
     init:function(handler){
         var self = this
         self.m_handler = handler
-        G.globalSocket.listenMsg(constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH)
-        G.globalSocket.listenMsg(constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH)
-        G.globalSocket.listenMsg(constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH)
-        G.globalSocket.listenMsg(constants.SOCKET_EVENT_s2c.USER_STATE_PUSH)
+        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH)
+        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH)
+        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH)
+        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH)
 
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
     },
     
     gameBegin:function(event){
@@ -60,9 +60,9 @@ cc.Class({
     },
 
     onDestroy(){
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
     }
 })

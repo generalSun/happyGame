@@ -1,3 +1,17 @@
+cc.Button.prototype._onTouchEnded = function (t) {
+　　G.audioManager.playSFX('btnClick.mp3')
+　　if (this.interactable && this.enabledInHierarchy) {
+　　　　if (this._pressed) {
+　　　　　　cc.Component.EventHandler.emitEvents(this.clickEvents, t);
+　　　　　　this.node.emit("click", this);
+　　　　}
+　　　　this._pressed = !1;
+　　　　this._updateState();
+　　　　t.stopPropagation();
+　　}
+};
+
+
 var UiFactory = module.exports = {};
 
 //创建sprite

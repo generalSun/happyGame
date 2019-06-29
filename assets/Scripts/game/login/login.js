@@ -1,5 +1,5 @@
 
-var constants = require('./../../config/Constants')
+var Constants = require('./../../config/Constants')
 cc.Class({
     extends: cc.Component,
 
@@ -127,7 +127,7 @@ cc.Class({
             sign:G.selfUserData.getUserSign(),
             name:str
         };
-        G.httpManage.sendRequest(constants.HTTP_NET_EVENT.CREATE_USER,data,function(event){
+        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.CREATE_USER,data,function(event){
             if(event.errcode == 0){
                 console.log('角色创建成功！')
                 self.login()
@@ -225,7 +225,7 @@ cc.Class({
             return;
         }
         
-        G.httpManage.sendRequest(constants.HTTP_NET_EVENT.GUEST_LOGIN,{account:G.tools.getUdid()},function(event){
+        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.GUEST_LOGIN,{account:G.tools.getUdid()},function(event){
             if(event.errcode == 0){
                 console.log('游客登陆成功！')
                 G.httpManage.HTTPROOTURL = "http://" + event.halladdr
@@ -257,7 +257,7 @@ cc.Class({
                 G.selfUserData.setUserRoomID(ret.roomId)
                 G.gameInfo.isLogined = true
                 G.gameInfo.isInGame = false
-                G.httpManage.sendRequest(constants.HTTP_NET_EVENT.GET_GAMELIST,
+                G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.GET_GAMELIST,
                     {account:ret.account,sign:G.selfUserData.getUserSign()},function(event){
                         if(event.errcode == 0){
                             console.log('请求游戏列表！')
@@ -270,7 +270,7 @@ cc.Class({
         };
         var account =  G.selfUserData.getUserAccount()
         var sign = G.selfUserData.getUserSign()
-        G.httpManage.sendRequest(constants.HTTP_NET_EVENT.HALLLOGIN,{account:account,sign:sign},onLogin);
+        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.HALLLOGIN,{account:account,sign:sign},onLogin);
     },
 
     //进入注册界面
@@ -308,10 +308,10 @@ cc.Class({
         var account = phoneNum
         var password = codeNum
         if(customData == 0){//0注册  1登陆
-            G.httpManage.sendRequest(constants.HTTP_NET_EVENT.REGISTER,{account:account,password:password},function(event){
+            G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.REGISTER,{account:account,password:password},function(event){
                 if(event.errcode == 0){
                     console.log('注册成功！')
-                    G.httpManage.sendRequest(constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
+                    G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
                         if(event.errcode == 0){
                             console.log('登陆成功！')
                             G.httpManage.HTTPROOTURL = "http://" + event.halladdr
@@ -328,7 +328,7 @@ cc.Class({
                 }
             },null,null,'账号注册...')       
         }else if(customData == 1){
-            G.httpManage.sendRequest(constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
+            G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
                 if(event.errcode == 0){
                     console.log('登陆成功！')
                     G.httpManage.HTTPROOTURL = "http://" + event.halladdr

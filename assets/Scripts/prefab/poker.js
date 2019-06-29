@@ -14,7 +14,7 @@ cc.Class({
         self.m_pokerAtlas = null
         self.m_noramlPos = cc.v2(0,0)
         self.signSprite.node.active = false
-        G.eventManager.listenEvent(constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
+        G.eventManager.listenEvent(Constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
     },
 
     frameEvent(eventName){
@@ -190,6 +190,6 @@ cc.Class({
     onDestroy(){
         var self = this
         self.node.getComponent('animationOperate').stopAnim()
-        G.eventManager.cancelEvent(constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
+        G.eventManager.cancelEvent(Constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
     }
 })

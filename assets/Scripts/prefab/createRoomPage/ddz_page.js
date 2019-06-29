@@ -1,4 +1,4 @@
-var constants = require('./../../config/Constants')
+var Constants = require('./../../config/Constants')
 cc.Class({
     extends: cc.Component,
 
@@ -72,7 +72,7 @@ cc.Class({
             sign: G.selfUserData.getUserSign(),
             conf: JSON.stringify(conf)
         }
-        G.httpManage.sendRequest(constants.HTTP_NET_EVENT.CREATE_PRIVATE_ROOM, data, function(event){
+        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.CREATE_PRIVATE_ROOM, data, function(event){
             console.log('CREATE_PRIVATE_ROOM :'+event)
             if (event.errcode !== 0) {
                 if (event.errcode == 2222) {

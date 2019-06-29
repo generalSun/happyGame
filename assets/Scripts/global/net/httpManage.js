@@ -1,4 +1,4 @@
-var constants = require('./../../config/Constants')
+var Constants = require('./../../config/Constants')
 /**
  * Http 请求封装
  */
@@ -10,7 +10,7 @@ var httpManage ={
         var xhr = cc.loader.getXMLHttpRequest();
         xhr.timeout = 5000;
         data = data || {}
-        var userInfo = G.ioUtil.get(constants.LOCALLSTORAGEKEY.USERINFO)
+        var userInfo = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.USERINFO)
         if(userInfo && userInfo.token){
             data.token = userInfo.token
         }

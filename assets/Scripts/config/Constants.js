@@ -36,7 +36,8 @@ const HTTP_NET_EVENT = {//http网络事件名
     BASE_INFO:'/base_info',
     GET_GAMELIST:'/get_gameList',
     CREATE_PRIVATE_ROOM:'/create_private_room',
-    ENTER_PRIVATE_ROOM:'/enter_private_room'
+    ENTER_PRIVATE_ROOM:'/enter_private_room',
+    GET_GAMEDESTORY:'/get_gameDestory',
 }
 
 const SOCKET_EVENT_c2s = {//socket网络事件名

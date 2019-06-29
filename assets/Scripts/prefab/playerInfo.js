@@ -10,7 +10,11 @@ cc.Class({
 
     onLoad () {
         var self = this
-        
+        self.node.on('touchend',function(event){
+            if(self.node.active){
+                self.node.active = false
+            }
+        },self)
     },
 
     show(info){
@@ -18,7 +22,27 @@ cc.Class({
         var self = this
         self.m_nickName.string = info.name || ""
         self.m_gold.string = info.gold || ""
-        self.m_head.spriteFrame = info.headSprite.spriteFrame
+        var userId = info.userId
+        if(userId){
+            G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.BASE_INFO,{userId:userId},function(event){
+                if(event.errcode == 0){
+                    G.selfUserData.setUserName(event.name)
+                    G.selfUserData.setUserSex(event.sex)
+                    console.log(event)
+                    if(event.headimgurl){
+                        var url = G.httpManage.accountServerUrl + '/image?url=' + encodeURIComponent(event.headimgurl) + ".jpg";
+                        cc.loader.load(url,function (err,tex) {
+                            if(err){
+                                console.log(err)
+                                return
+                            }
+                            var spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height));
+                            self.m_head.node.getComponent(cc.Sprite).spriteFrame = spriteFrame
+                        });
+                    }
+                }
+            },null,G.httpManage.accountServerUrl);
+        }
     },
 
     closeButtonCallBack(event,customEventData){

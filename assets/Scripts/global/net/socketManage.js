@@ -1,4 +1,4 @@
-var constants = require('./../../config/Constants')
+var Constants = require('./../../config/Constants')
 cc.Class({
     extends:cc.Component,
 
@@ -56,14 +56,14 @@ cc.Class({
                 time:data.time,
                 sign:data.sign,
             };
-            self.send(constants.SOCKET_EVENT_c2s.LOGIN,sd)
-            self.listenMsg(constants.SOCKET_EVENT_s2c.RECONNECTING)
-            self.listenMsg(constants.SOCKET_EVENT_s2c.RECONNECT)
-            self.listenMsg(constants.SOCKET_EVENT_s2c.LOGIN_RESULT)
-            self.listenMsg(constants.SOCKET_EVENT_s2c.LOGIN_FINISHED)
+            self.send(Constants.SOCKET_EVENT_c2s.LOGIN,sd)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.RECONNECTING)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.RECONNECT)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED)
         });
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
-        G.eventManager.listenEvent(constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)
 
         G.eventManager.listenEvent("dispatcherSocketMsg",self.dispatcherSocketMsg,self)
     },
@@ -90,7 +90,7 @@ cc.Class({
                     data = [data];
                 }
                 if(cc.director.getScene().name == 'HallScene'){
-                    if(name == constants.SOCKET_EVENT_s2c.LOGIN_RESULT || name == constants.SOCKET_EVENT_s2c.LOGIN_FINISHED){
+                    if(name == Constants.SOCKET_EVENT_s2c.LOGIN_RESULT || name == Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED){
                         G.eventManager.emitEvent(name,data)
                     }else{
                         var info = {
@@ -134,8 +134,8 @@ cc.Class({
 
     onDestroy(){
         var self = this
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
-        G.eventManager.cancelEvent(constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)
         G.eventManager.cancelEvent('dispatcherSocketMsg',self.dispatcherSocketMsg,self)
         self.unscheduleAllCallbacks()
         self.close()
