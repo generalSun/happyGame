@@ -8755,6 +8755,9 @@
     "_components": [
       {
         "__id__": 193
+      },
+      {
+        "__id__": 194
       }
     ],
     "_prefab": null,
@@ -8811,7 +8814,22 @@
     "_enabled": true,
     "bgmVolume": 1,
     "sfxVolume": 1,
-    "bgmAudioID": -1,
     "_id": "e8v4G+2xNIj45sXJ7Vergg"
+  },
+  {
+    "__type__": "cc.AudioSource",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 192
+    },
+    "_enabled": true,
+    "_clip": null,
+    "_volume": 1,
+    "_mute": false,
+    "_loop": false,
+    "playOnLoad": false,
+    "preload": false,
+    "_id": "17Iw59aeJGp7WKBAObljmT"
   }
 ]
