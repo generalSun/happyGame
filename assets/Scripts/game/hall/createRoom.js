@@ -13,10 +13,10 @@ cc.Class({
         }, self)
     },
 
-    init(info){//name,describle,state(0开放、1维护),rule
+    init(info,socketProcess){//name,describle,state(0开放、1维护),rule
         var self = this
         self.gameScrollView.getComponent('createRoomScrollView').init(info,self.notifyPageTurn.bind(self))
-        self.descPageView.getComponent('createRoomPageView').init(info)
+        self.descPageView.getComponent('createRoomPageView').init(info,socketProcess)
     },
 
     notifyPageTurn(index){

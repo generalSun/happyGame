@@ -11,6 +11,11 @@ cc.Class({
     init: function () {
         var self = this
         cc.game.addPersistRootNode(self.node)
+        self.initVolume()
+    },
+
+    initVolume(){
+        var self = this
         var bgmVolume = self.bgmVolume
         var sfxVolume = self.sfxVolume
         var audio = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.AUDIO);

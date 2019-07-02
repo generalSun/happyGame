@@ -23,26 +23,7 @@ cc.Class({
         self.nickName.string = G.selfUserData.getUserName()
         self.gold.string = G.selfUserData.getUserCoins()
         var userId = G.selfUserData.getUserId()
-        if(userId){
-            G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.BASE_INFO,{userId:userId},function(event){
-                if(event.errcode == 0){
-                    G.selfUserData.setUserName(event.name)
-                    G.selfUserData.setUserSex(event.sex)
-                    console.log(event)
-                    if(event.headimgurl){
-                        var url = G.httpManage.accountServerUrl + '/image?url=' + encodeURIComponent(event.headimgurl) + ".jpg";
-                        cc.loader.load(url,function (err,tex) {
-                            if(err){
-                                console.log(err)
-                                return
-                            }
-                            var spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height));
-                            self.head.node.getComponent(cc.Sprite).spriteFrame = spriteFrame
-                        });
-                    }
-                }
-            },null,G.httpManage.accountServerUrl);
-        }
+        self.m_socketProcess.requestUserBaseInfo(userId)
     },
 
     onCreateRoomClickCallBack(event, customEventData){
@@ -53,7 +34,7 @@ cc.Class({
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         self.creatRoomNode.active = true
-        self.creatRoomNode.getComponent('createRoom').init(G.gameListInfo)
+        self.creatRoomNode.getComponent('createRoom').init(G.gameListInfo,self.m_socketProcess)
     },
 
     onJoinRoomClickCallBack(event, customEventData){
@@ -64,45 +45,7 @@ cc.Class({
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         self.enterRoomNode.active = true
-        self.enterRoomNode.getComponent('enterRoom').init(self.enterRoom.bind(self))
-    },
-
-    enterRoom:function(roomId,callBack){
-        var self = this;
-        var data = {
-            account: G.selfUserData.getUserAccount(),
-            sign: G.selfUserData.getUserSign(),
-            roomId: roomId
-        }
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.ENTER_PRIVATE_ROOM,data,function(event){
-            console.log('ENTER_PRIVATE_ROOM :')
-            console.log(event)
-            if (event.errcode !== 0) {
-                if(event.errcode == -1){
-                    G.globalLoading.setLoadingVisible(true,'正在进入房间...')
-                    setTimeout(function(){
-                        self.enterRoom(roomId,callBack);
-                    },5000);
-                }else{
-                    var content = "房间["+ roomId +"]不存在，请重新输入!";
-                    if(event.errcode == 1){
-                        content = "房间["+ roomId + "]已满!";
-                    }else if(event.errcode == 2){
-                        content = "已在房间中!";
-                    }
-                    G.msgBoxMgr.showMsgBox({content:content})
-                    if(callBack){
-                        callBack(event)
-                    }
-                }
-            }else {
-                G.globalSocket.setIp(event.ip)
-                G.globalSocket.setPort(event.port)
-                G.globalSocket.connectSocket(event)
-            }
-        },function(msg){
-            console.log('ENTER_PRIVATE_ROOM :'+msg.errmsg)
-        },null,'正在进入房间...');
+        self.enterRoomNode.getComponent('enterRoom').init(self.m_socketProcess)
     },
 
     //更换场景
@@ -122,7 +65,7 @@ cc.Class({
         var self = this
         var roomID = G.selfUserData.getUserRoomID()
         if(roomID && !self.m_checkHasGame){
-            self.enterRoom(roomID);
+            self.m_socketProcess.requestEnterRoom(roomID);
             self.m_checkHasGame = true
         }else{
             self.m_checkHasGame = true

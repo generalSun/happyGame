@@ -59,13 +59,15 @@ var NotificationCenter = {
         for (var idx in eventNames)
         {
             var eventName = eventNames[idx];
-            for (var i = 0; i < this.handles_[eventName].length; i++)
-            {
-                var handler = this.handles_[eventName][i];
-                if (target == handler.target &&
-                    (callback.toString() == handler.callback.toString() || callback == undefined))
+            if(this.handles_[eventName]){
+                for (var i = 0; i < this.handles_[eventName].length; i++)
                 {
-                    this.handles_[eventName].splice(i, 1);
+                    var handler = this.handles_[eventName][i];
+                    if (target == handler.target &&
+                        (callback.toString() == handler.callback.toString() || callback == undefined))
+                    {
+                        this.handles_[eventName].splice(i, 1);
+                    }
                 }
             }
         }

@@ -7,12 +7,12 @@ cc.Class({
 
     onLoad () {
         var self = this
-        self.m_enterRoomCallBack = null
+        self.m_socketProcess = null
     },
 
-    init (callBack) {
+    init (socketProcess) {
         var self = this
-        self.m_enterRoomCallBack = callBack
+        self.m_socketProcess = socketProcess
         for(var i = 0; i < self.m_labels.length; i++){
             var label = self.m_labels[i]
             if(cc.isValid(label)){
@@ -76,7 +76,7 @@ cc.Class({
             }
         }
         if(str.length == self.m_labels.length){
-            self.m_enterRoomCallBack(str,function(event){
+            self.m_socketProcess.requestEnterRoom(str,function(event){
                 self.deleteLabel(false)
             })
         }

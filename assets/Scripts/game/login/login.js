@@ -1,5 +1,6 @@
 
 var Constants = require('./../../config/Constants')
+var socketProcess = require('./login_socketProcess')
 cc.Class({
     extends: cc.Component,
 
@@ -23,6 +24,8 @@ cc.Class({
         self.isAgress = true
         self.fillNameNode.active = false
         self.interfaceNode.active = false
+        self.m_socketProcess = new socketProcess()
+        self.m_socketProcess.init(self)
     },
 
     onDestroy(){
@@ -127,12 +130,7 @@ cc.Class({
             sign:G.selfUserData.getUserSign(),
             name:str
         };
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.CREATE_USER,data,function(event){
-            if(event.errcode == 0){
-                console.log('角色创建成功！')
-                self.login()
-            }
-        },null,null,'准备进入游戏...')
+        self.m_socketProcess.createAvater(data)
     },
 
     //检查是否同意用户使用协议
@@ -224,53 +222,7 @@ cc.Class({
             console.log('请先同意用户使用协议！')
             return;
         }
-        
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.GUEST_LOGIN,{account:G.tools.getUdid()},function(event){
-            if(event.errcode == 0){
-                console.log('游客登陆成功！')
-                G.httpManage.HTTPROOTURL = "http://" + event.halladdr
-                G.selfUserData.setUserSign(event.sign)
-                G.selfUserData.setUserPassword(event.sign)
-                G.selfUserData.setUserAccount(event.account)
-                self.login()
-            }
-        },null,null,'游客登陆...')  
-    },
-
-    login:function(){
-        var self = this;
-        var onLogin = function(ret){
-            if(!ret.userId){
-                //jump to register user info.
-                self.displayInterface('fillName')
-            }else{
-                console.log(ret);
-                G.selfUserData.setUserAccount(ret.account)
-                G.selfUserData.setUserId(ret.userId)
-                G.selfUserData.setUserName(ret.name)
-                G.selfUserData.setUserLV(ret.lv)
-                G.selfUserData.setUserExp(ret.exp)
-                G.selfUserData.setUserCoins(ret.coins)
-                G.selfUserData.setUserGems(ret.gems)
-                G.selfUserData.setUserSex(ret.sex)
-                G.selfUserData.setUserIP(ret.ip)
-                G.selfUserData.setUserRoomID(ret.roomId)
-                G.gameInfo.isLogined = true
-                G.gameInfo.isInGame = false
-                G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.GET_GAMELIST,
-                    {account:ret.account,sign:G.selfUserData.getUserSign()},function(event){
-                        if(event.errcode == 0){
-                            console.log('请求游戏列表！')
-                            console.log(event)
-                            G.gameListInfo = event.data
-                            self.changeScene()
-                        }
-                    })
-            }
-        };
-        var account =  G.selfUserData.getUserAccount()
-        var sign = G.selfUserData.getUserSign()
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.HALLLOGIN,{account:account,sign:sign},onLogin);
+        self.m_socketProcess.guestLogin()
     },
 
     //进入注册界面
@@ -305,41 +257,16 @@ cc.Class({
             G.msgBoxMgr.showMsgBox({content:'手机号码输入有误，请检查手机号码！'})
             return;
         }
+        if(!codeNum || codeNum == ''){
+            G.msgBoxMgr.showMsgBox({content:'密码不能为空！'})
+            return;
+        }
         var account = phoneNum
         var password = codeNum
         if(customData == 0){//0注册  1登陆
-            G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.REGISTER,{account:account,password:password},function(event){
-                if(event.errcode == 0){
-                    console.log('注册成功！')
-                    G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
-                        if(event.errcode == 0){
-                            console.log('登陆成功！')
-                            G.httpManage.HTTPROOTURL = "http://" + event.halladdr
-                            G.selfUserData.setUserSign(event.sign)
-                            G.selfUserData.setUserPassword(password)
-                            G.selfUserData.setUserAccount(event.account)
-                            self.login()
-                        }else{
-                            G.msgBoxMgr.showMsgBox({content:'无效的账号!'})
-                        }
-                    }) 
-                }else{
-                    G.msgBoxMgr.showMsgBox({content:'账号已经被使用!'})
-                }
-            },null,null,'账号注册...')       
+            self.m_socketProcess.register(account,password)     
         }else if(customData == 1){
-            G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
-                if(event.errcode == 0){
-                    console.log('登陆成功！')
-                    G.httpManage.HTTPROOTURL = "http://" + event.halladdr
-                    G.selfUserData.setUserSign(event.sign)
-                    G.selfUserData.setUserPassword(password)
-                    G.selfUserData.setUserAccount(event.account)
-                    self.login()
-                }else{
-                    G.msgBoxMgr.showMsgBox({content:'账号错误，登陆失败！'})
-                }
-            },null,null,'账号登陆...')    
+            self.m_socketProcess.login(account,password)     
         }
     },
 
@@ -352,7 +279,7 @@ cc.Class({
         if(!phone)return;
         var phoneNum = phone.getComponent(cc.EditBox).string
         if(!G.tools.isPoneAvailable(phoneNum))return;
-        G.globalSocket.send(G.SocketCmd.GETSMS,{mobile:phoneNum});   
+         
     },
 
     //第三方登陆

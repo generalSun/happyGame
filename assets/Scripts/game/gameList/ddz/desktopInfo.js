@@ -12,8 +12,9 @@ cc.Class({
     onLoad () {
         var self = this
         var info = G.selfUserData.getUserRoomInfo()
+        var roomId = G.selfUserData.getUserRoomID()
         self.setGameRoundNum(info.num_of_turns,info.conf.maxGames)
-        self.setRoomNum(info.roomId)
+        self.setRoomNum(roomId)
         self.scheduleCallBack()
         self.schedule(self.scheduleCallBack.bind(self), 5)
     },

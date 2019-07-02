@@ -96,22 +96,8 @@ cc.Class({
         self.parentNode.node.addChild(self.m_moreNode);
     },
 
-    dealPoker(){
+    dealPoker(pokerInfo){
         var self = this
-        var pokerInfo = {
-            [config.chair.home]:{
-                pokers:[10,12,13,6,5,6,6,10,9,10,11,12,13,1,2,3,4,1,2,3,4]
-            },
-            [config.chair.nextDoor]:{
-                pokers:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            },
-            [config.chair.rightHome]:{
-                pokers:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            },
-            [config.chair.upperHouse]:{
-                pokers:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            },
-        }
         for(var i = 0; i < self.m_player.length; i++){
             var player = self.m_player[i]
             
@@ -121,7 +107,7 @@ cc.Class({
 
             var hand = player.getHandCardNode()
             var chair = player.getChair()
-            var pokers = pokerInfo[chair].pokers
+            var pokers = pokerInfo[chair].holds
             hand.clear()
             hand.addCard(pokers,true)
         }

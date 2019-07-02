@@ -17,14 +17,26 @@ cc.Class({
     
     gameBegin:function(event){
         var self = this
-        /**
-        num_of_turns:roomInfo.num_of_turns,
-        yuCards:game.yuCards,
-        currentPlayingIndex:game.currentPlayingIndex,
-        seatsInfo:new Array()
-        */
-       self.m_handler.m_deskScript.setGameRoundNum(event.num_of_turns)
-    
+        var num_of_turns = event.num_of_turns
+        var yuCards = event.yuCards
+        var currentPlayingIndex = event.currentPlayingIndex
+        var seatsInfo = event.seatsInfo
+        self.m_handler.m_deskScript.setGameRoundNum(num_of_turns)
+        var pokerInfo = {}
+        for(var i = 0; i < seatsInfo.length; i++){
+            var seatInfo = seatsInfo[i]
+            var player = self.m_handler.getPlayerByUserId(seatInfo.userId)
+            if(player){
+                var info = {}
+                if(seatInfo.holds){
+                    info.pokers = seatInfo.holds
+                }else{
+                    info.pokers = new Array(seatInfo.holdsNum).fill(0)
+                }
+                pokerInfo[player.getChair()] = info
+            }
+        }    
+        self.m_handler.dealPoker(pokerInfo)
     },
     
     playerJoin:function(event){

@@ -6,7 +6,7 @@ cc.Class({
         content:cc.Node
     },
 
-    init(infos){
+    init(infos,socketProcess){
         var self = this
         infos = infos || []
         self.m_items.splice(0,self.m_items.length)
@@ -31,7 +31,7 @@ cc.Class({
                 self.content.addChild(item);
                 self.m_items.push(item);
                 var scriptName = value.describle + '_page'
-                item.getComponent(scriptName).init(value)
+                item.getComponent(scriptName).init(value,socketProcess)
             }
         })
         .catch(function(err){

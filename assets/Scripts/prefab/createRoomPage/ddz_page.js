@@ -8,7 +8,7 @@ cc.Class({
         jushuxuanze:[cc.Toggle],
     },
 
-    init(info){
+    init(info,socketProcess){
         var rule = JSON.parse(info.rule)
         rule = rule || {}
         var self = this
@@ -28,7 +28,7 @@ cc.Class({
                 }
             }
         }
-        console.log('end init')
+        self.m_socketProcess = socketProcess
     },
 
     getResult(arr){
@@ -38,10 +38,6 @@ cc.Class({
                 return i
             }
         }
-    },
-
-    onLoad () {
-        var self = this
     },
 
     createRoomCallBack(event,customEventData){
@@ -67,26 +63,6 @@ cc.Class({
             jushuxuanze:jushuxuanze,
             playerMaxNum:3
         }
-        var data = {
-            account: G.selfUserData.getUserAccount(),
-            sign: G.selfUserData.getUserSign(),
-            conf: JSON.stringify(conf)
-        }
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.CREATE_PRIVATE_ROOM, data, function(event){
-            console.log('CREATE_PRIVATE_ROOM :'+event)
-            if (event.errcode !== 0) {
-                if (event.errcode == 2222) {
-                    G.msgBoxMgr.showMsgBox({content:'钻石不足，创建房间失败!'})
-                }else {
-                    G.msgBoxMgr.showMsgBox({content:'创建房间失败,错误码:'+ event.errcode})
-                }
-            }else {
-                G.globalSocket.setIp(event.ip)
-                G.globalSocket.setPort(event.port)
-                G.globalSocket.connectSocket(event)
-            }
-        },function(msg){
-            console.log('CREATE_PRIVATE_ROOM :'+msg.errmsg)
-        },null,'正在创建斗地主房间...');
+        self.m_socketProcess.requestCreatorRoom(conf,'正在创建斗地主房间...')
     }
 });

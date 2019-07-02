@@ -27,7 +27,7 @@ const FRAMEEVENT = {//帧事件名 target 0为发送给自己的节点   1为发
 }
 
 const HTTP_NET_EVENT = {//http网络事件名
-	GET_SERVERINFO:'/get_serverinfo',
+    GET_APP_WEB:'get_app_web',
 	GUEST_LOGIN:'/guest',
     HALLLOGIN:'/login',//大厅登陆
     REGISTER:'/register',
@@ -37,7 +37,6 @@ const HTTP_NET_EVENT = {//http网络事件名
     GET_GAMELIST:'/get_gameList',
     CREATE_PRIVATE_ROOM:'/create_private_room',
     ENTER_PRIVATE_ROOM:'/enter_private_room',
-    GET_GAMEDESTORY:'/get_gameDestory',
 }
 
 const SOCKET_EVENT_c2s = {//socket网络事件名
