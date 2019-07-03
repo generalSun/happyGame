@@ -31,6 +31,15 @@ cc.Class({
         self.seatUp()
     },
 
+    isSelf(){
+        var self = this
+        var userId = G.selfUserData.getUserId()
+        if(self.m_userId == userId){
+            return true
+        }
+        return false
+    },
+
     setUserId(id){
         var self = this
         self.m_userId = id

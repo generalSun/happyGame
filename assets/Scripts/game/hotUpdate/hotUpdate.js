@@ -63,6 +63,7 @@ cc.Class({
 
         G.gameInfo.isLogined = false
         G.gameInfo.isInGame = false
+        G.gameInfo.isGamePlay = false
         // G.ioUtil.clear()
     },
 

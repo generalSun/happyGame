@@ -61,6 +61,16 @@ cc.Class({
             self.listenMsg(Constants.SOCKET_EVENT_s2c.RECONNECT)
             self.listenMsg(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT)
             self.listenMsg(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED)
+
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.EXIT_RESULT)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH)
+
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH)
         });
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)

@@ -6,7 +6,8 @@ G.Code = {
 
 G.gameInfo = {
     isLogined:true,
-	isInGame:true
+	isInGame:true,
+	isGamePlay:true
 }
 
 G.gameListInfo = {}

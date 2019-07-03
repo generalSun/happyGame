@@ -40,7 +40,10 @@ const HTTP_NET_EVENT = {//http网络事件名
 }
 
 const SOCKET_EVENT_c2s = {//socket网络事件名
-    LOGIN:'login',
+    LOGIN:                  'login',
+    EXIT_GAME:              'exit',
+    DISPRESS_ROOM:          'dispress',
+    DISSOLVE_REQUEST:       'dissolve_request',
 }
 
 const SOCKET_EVENT_s2c = {//socket网络事件名
@@ -57,6 +60,11 @@ const SOCKET_EVENT_s2c = {//socket网络事件名
     GAME_SYNC_PUSH:         'game_sync_push',//玩家重连
     NEW_USER_COMES_PUSH:    'new_user_comes_push',//新玩家进入
     USER_STATE_PUSH:        'user_state_push',
+    EXIT_RESULT:            'exit_result',
+    EXIT_NOTIFY_PUSH:       'exit_notify_push',
+    DISPRESS_PUSH:          'dispress_push',
+    DISSOLVE_NOTICE_PUSH:   'dissolve_notice_push',
+    DISSOLVE_CANCEL_PUSH:   'dissolve_cancel_push'
 }
 
 module.exports = {

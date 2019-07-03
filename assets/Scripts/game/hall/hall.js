@@ -56,6 +56,7 @@ cc.Class({
         var gameScene = type+'GameScene'
         G.gameInfo.isLogined = true
         G.gameInfo.isInGame = true
+        G.gameInfo.isGamePlay = false
         if(cc.director.getScene().name != gameScene){
             cc.director.loadScene(gameScene)
         }

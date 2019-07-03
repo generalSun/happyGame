@@ -86,9 +86,9 @@ cc.Class({
                     ip:user.ip,
                     userId:user.userId
                 })
+                playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
+                playerScript.setDisCardNode(true,new disCard(),self.pokerAtlas)
             }
-            playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
-            playerScript.setDisCardNode(true,new disCard(),self.pokerAtlas)
         }
 
         self.m_moreNode = cc.instantiate(self.morePrefab);
@@ -107,7 +107,7 @@ cc.Class({
 
             var hand = player.getHandCardNode()
             var chair = player.getChair()
-            var pokers = pokerInfo[chair].holds
+            var pokers = pokerInfo[chair].pokers
             hand.clear()
             hand.addCard(pokers,true)
         }

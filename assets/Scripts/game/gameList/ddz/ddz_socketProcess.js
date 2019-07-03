@@ -1,21 +1,24 @@
 var Constants = require('../../../config/Constants')
 var config = require('./config')
+var handCard = require('./handCard')
+var disCard = require('./disCard')
 cc.Class({
     init:function(handler){
         var self = this
         self.m_handler = handler
-        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH)
-        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH)
-        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH)
-        G.globalSocket.listenMsg(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH)
 
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.EXIT_RESULT,self.exitRoom,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH,self.exitRoomPush,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH,self.dissolveNoticePush,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH,self.dissolveCancelPush,self)
     },
     
     gameBegin:function(event){
+        G.gameInfo.isGamePlay = true
         var self = this
         var num_of_turns = event.num_of_turns
         var yuCards = event.yuCards
@@ -55,6 +58,8 @@ cc.Class({
                 ip:event.ip,
                 userId:event.userId
             })
+            player.setHandCardNode(true,new handCard(),self.m_handler.pokerAtlas)
+            player.setDisCardNode(true,new disCard(),self.m_handler.pokerAtlas)
         }
     },
     
@@ -71,10 +76,77 @@ cc.Class({
         }
     },
 
+    exitRoom:function(event){
+        G.gameInfo.isLogined = true
+        G.gameInfo.isInGame = false
+        G.gameInfo.isGamePlay = false
+        if(cc.director.getScene().name != 'HallScene'){
+            cc.director.loadScene('HallScene')
+        }
+    },
+
+    exitRoomPush:function(event){
+        var userId = event.userId
+        var player = self.m_handler.getPlayerByUserId(userId)
+        if(player){
+            player.seatUp()
+        }
+    },
+
+    dissolveNoticePush:function(event){
+        var time = event.time
+        var states = event.states
+        var originator = event.originator
+        var player = self.m_handler.getPlayerByUserId(userId)
+        if(!player){
+            return
+        }
+        var info = {
+            time:time,
+            originator:originator,
+            playerInfo:[]
+        }
+        for(var i = 0; i < self.m_handler.m_player.length; i++){
+            var state = states[i]
+            var player = self.m_handler.getPlayerByServerChair(i)
+            var seatInfo = {
+                state:state,
+                name:player.getNickName()
+            } 
+            info.playerInfo.push(seatInfo)
+        }
+        var dissolveNode = self.m_handler.parentNode.node.getChildByName('dissolveNode')
+        if(dissolveNode){
+            dissolveNode.getComponent('dissolve').show(info)
+            return;
+        }
+        console.log('thert is not the node set')
+        cc.loader.loadRes('prefabs/dissolveNode', cc.Prefab, function(err, prefab) {
+            if (err) {
+                cc.log(err.message || err);
+                return;
+            }
+            var node = cc.instantiate(prefab);
+            node.getComponent('dissolve').show(info)
+            self.m_handler.parentNode.node.addChild(node);
+        });
+    },
+
+    dissolveCancelPush(){
+        var dissolveNode = self.m_handler.parentNode.node.getChildByName('dissolveNode')
+        if(dissolveNode){
+            dissolveNode.getComponent('dissolve').hide()
+        }
+    },
+
     onDestroy(){
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.EXIT_RESULT,self.exitRoom,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH,self.exitRoomPush,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH,self.dissolveNoticePush,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH,self.dissolveCancelPush,self)
     }
 })

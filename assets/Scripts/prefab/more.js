@@ -1,3 +1,4 @@
+var Constants = require('./../config/Constants')
 cc.Class({
     extends: cc.Component,
 
@@ -23,7 +24,14 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        
+        if(G.gameInfo.isGamePlay){
+            G.msgBoxMgr.showMsgBox({
+                content:'游戏已经开始，是否确认解散房间？',
+                sureClickEventCallBack:function(){
+                    G.globalSocket.send(Constants.SOCKET_EVENT_c2s.DISSOLVE_REQUEST)
+                }
+            })
+        }
     },
 
     onListClickCallBack(event, customEventData){
@@ -69,12 +77,10 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        if(G.gameInfo.isInGame){
+        if(G.gameInfo.isGamePlay){
             G.msgBoxMgr.showMsgBox({content:'游戏已经开始了，无法退出'})
         }else{
-            if(cc.director.getScene().name != 'HallScene'){
-                cc.director.loadScene('HallScene')
-            }
+            G.globalSocket.send(Constants.SOCKET_EVENT_c2s.EXIT_GAME)
         }
     },
 })
