@@ -35,8 +35,9 @@ var httpManage ={
             xhr.setRequestHeader("Accept-Encoding", "gzip,deflate", "text/html;charset=UTF-8");
         }
         
-        var success = function(event){
+        var success = function(event,responseURL){
             G.globalLoading.setLoadingVisible(false)
+            cc.log("request from [" + responseURL + "] data [", event, "]");
             if(successHandler){
                 successHandler(event)
             }
@@ -44,6 +45,7 @@ var httpManage ={
 
         var error = function(msg){
             G.globalLoading.setLoadingVisible(false)
+            cc.log("request 错误："+ msg);
             xhr.abort();
             if(errorHandler){
                 errorHandler({
@@ -61,16 +63,13 @@ var httpManage ={
         };
     
         xhr.onreadystatechange = function () {
-            console.log("onreadystatechange");
             if (xhr.readyState === 4){
                 if (xhr.status >= 200 && xhr.status < 300) {
                     var respText = xhr.responseText;
                     try {
                         var ret = JSON.parse(respText);
-                        cc.log("request from [" + xhr.responseURL + "] data [", ret, "]");
-                        success(ret);
+                        success(ret,xhr.responseURL);
                     } catch (e) {
-                        console.log("err:" + e);
                         error(e);
                     }
                 }

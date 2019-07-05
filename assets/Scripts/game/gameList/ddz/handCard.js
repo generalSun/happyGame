@@ -1,7 +1,7 @@
 var config = require('./config')
 var handCardTouch = require('./handCardTouch')
 var Constants = require('./../../../config/Constants')
-var count = 0
+var ddz_logic = require('./ddz_logic')
 cc.Class({
     ctor(){
         var self = this
@@ -57,12 +57,17 @@ cc.Class({
         return null;
     },
 
-    addCard(info,ani){
+    addCards(info,ani){
         var self = this
-        info = info || {}
+        info = info || []
         var ps = new Array()
         for(var i = 0; i < info.length; i++){
-            var p = G.tools.loadResPromise('prefabs/cardNode', cc.Prefab,info[i])
+            var p = null
+            if(self.m_chair == config.chair.home){
+                p = G.tools.loadResPromise('prefabs/bigPoker', cc.Prefab,info[i])
+            }else{
+                p = G.tools.loadResPromise('prefabs/midPoker', cc.Prefab,info[i])
+            }
             ps.push(p)
         }
         Promise.all(ps).then(function(args){
@@ -77,17 +82,22 @@ cc.Class({
                 self.m_cards.push(cardScript)
                 var scale = config.handCardScale[self.m_chair]
                 cardScript.setPokerScale(scale)
+                cardScript.setLogic(ddz_logic)
                 cardScript.setAtlas(self.m_pokerAtlas)
+                cardScript.setPokerType(0)
+                if(self.m_chair != config.chair.home){
+                    cardScript.setPokerType(1)
+                }
                 cardScript.setCard(value)
                 if(self.m_chair == config.chair.home){
                     cardScript.setPokerCurrentPosition(
-                        cc.v2(self.m_cardNode.width/2 - config.normalPokerSize.width*scale.x/2,
-                            -1 * self.m_cardNode.height/2 + config.normalPokerSize.height*scale.y/2)
+                        cc.v2(self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,
+                            -1 * self.m_cardNode.height/2 + config.normalHandPokerSize[self.m_chair].height*scale.y/2)
                     )
                 }else if(self.m_chair == config.chair.nextDoor){
-                    cardScript.setPokerCurrentPosition(cc.v2(config.normalPokerSize.width*scale.x/2 - self.m_cardNode.width/2,0))
+                    cardScript.setPokerCurrentPosition(cc.v2(config.normalHandPokerSize[self.m_chair].width*scale.x/2 - self.m_cardNode.width/2,0))
                 }else{
-                    cardScript.setPokerCurrentPosition(cc.v2(self.m_cardNode.width/2 - config.normalPokerSize.width*scale.x/2,0))
+                    cardScript.setPokerCurrentPosition(cc.v2(self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,0))
                 }
             }
             if(self.m_handCardTouch){
@@ -117,7 +127,7 @@ cc.Class({
             var card = self.m_cards[i]
             if(cc.isValid(card)){
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
-                card.setPokerCurrentPosition({x:self.m_cardNode.width/2 - config.normalPokerSize.width*scale.x/2,y:startPos.y})
+                card.setPokerCurrentPosition({x:self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,y:startPos.y})
                 if(ani){
                     if(i + 1 == self.m_cards.length){
                         card.node.runAction(
@@ -167,9 +177,9 @@ cc.Class({
             if(cc.isValid(card)){
                 card.setPokerNormalPosition({x:endPos.x,y:endPos.y})
                 if(self.m_chair == config.chair.nextDoor){
-                    card.setPokerCurrentPosition({x:config.normalPokerSize.width*scale.x/2 - self.m_cardNode.width/2,y:endPos.y})
+                    card.setPokerCurrentPosition({x:config.normalHandPokerSize[self.m_chair].width*scale.x/2 - self.m_cardNode.width/2,y:endPos.y})
                 }else{
-                    card.setPokerCurrentPosition({x:self.m_cardNode.width/2 - config.normalPokerSize.width*scale.x/2,y:endPos.y})
+                    card.setPokerCurrentPosition({x:self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,y:endPos.y})
                 }
                 if(ani){
                     card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,endPos.x,endPos.y),cc.callFunc(callBack,card,{index:i})))
@@ -274,13 +284,13 @@ cc.Class({
         var cardsNum = self.m_cards.length
         var pos = cc.v2(0,0)
         if(cardsNum > 0){
-            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale.x
+            var cardsWidth = (cardsNum - 1)*space + config.normalHandPokerSize[self.m_chair].width*scale.x
             var minx = cardMinOffest.x - width/2
             var x = cardOffest.x - cardsWidth/2
-            pos.x = x < minx?(minx + config.normalPokerSize.width*scale.x/2):(x + config.normalPokerSize.width*scale.x/2)
+            pos.x = x < minx?(minx + config.normalHandPokerSize[self.m_chair].width*scale.x/2):(x + config.normalHandPokerSize[self.m_chair].width*scale.x/2)
         }
         if(self.m_chair == config.chair.home){
-            pos.y = -1 * self.m_cardNode.height/2 + config.normalPokerSize.height*scale.x/2
+            pos.y = -1 * self.m_cardNode.height/2 + config.normalHandPokerSize[self.m_chair].height*scale.x/2
         }
         return pos
     },
@@ -295,11 +305,11 @@ cc.Class({
         var cardsNum = self.m_cards.length
         var currSpace = space
         if(cardsNum > 0){
-            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale.x
+            var cardsWidth = (cardsNum - 1)*space + config.normalHandPokerSize[self.m_chair].width*scale.x
             var maxw = width - cardMinOffest.x 
             var w = cardsWidth + cardOffest.x
             if(w > maxw){
-                currSpace = (maxw - config.normalPokerSize.width*scale)/((cardsNum - 1) == 0?1:(cardsNum - 1))
+                currSpace = (maxw - config.normalHandPokerSize[self.m_chair].width*scale.x)/((cardsNum - 1) == 0?1:(cardsNum - 1))
             }
         }
         return currSpace

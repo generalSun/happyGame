@@ -114,6 +114,7 @@ cc.Class({
     },
 
     onDestroy(){
+        var self = this
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
     }

@@ -139,6 +139,9 @@ cc.Class({
 
     isSeat () {
         var self = this
+        if(!cc.isValid(self) || !cc.isValid(self.seatNode) || !cc.isValid(self.seatSprite)){
+            return false
+        }
         return self.seatNode && self.seatNode.active && !self.seatSprite.node.active
     },
 
@@ -269,7 +272,10 @@ cc.Class({
         visible = visible || false
         self.clock.node.active = visible
         if(!visible){
-
+            if(self.clock.scheduleId){
+                clearInterval(self.clock.scheduleId);
+                self.clock.scheduleId = null
+            }
             return;
         }
         var describle = self.clock.node.getChildByName('describle')
@@ -278,14 +284,19 @@ cc.Class({
         if(label){
             label.string = num
         }
-        self.schedule(function(){
+        self.clock.scheduleId = setInterval(function(){
             if(cc.isValid(label)){
                 label.string = label.string - 1
                 if(label.string <= 3){
-
+                    self.clock.node.runAction(cc.blink(1,3))
+                }
+                if(label.string <= 0){
+                    clearInterval(self.clock.scheduleId);
+                    self.clock.scheduleId = null
+                    self.clock.node.active = false
                 }
             }
-        }, 1)
+        }, 1000)
     },
 
     getClock () {

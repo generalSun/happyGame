@@ -14,7 +14,8 @@ cc.Class({
         playerPrefab: cc.Prefab,
         ruleInfo:cc.Node,
         morePrefab:cc.Prefab,
-        pokerAtlas:[cc.SpriteAtlas]
+        pokerAtlas:[cc.SpriteAtlas],
+        cardBottomSprite:cc.Sprite
     },
 
     onDestroy(){
@@ -29,9 +30,15 @@ cc.Class({
         self.m_socketProcess.init(self)
         self.m_deskScript = self.desktopInfo.getComponent('desktopInfo');
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
+        self.m_yuCardsScript = self.cardBottomSprite.getComponent('yuCards');
         self.m_player = new Array();
         self.m_meChairID = config.INVALID_CHAIR;
         // self.m_gameState = 
+    },
+
+    start(){
+        var self = this
+        self.m_yuCardsScript.init(self.pokerAtlas)
         var info = G.selfUserData.getUserRoomInfo()
         config.maxPlayerNum = info.conf.playerMaxNum
         self.setMyServerID(info.seats)
@@ -96,20 +103,59 @@ cc.Class({
         self.parentNode.node.addChild(self.m_moreNode);
     },
 
-    dealPoker(pokerInfo){
+    dealPoker(pokerInfo,ani){
+        ani = ani || false
+        pokerInfo = pokerInfo || [
+            {
+                pokers:[1,2,3,4,5,6,7,8,9,10,65,66,11,12,13,17,18]
+            },
+            {
+                pokers:[1,2,3,4,5,65,66,0,0,0]
+            },
+            {
+                pokers:[1,3,65,66,3,0,0,0,0,0]
+            },
+            {
+                pokers:[0,2,3,2,13,0,0,0,0,0]
+            },
+        ]
         var self = this
         for(var i = 0; i < self.m_player.length; i++){
             var player = self.m_player[i]
-            
-            var dis = player.getDisCardNode()
-            dis.clear()
-            player.setReadySprite(false)
-
-            var hand = player.getHandCardNode()
             var chair = player.getChair()
             var pokers = pokerInfo[chair].pokers
-            hand.clear()
-            hand.addCard(pokers,true)
+            player.setReadySprite(false)
+            var dis = player.getDisCardNode()
+            if(dis){
+                dis.clear()
+            }
+            
+            var hand = player.getHandCardNode()
+            if(hand){
+                hand.clear()
+                hand.addCards(pokers,ani)
+            }
+        }
+    },
+
+    addYuCards(cards,ani){
+        ani = ani || false
+        cards = cards || [1,2,3]
+        var self = this
+        self.m_yuCardsScript.clear()
+        self.m_yuCardsScript.addCards(cards,ani)
+    },
+
+    //更换场景
+    changeScene(){
+        var self = this
+        G.gameInfo.isLogined = true
+        G.gameInfo.isInGame = false
+        G.gameInfo.isGamePlay = false
+        G.selfUserData.setUserRoomID(null)
+        G.globalSocket.close()
+        if(cc.director.getScene().name != 'HallScene'){
+            cc.director.loadScene('HallScene')
         }
     },
 
@@ -166,7 +212,8 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        self.dealPoker()
+        self.dealPoker(null,true)
+        self.addYuCards(null,true)
     },
 
     onVoiceClickCallBack(event, customEventData){

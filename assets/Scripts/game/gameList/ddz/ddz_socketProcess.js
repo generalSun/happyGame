@@ -15,6 +15,7 @@ cc.Class({
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH,self.exitRoomPush,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH,self.dissolveNoticePush,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH,self.dissolveCancelPush,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_OVER_PUSH,self.gameOverPush,self)
     },
     
     gameBegin:function(event){
@@ -39,7 +40,8 @@ cc.Class({
                 pokerInfo[player.getChair()] = info
             }
         }    
-        self.m_handler.dealPoker(pokerInfo)
+        self.m_handler.dealPoker(pokerInfo,true)
+        self.m_handler.addYuCards(yuCards,true)
     },
     
     playerJoin:function(event){
@@ -77,15 +79,12 @@ cc.Class({
     },
 
     exitRoom:function(event){
-        G.gameInfo.isLogined = true
-        G.gameInfo.isInGame = false
-        G.gameInfo.isGamePlay = false
-        if(cc.director.getScene().name != 'HallScene'){
-            cc.director.loadScene('HallScene')
-        }
+        var self = this
+        self.m_handler.changeScene()
     },
 
     exitRoomPush:function(event){
+        var self = this
         var userId = event.userId
         var player = self.m_handler.getPlayerByUserId(userId)
         if(player){
@@ -94,17 +93,19 @@ cc.Class({
     },
 
     dissolveNoticePush:function(event){
-        var time = event.time
+        var self = this
+        var time = Math.ceil(event.time)
         var states = event.states
         var originator = event.originator
-        var player = self.m_handler.getPlayerByUserId(userId)
+        var player = self.m_handler.getPlayerByUserId(originator)
         if(!player){
             return
         }
         var info = {
             time:time,
-            originator:originator,
-            playerInfo:[]
+            originator:player.getNickName(),
+            playerInfo:[],
+            hasChose:false
         }
         for(var i = 0; i < self.m_handler.m_player.length; i++){
             var state = states[i]
@@ -114,6 +115,9 @@ cc.Class({
                 name:player.getNickName()
             } 
             info.playerInfo.push(seatInfo)
+            if(state != 0 && player.isSelf()){
+                info.hasChose = true
+            }
         }
         var dissolveNode = self.m_handler.parentNode.node.getChildByName('dissolveNode')
         if(dissolveNode){
@@ -133,13 +137,20 @@ cc.Class({
     },
 
     dissolveCancelPush(){
+        var self = this
         var dissolveNode = self.m_handler.parentNode.node.getChildByName('dissolveNode')
         if(dissolveNode){
             dissolveNode.getComponent('dissolve').hide()
         }
     },
 
+    gameOverPush(){
+        var self = this
+        self.m_handler.changeScene()
+    },
+
     onDestroy(){
+        var self = this
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
@@ -148,5 +159,6 @@ cc.Class({
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH,self.exitRoomPush,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH,self.dissolveNoticePush,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH,self.dissolveCancelPush,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_OVER_PUSH,self.gameOverPush,self)
     }
 })

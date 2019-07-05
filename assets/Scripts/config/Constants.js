@@ -44,6 +44,8 @@ const SOCKET_EVENT_c2s = {//socket网络事件名
     EXIT_GAME:              'exit',
     DISPRESS_ROOM:          'dispress',
     DISSOLVE_REQUEST:       'dissolve_request',
+    DISSOLVE_AGREE:         'dissolve_agree',
+    DISSOLVE_REJECT:        'dissolve_reject',
 }
 
 const SOCKET_EVENT_s2c = {//socket网络事件名
@@ -64,7 +66,8 @@ const SOCKET_EVENT_s2c = {//socket网络事件名
     EXIT_NOTIFY_PUSH:       'exit_notify_push',
     DISPRESS_PUSH:          'dispress_push',
     DISSOLVE_NOTICE_PUSH:   'dissolve_notice_push',
-    DISSOLVE_CANCEL_PUSH:   'dissolve_cancel_push'
+    DISSOLVE_CANCEL_PUSH:   'dissolve_cancel_push',
+    GAME_OVER_PUSH:         'game_over_push'
 }
 
 module.exports = {

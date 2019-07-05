@@ -139,6 +139,21 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
+            <key>cardBottom.png</key>
+            <dict>
+                <key>aliases</key>
+                <array/>
+                <key>spriteOffset</key>
+                <string>{0,0}</string>
+                <key>spriteSize</key>
+                <string>{129,73}</string>
+                <key>spriteSourceSize</key>
+                <string>{129,73}</string>
+                <key>textureRect</key>
+                <string>{{1465,0},{129,73}}</string>
+                <key>textureRotated</key>
+                <false/>
+            </dict>
             <key>ddz.png</key>
             <dict>
                 <key>aliases</key>
@@ -150,7 +165,7 @@
                 <key>spriteSourceSize</key>
                 <string>{281,57}</string>
                 <key>textureRect</key>
-                <string>{{1465,0},{281,57}}</string>
+                <string>{{1594,0},{281,57}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -361,9 +376,9 @@
             <key>realTextureFileName</key>
             <string>ddzGameRes.png</string>
             <key>size</key>
-            <string>{1758,1598}</string>
+            <string>{1875,1598}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:6e306b3532ba49092ba8d61b0157a184:30b8a0dd77a3990eb4f6bdee122018a0:8bbf384bdf6e9f306d28c29869b91944$</string>
+            <string>$TexturePacker:SmartUpdate:ed187baa320055fb8caa71a6e15fde4c:5b2a160b39b4dd0da27a8e440fa2cf3f:8bbf384bdf6e9f306d28c29869b91944$</string>
             <key>textureFileName</key>
             <string>ddzGameRes.png</string>
         </dict>

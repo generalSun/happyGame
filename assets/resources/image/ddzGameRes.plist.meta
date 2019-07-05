@@ -3,7 +3,7 @@
   "uuid": "1ef6b975-af0d-46c7-9ce7-07859bd9e615",
   "rawTextureUuid": "abad8d73-ef7d-436f-b6f8-843e1c637bd8",
   "size": {
-    "width": 1758,
+    "width": 1875,
     "height": 1598
   },
   "type": "Texture Packer",
@@ -206,6 +206,28 @@
       "spriteType": "normal",
       "subMetas": {}
     },
+    "cardBottom.png": {
+      "ver": "1.0.4",
+      "uuid": "14f46dae-0710-4e09-af72-b03f55870cc7",
+      "rawTextureUuid": "abad8d73-ef7d-436f-b6f8-843e1c637bd8",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 1465,
+      "trimY": 0,
+      "width": 129,
+      "height": 73,
+      "rawWidth": 129,
+      "rawHeight": 73,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "spriteType": "normal",
+      "subMetas": {}
+    },
     "ddz.png": {
       "ver": "1.0.4",
       "uuid": "42c63a2f-abcf-4511-8467-4982b23df305",
@@ -215,7 +237,7 @@
       "rotated": false,
       "offsetX": 0,
       "offsetY": 0,
-      "trimX": 1465,
+      "trimX": 1594,
       "trimY": 0,
       "width": 281,
       "height": 57,

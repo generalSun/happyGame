@@ -18,7 +18,6 @@ cc.Class({
     init(){
         var self = this
         cc.game.addPersistRootNode(self.node)
-        self.m_connectFlag = false                          //socket连接是否成功 
         self.m_socket = null
         self.m_msgList = new Array()
     },
@@ -44,12 +43,12 @@ cc.Class({
             'timeout':2000
         }
         var url = 'http://' + self.ip + ':' + self.port
-        self.m_socket = io.connect(url,opts);
+        var m_socket = io.connect(url,opts);
         G.globalLoading.setLoadingVisible(true,'正在进入房间...')
-        self.m_socket.on('connect',function(){
+        m_socket.on('connect',function(){
             console.log('connect');
+            self.m_socket = m_socket
             G.globalLoading.setLoadingVisible(false)
-            self.m_connectFlag = true
             var sd = {
                 token:data.token,
                 roomId:data.roomId,
@@ -66,6 +65,7 @@ cc.Class({
             self.listenMsg(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH)
             self.listenMsg(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH)
             self.listenMsg(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH)
+            self.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_OVER_PUSH)
 
             self.listenMsg(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH)
             self.listenMsg(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH)
@@ -118,7 +118,7 @@ cc.Class({
     
     send: function (event,data) {
         var self = this
-        if(!self.m_connectFlag || !self.m_socket){
+        if(!self.m_socket){
             console.log('未连接成功')
             return
         }
@@ -139,7 +139,6 @@ cc.Class({
             self.m_socket.disconnect();
         }
         self.m_socket = null;
-        self.m_connectFlag = false
     },
 
     onDestroy(){
@@ -175,6 +174,5 @@ cc.Class({
     reconnect:function(){
         var self = this;
         G.globalLoading.setLoadingVisible(false)
-        self.m_connectFlag = true
     },
 });

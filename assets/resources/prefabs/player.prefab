@@ -2243,7 +2243,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 541,
-      "y": 105,
+      "y": 150,
       "z": 0
     },
     "_scale": {
@@ -2286,7 +2286,7 @@
         "__id__": 85
       }
     ],
-    "_active": false,
+    "_active": true,
     "_level": 5,
     "_components": [],
     "_prefab": {

@@ -1,10 +1,24 @@
 var Constants = require('./../config/Constants')
+var pokerAtlas = {
+    back:['big_back','mid_back','small_back'],
+    bottom:['big_bottom','mid_bottom','small_bottom'],
+    king:['big_king','mid_king','small_king'],
+    xiaoWang:['big_xiaoWang','mid_xiaoWang','small_xiaoWang'],
+    black:['1','2','3','4','5','6','7','8','9','10','11','12','13'],
+    red:['r1','r2','r3','r4','r5','r6','r7','r8','r9','r10','r11','r12','r13'],
+    flowerColor:['spade','plumBlossom','heart','block']
+}
 cc.Class({
     extends: cc.Component,
 
     properties: {
-        cardSprite:cc.Sprite,
-        signSprite:cc.Sprite
+        backSprite:cc.Sprite,
+        back:cc.Sprite,
+        signSprite:cc.Sprite,
+        kingSprite:cc.Sprite,
+        numNode:cc.Node,
+        numSprite:[cc.Sprite],
+        colorSprite:[cc.Sprite]
     },
 
     onLoad () {
@@ -13,7 +27,11 @@ cc.Class({
         self.m_value = 0
         self.m_pokerAtlas = null
         self.m_noramlPos = cc.v2(0,0)
+        self.m_pokerType = 0 //0big 1mid 2small
+        self.m_logic = null
+        self.backSprite.node.active = false
         self.signSprite.node.active = false
+        self.back.node.active = true
         G.eventManager.listenEvent(Constants.FRAMEEVENT.POKERFLIP,self.pokerFilp,self)
     },
 
@@ -27,8 +45,20 @@ cc.Class({
         self.setCard()
     },
 
-    pokerFilpEnd(){
+    setLogic(logic){
+        var self = this
+        self.m_logic = logic
+    },
 
+    setPokerType(type){
+        type = type || 0
+        var self = this
+        self.m_pokerType = type
+    },
+
+    getPokerType(){
+        var self = this
+        return self.m_pokerType
     },
 
     setPokerScale(scale){
@@ -109,16 +139,51 @@ cc.Class({
         var self = this
         cbCard = cbCard || self.m_value
         self.m_value = cbCard
-        var cardTyp = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.CARDTYPE) || 1
-        var atlas = self.m_pokerAtlas[cardTyp]
-        var path = null
+        var cardType = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.CARDTYPE) || 1
+        var atlas = self.m_pokerAtlas[0]
         if(!cbCard || cbCard <= 0 || cbCard >= 80){
-            path = 'ddz_cards_{0}-poker_{1}'.format((''+(cardTyp+1)).padStart(2,'0'),0)
+            self.backSprite.node.active = false
+            self.back.node.active = true 
+            var backFrame = atlas.getSpriteFrame(pokerAtlas.back[self.m_pokerType]);
+            self.back.spriteFrame = backFrame;
         }else {
-            path = 'ddz_cards_{0}-poker_{1}'.format((''+(cardTyp+1)).padStart(2,'0'),cbCard)
+            self.backSprite.node.active = true
+            self.back.node.active = false
+            self.kingSprite.node.active = false 
+            self.numNode.active = false
+            var backFrame = atlas.getSpriteFrame(pokerAtlas.bottom[self.m_pokerType]);
+            self.backSprite.spriteFrame = backFrame;
+            var kingFrame = null
+            var numFrame = null
+            var colorFrame = null
+            if(cbCard == 65){//小王
+                kingFrame = atlas.getSpriteFrame(pokerAtlas.xiaoWang[self.m_pokerType]);
+            }else if(cbCard == 66){//大王
+                kingFrame = atlas.getSpriteFrame(pokerAtlas.king[self.m_pokerType]);
+            }else{
+                var color = self.m_logic.getcardcolor(cbCard)
+                var value = self.m_logic.getcardvalue(cbCard)
+                colorFrame = atlas.getSpriteFrame(pokerAtlas.flowerColor[color]);
+                if(color == 2 || color == 3){
+                    numFrame = atlas.getSpriteFrame(pokerAtlas.red[value-1]);
+                }else{
+                    numFrame = atlas.getSpriteFrame(pokerAtlas.black[value-1]);
+                }
+            }
+            if(kingFrame){
+                self.kingSprite.spriteFrame = kingFrame;
+                self.kingSprite.node.active = true 
+            }
+            if(numFrame && colorFrame){
+                self.numNode.active = true
+                for(var i = 0; i < self.numSprite.length; i++){
+                    var card = self.numSprite[i]
+                    var color = self.colorSprite[i]
+                    card.spriteFrame = numFrame;
+                    color.spriteFrame = colorFrame;
+                }
+            }
         }
-        var frame = atlas.getSpriteFrame(path);
-        self.cardSprite.spriteFrame = frame;
     },
 
     isClicked(pos){
@@ -141,7 +206,7 @@ cc.Class({
 
     setColor(color){
         var self = this
-        self.cardSprite.node.color = color
+        self.backSprite.node.color = color
     },
 
     getAnimationComponent(){

@@ -76,10 +76,10 @@
     "_level": 0,
     "_components": [
       {
-        "__id__": 59
+        "__id__": 62
       },
       {
-        "__id__": 60
+        "__id__": 63
       }
     ],
     "_prefab": null,
@@ -239,13 +239,16 @@
       },
       {
         "__id__": 33
+      },
+      {
+        "__id__": 58
       }
     ],
     "_active": true,
     "_level": 1,
     "_components": [
       {
-        "__id__": 58
+        "__id__": 61
       }
     ],
     "_prefab": null,
@@ -1596,7 +1599,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 475,
-      "y": -160,
+      "y": -120,
       "z": 0
     },
     "_scale": {
@@ -1876,7 +1879,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 573,
-      "y": -160,
+      "y": -120,
       "z": 0
     },
     "_scale": {
@@ -2672,6 +2675,110 @@
     "customEventData": ""
   },
   {
+    "__type__": "cc.Node",
+    "_name": "cardBottomSprite",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 5
+    },
+    "_children": [],
+    "_active": true,
+    "_level": 2,
+    "_components": [
+      {
+        "__id__": 59
+      },
+      {
+        "__id__": 60
+      }
+    ],
+    "_prefab": null,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 129,
+      "height": 73
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_position": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 315,
+      "z": 0
+    },
+    "_scale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_quat": {
+      "__type__": "cc.Quat",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_is3DNode": false,
+    "groupIndex": 0,
+    "_rotationX": 0,
+    "_rotationY": 0,
+    "_id": "5dTFo330ZF9JD0afMgWOFR"
+  },
+  {
+    "__type__": "cc.Sprite",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 58
+    },
+    "_enabled": true,
+    "_materials": [],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
+    "_spriteFrame": {
+      "__uuid__": "14f46dae-0710-4e09-af72-b03f55870cc7"
+    },
+    "_type": 0,
+    "_sizeMode": 1,
+    "_fillType": 0,
+    "_fillCenter": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_fillStart": 0,
+    "_fillRange": 0,
+    "_isTrimmedMode": true,
+    "_atlas": {
+      "__uuid__": "1ef6b975-af0d-46c7-9ce7-07859bd9e615"
+    },
+    "_id": "aawVT5K/9K67Io7oK4nP7X"
+  },
+  {
+    "__type__": "a1d72liGTZAXKj4o8Vss/Wr",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 58
+    },
+    "_enabled": true,
+    "_id": "9bo/CIjd5IjZvC3VAIyxaR"
+  },
+  {
     "__type__": "cc.Sprite",
     "_name": "",
     "_objFlags": 0,
@@ -2727,7 +2834,7 @@
     },
     "_enabled": true,
     "parentNode": {
-      "__id__": 58
+      "__id__": 61
     },
     "buttonNode": {
       "__id__": 33
@@ -2746,12 +2853,12 @@
     },
     "pokerAtlas": [
       {
-        "__uuid__": "63b2c6a0-53da-48b8-a865-b9526dde7626"
-      },
-      {
-        "__uuid__": "1c8a5145-4310-4753-a9d1-2657dc30f5c5"
+        "__uuid__": "bb906fac-daa7-4e09-b160-13f5825358ab"
       }
     ],
+    "cardBottomSprite": {
+      "__id__": 59
+    },
     "_id": "39SHoCw4FEs5PbMWC265n5"
   }
 ]

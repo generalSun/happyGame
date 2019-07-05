@@ -47,13 +47,18 @@ var config = {
 
     ],
     handCardScale:[
-        cc.v2(0.8,0.8),
-        cc.v2(0.5,0.5),
-        cc.v2(0.5,0.5),
-        cc.v2(0.5,0.5),
+        cc.v2(1,1),
+        cc.v2(1,1),
+        cc.v2(1,1),
+        cc.v2(1,1),
     ],
-    handCardSpace:[50,30,30,30],
-    normalPokerSize:cc.size(118,160),
+    handCardSpace:[71,39,39,39],
+    normalHandPokerSize:[
+        cc.size(142,185),
+        cc.size(78,103),
+        cc.size(78,103),
+        cc.size(78,103),
+    ],
     cardPopHeight:25,
 
     disNodeSize:[
@@ -87,6 +92,18 @@ var config = {
         cc.v2(0.5,0.5),
     ],
     disCardSpace:[30,30,30,30],
+    normalDisPokerSize:[
+        cc.size(142,185),
+        cc.size(78,103),
+        cc.size(78,103),
+        cc.size(78,103),
+    ],
+
+    yuCardsScale:cc.v2(1,1),
+    normalBottomPokerSize:cc.size(44,58),
+    yuCardsSpace:22,
+    yuCardsOffset:cc.v2(0,0),
+    yuCardsMinOffset:cc.v2(0,0),
 }
 
 module.exports = config

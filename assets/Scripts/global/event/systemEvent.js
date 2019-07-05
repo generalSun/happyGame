@@ -63,13 +63,7 @@ cc.Class({
 
     listenEvent(name,callBack,target){
         var self = this
-        notification.on(name,function(data){
-            console.log('[本地]接收到了事件 '+name)
-            console.log(data)
-            if(callBack){
-                callBack.call(target,data)
-            }
-        },self)
+        notification.on(name,callBack,target)
     },
 
     cancelEvent(name,callBack,target){
@@ -79,12 +73,13 @@ cc.Class({
 
     listenEventOnce(name,callBack,target){
         var self = this
-        notification.on(name,function(data){
+        var fun = function(data){
             if(callBack){
                 callBack.call(target,data)
             }
-            notification.off(name,callBack,self)
-        },self)
+            notification.off(name,fun,target)
+        }
+        notification.on(name,fun,target)
     },
 
     emitEvent(name,msg){

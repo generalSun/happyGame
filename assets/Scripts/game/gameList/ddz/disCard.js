@@ -31,7 +31,7 @@ cc.Class({
         self.m_cardNode.y = nodeOffest.y
     },
 
-    addCard(info,ani){
+    addCards(info,ani){
         var self = this
         info = info || {}
         var ps = new Array()
@@ -71,10 +71,10 @@ cc.Class({
         var cardsNum = self.m_cards.length
         var pos = cc.v2(0,0)
         if(cardsNum > 0){
-            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale.x
+            var cardsWidth = (cardsNum - 1)*space + config.normalDisPokerSize[self.m_chair].width*scale.x
             var minx = cardMinOffest.x - width/2
             var x = cardOffest.x - cardsWidth/2
-            pos.x = x < minx?(minx + config.normalPokerSize.width*scale.x/2):(x + config.normalPokerSize.width*scale.x/2)
+            pos.x = x < minx?(minx + config.normalDisPokerSize[self.m_chair].width*scale.x/2):(x + config.normalDisPokerSize[self.m_chair].width*scale.x/2)
         }
         return pos
     },
@@ -89,11 +89,11 @@ cc.Class({
         var cardsNum = self.m_cards.length
         var currSpace = space
         if(cardsNum > 0){
-            var cardsWidth = (cardsNum - 1)*space + config.normalPokerSize.width*scale.x
+            var cardsWidth = (cardsNum - 1)*space + config.normalDisPokerSize[self.m_chair].width*scale.x
             var maxw = width - cardMinOffest.x 
             var w = cardsWidth + cardOffest.x
             if(w > maxw){
-                currSpace = (maxw - config.normalPokerSize.width*scale.x)/((cardsNum - 1) == 0?1:(cardsNum - 1))
+                currSpace = (maxw - config.normalDisPokerSize[self.m_chair].width*scale.x)/((cardsNum - 1) == 0?1:(cardsNum - 1))
             }
         }
         return currSpace
