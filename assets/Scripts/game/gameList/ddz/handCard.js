@@ -219,10 +219,10 @@ cc.Class({
         if(self.m_chair != config.chair.home)return
         var ani = args.ani || false
         self.sortCards()
-        if(ani){
-            for(var i = 0; i < self.m_cards.length; i++){
-                var poker = self.m_cards[i]
-                if(cc.isValid(poker)){
+        for(var i = 0; i < self.m_cards.length; i++){
+            var poker = self.m_cards[i]
+            if(cc.isValid(poker)){
+                if(ani){
                     poker.playAnimationFilp()
                     var data = [
                         {frame:0,value:new cc.Vec2(poker.getPokerScaleX(),poker.getPokerScaleY())},
@@ -232,13 +232,15 @@ cc.Class({
                     poker.setAnimationCurveData('scale',data)
                     poker.setAnimationWrapMode(cc.WrapMode.Normal)
                     poker.speedUpAnimation(5)
+                }else{
+                    poker.setCard()
                 }
             }
+        }
+        if(ani){
             G.eventManager.listenEventOnce(Constants.FRAMEEVENT.POKERFLIPEND,self.pokerFilpEnd,self)
         }else{
-            if(self.m_handCardTouch){
-                self.m_handCardTouch.canTouched(true)
-            }
+            self.pokerFilpEnd()
         }
     },
 
@@ -250,13 +252,7 @@ cc.Class({
         if(self.m_handCardTouch){
             self.m_handCardTouch.canTouched(true)
         }
-        self.m_object.setOperateNode(true)
-        self.m_objectEvent.showOperateByIndex(0,[
-            {name:'outCardButton',visible:true},
-            {name:'tipButton',visible:true},
-            {name:'ybqButton',visible:true},
-            {name:'buchuButton',visible:true},
-        ])
+        G.eventManager.emitEvent(Constants.LOCALEVENT.POKER_FILP_END)
     },
 
     refreshCards(){
@@ -268,6 +264,7 @@ cc.Class({
             var card = self.m_cards[i]
             if(cc.isValid(card)){
                 card.setPokerScale(scale)
+                card.setCard()
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
                 card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
             }

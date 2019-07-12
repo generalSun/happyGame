@@ -27,8 +27,19 @@ cc.Class({
         self.m_config = null
         self.m_ip = null
         self.m_userId = null
+        self.m_isOperater = false
         self.m_playerEventScript = self.node.getComponent('playerEvent')
         self.seatUp()
+    },
+
+    setIsOperater(isOperate){
+        var self = this
+        self.m_isOperater = isOperate
+    },
+
+    isOperater(){
+        var self = this
+        return self.m_isOperater
     },
 
     isSelf(){
@@ -126,6 +137,7 @@ cc.Class({
         self.setNickName(args.name)
         self.setIP(args.ip)
         self.setUserId(args.userId)
+        self.setIsOperater(false)
         self.m_playerEventScript.setChair(self.m_chair)
         if(self.m_chair == 1){
             self.signSprite.node.x = -1*self.signSprite.node.x;
@@ -354,6 +366,12 @@ cc.Class({
         if(label){
             return label.string
         }
+    },
+
+    getPlayerEvent () {
+        var self = this
+        if(!self.isSeat())return false;
+        return self.m_playerEventScript
     },
 
     setHandCardNode (visible,instance,atlas) {

@@ -26,19 +26,30 @@ cc.Class({
                 G.gameInfo.isLogined = true
                 G.gameInfo.isInGame = false
                 G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.GET_GAMELIST,
-                    {account:ret.account,sign:G.selfUserData.getUserSign()},function(event){
+                    {account:ret.account,sign:G.selfUserData.getUserSign()},
+                    function(event){
                         if(event.errcode == 0){
                             console.log('请求游戏列表！')
                             console.log(event)
                             G.gameListInfo = event.data
                             self.m_handler.changeScene()
                         }
-                    })
+                    },
+                    null,
+                    G.httpManage.hallServerUrl,
+                    '请求游戏列表...'
+                )
             }
         };
         var account =  G.selfUserData.getUserAccount()
         var sign = G.selfUserData.getUserSign()
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.HALLLOGIN,{account:account,sign:sign},onLogin);
+        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.HALLLOGIN,
+            {account:account,sign:sign},
+            onLogin,
+            null,
+            G.httpManage.hallServerUrl,
+            '请求进入游戏...'
+        );
     },
 
     createAvater(data){
@@ -48,7 +59,7 @@ cc.Class({
                 console.log('角色创建成功！')
                 self.requestLogin()
             }
-        },null,null,'准备进入游戏...')
+        },null,G.httpManage.hallServerUrl,'准备进入游戏...')
     },
 
     guestLogin(){
@@ -56,7 +67,7 @@ cc.Class({
         G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.GUEST_LOGIN,{account:G.tools.getUdid()},function(event){
             if(event.errcode == 0){
                 console.log('游客登陆成功！')
-                G.httpManage.HTTPROOTURL = "http://" + event.halladdr
+                G.httpManage.hallServerUrl = "http://" + event.halladdr
                 G.selfUserData.setUserSign(event.sign)
                 G.selfUserData.setUserPassword(event.sign)
                 G.selfUserData.setUserAccount(event.account)
@@ -73,7 +84,7 @@ cc.Class({
                 G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
                     if(event.errcode == 0){
                         console.log('登陆成功！')
-                        G.httpManage.HTTPROOTURL = "http://" + event.halladdr
+                        G.httpManage.hallServerUrl = "http://" + event.halladdr
                         G.selfUserData.setUserSign(event.sign)
                         G.selfUserData.setUserPassword(password)
                         G.selfUserData.setUserAccount(event.account)
@@ -93,7 +104,7 @@ cc.Class({
         G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.LOGIN,{account:account,password:password},function(event){
             if(event.errcode == 0){
                 console.log('登陆成功！')
-                G.httpManage.HTTPROOTURL = "http://" + event.halladdr
+                G.httpManage.hallServerUrl = "http://" + event.halladdr
                 G.selfUserData.setUserSign(event.sign)
                 G.selfUserData.setUserPassword(password)
                 G.selfUserData.setUserAccount(event.account)

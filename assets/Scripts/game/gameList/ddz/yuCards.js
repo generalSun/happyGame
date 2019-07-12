@@ -43,7 +43,8 @@ cc.Class({
                 cardScript.setLogic(ddz_logic)
                 cardScript.setAtlas(self.m_pokerAtlas)
                 cardScript.setPokerType(2)
-                cardScript.setCard(value)
+                cardScript.setCard(0)
+                cardScript.setValue(value)
                 cardScript.setPokerCurrentPosition(cc.v2(config.normalBottomPokerSize.width*scale.x/2 - self.node.width/2,0))
             }
             self.addCardTypeOne(ani)
@@ -67,40 +68,40 @@ cc.Class({
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
                 card.setPokerCurrentPosition({x:self.node.width/2 - config.normalBottomPokerSize.width*scale.x/2,y:startPos.y})
                 if(ani){
-                    if(i + 1 == self.m_cards.length){
-                        card.node.runAction(
-                            cc.sequence(
-                                cc.delayTime(i*delay),
-                                cc.moveTo(duation,startPos.x + i*space,startPos.y),
-                                cc.delayTime(0.5),
-                                cc.callFunc(self.dealPokerEnd,self,{ani:ani})
-                            )
+                    card.node.runAction(
+                        cc.sequence(
+                            cc.delayTime(i*delay),
+                            cc.moveTo(duation,startPos.x + i*space,startPos.y)
                         )
-                    }else{
-                        card.node.runAction(
-                            cc.sequence(
-                                cc.delayTime(i*delay),
-                                cc.moveTo(duation,startPos.x + i*space,startPos.y)
-                            )
-                        )
-                    }
+                    )
                 }else{
                     card.setPokerCurrentPosition(startPos.x + i*space)
                 }
             }
         }
-        if(!ani){
-            self.dealPokerEnd(self,{ani:ani})
-        }
     },
 
-    //自己发牌结束
-    dealPokerEnd(target,args){
-        args = args || {}
+    showCards(ani){
+        ani = ani || false
         var self = this
-        if(self.m_chair != config.chair.home)return
-        var ani = args.ani || false
-        
+        for(var i = 0; i < self.m_cards.length; i++){
+            var poker = self.m_cards[i]
+            if(cc.isValid(poker)){
+                if(ani){
+                    poker.playAnimationFilp()
+                    var data = [
+                        {frame:0,value:new cc.Vec2(poker.getPokerScaleX(),poker.getPokerScaleY())},
+                        {frame:0.25,value:new cc.Vec2(0,poker.getPokerScaleY())},
+                        {frame:0.5,value:new cc.Vec2(poker.getPokerScaleX(),poker.getPokerScaleY())},
+                    ]
+                    poker.setAnimationCurveData('scale',data)
+                    poker.setAnimationWrapMode(cc.WrapMode.Normal)
+                    poker.speedUpAnimation(5)
+                }else{
+                    poker.setCard()
+                }
+            }
+        }
     },
 
     getStartPos(space){
@@ -162,6 +163,6 @@ cc.Class({
             }
             self.m_cards.splice(i,1);
         }
-        self.m_cardNode.removeAllChildren()
+        self.node.removeAllChildren()
     },
 });

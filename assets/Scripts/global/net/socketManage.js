@@ -75,7 +75,7 @@ cc.Class({
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
         G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)
 
-        G.eventManager.listenEvent("dispatcherSocketMsg",self.dispatcherSocketMsg,self)
+        G.eventManager.listenEvent(Constants.LOCALEVENT.DISPATCHER_SOCKET_MSG,self.dispatcherSocketMsg,self)
     },
 
     dispatcherSocketMsg(data){
@@ -145,7 +145,7 @@ cc.Class({
         var self = this
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.RECONNECTING,self.reconnecting,self)
         G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.RECONNECT,self.reconnecting,self)
-        G.eventManager.cancelEvent('dispatcherSocketMsg',self.dispatcherSocketMsg,self)
+        G.eventManager.cancelEvent(Constants.LOCALEVENT.DISPATCHER_SOCKET_MSG,self.dispatcherSocketMsg,self)
         self.unscheduleAllCallbacks()
         self.close()
     },

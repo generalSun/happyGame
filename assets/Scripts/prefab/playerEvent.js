@@ -165,6 +165,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.JIAO_DI_ZHU,{state:0})
     },
 
     bqButtonCallBack(event,customEventData){
@@ -174,6 +175,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.QIANG_DI_ZHU,{state:0})
     },
 
     jdzButtonCallBack(event,customEventData){
@@ -183,6 +185,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.JIAO_DI_ZHU,{state:1})
     },
 
     qdzButtonCallBack(event,customEventData){
@@ -192,6 +195,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.QIANG_DI_ZHU,{state:1})
     },
 
     oneButtonCallBack(event,customEventData){

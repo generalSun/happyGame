@@ -84,7 +84,7 @@ cc.Class({
             }
         },function(msg){
             console.log('ENTER_PRIVATE_ROOM :'+msg.errmsg)
-        },null,'正在进入房间...');
+        },G.httpManage.hallServerUrl,'正在进入房间...');
     },
 
     requestCreatorRoom:function(conf,message){
@@ -110,7 +110,7 @@ cc.Class({
             }
         },function(msg){
             console.log('CREATE_PRIVATE_ROOM :'+msg.errmsg)
-        },null,message || '正在创建房间...');
+        },G.httpManage.hallServerUrl,message || '正在创建房间...');
     },
 
     onDestroy(){

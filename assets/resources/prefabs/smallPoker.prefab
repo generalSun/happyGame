@@ -793,36 +793,6 @@
     "sync": false
   },
   {
-    "__type__": "cc.Animation",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "_defaultClip": null,
-    "_clips": [
-      {
-        "__uuid__": "cf087fa2-0bc7-4780-894b-975ccec33ac7"
-      }
-    ],
-    "playOnLoad": false,
-    "_id": ""
-  },
-  {
-    "__type__": "a28bdeDON9LNKruMusu7cUz",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "anim": {
-      "__id__": 22
-    },
-    "_id": ""
-  },
-  {
     "__type__": "fed1bariopLUKuvsgRBaliS",
     "_name": "",
     "_objFlags": 0,
@@ -855,6 +825,38 @@
         "__id__": 8
       }
     ],
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Animation",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_defaultClip": {
+      "__uuid__": "cf087fa2-0bc7-4780-894b-975ccec33ac7"
+    },
+    "_clips": [
+      {
+        "__uuid__": "cf087fa2-0bc7-4780-894b-975ccec33ac7"
+      }
+    ],
+    "playOnLoad": false,
+    "_id": ""
+  },
+  {
+    "__type__": "a28bdeDON9LNKruMusu7cUz",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "anim": {
+      "__id__": 23
+    },
     "_id": ""
   },
   {

@@ -3,7 +3,7 @@ var Constants = require('./../../config/Constants')
  * Http 请求封装
  */
 var httpManage ={
-    HTTPROOTURL:"http://127.0.0.1:9000",
+    hallServerUrl:"http://127.0.0.1:9000",
     accountServerUrl:"http://127.0.0.1:9000",
     sendRequest:function (path, data, successHandler, errorHandler, extraUrl,desc) {
         G.globalLoading.setLoadingVisible(true,desc)
@@ -15,7 +15,7 @@ var httpManage ={
             data.token = userInfo.token
         }
         if (extraUrl == null) {
-            extraUrl = httpManage.HTTPROOTURL
+            extraUrl = httpManage.accountServerUrl
         }
         //解析请求路由以及格式化请求参数
         var sendpath = path;

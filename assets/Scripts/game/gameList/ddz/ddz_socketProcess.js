@@ -39,7 +39,11 @@ cc.Class({
                 }
                 pokerInfo[player.getChair()] = info
             }
-        }    
+        } 
+        var player = self.m_handler.getPlayerByServerChair(currentPlayingIndex)
+        if(player){
+            player.setIsOperater(true)
+        }
         self.m_handler.dealPoker(pokerInfo,true)
         self.m_handler.addYuCards(yuCards,true)
     },
@@ -66,8 +70,35 @@ cc.Class({
     },
     
     gameReconnect:function(event){
+        G.gameInfo.isGamePlay = true
         var self = this
-        
+        var num_of_turns = event.num_of_turns
+        var yuCards = event.yuCards
+        var currentPlayingIndex = event.currentPlayingIndex
+        var seatsInfo = event.seatsInfo
+        var state = event.state
+        self.m_handler.m_deskScript.setGameRoundNum(num_of_turns)
+        var pokerInfo = {}
+        for(var i = 0; i < seatsInfo.length; i++){
+            var seatInfo = seatsInfo[i]
+            var player = self.m_handler.getPlayerByUserId(seatInfo.userId)
+            if(player){
+                var info = {}
+                if(seatInfo.holds){
+                    info.pokers = seatInfo.holds
+                }else{
+                    info.pokers = new Array(seatInfo.holdsNum).fill(0)
+                }
+                info.folds = seatInfo.folds
+                pokerInfo[player.getChair()] = info
+            }
+        } 
+        var player = self.m_handler.getPlayerByServerChair(currentPlayingIndex)
+        if(player){
+            player.setIsOperater(true)
+        }
+        self.m_handler.dealPoker(pokerInfo,true)
+        self.m_handler.addYuCards(yuCards,true)
     },
     
     playerStateChange:function(event){

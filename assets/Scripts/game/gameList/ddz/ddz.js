@@ -44,7 +44,9 @@ cc.Class({
         self.setMyServerID(info.seats)
         self.loadPrefab(info);
         self.initZorder()
-        G.eventManager.emitEvent('dispatcherSocketMsg',{})
+        G.eventManager.emitEvent(Constants.LOCALEVENT.DISPATCHER_SOCKET_MSG,{})
+
+        G.eventManager.listenEvent(Constants.LOCALEVENT.POKER_FILP_END,self.pokerFilpEnd,self)
     },
 
     setMyServerID(arr){
@@ -144,6 +146,39 @@ cc.Class({
         var self = this
         self.m_yuCardsScript.clear()
         self.m_yuCardsScript.addCards(cards,ani)
+    },
+
+    pokerFilpEnd(){
+        var self = this
+        self.m_yuCardsScript.showCards(true)
+        for(var i = 0; i < self.m_player.length; i++){
+            var player = self.m_player[i]
+            if(player){
+                if(player.isSelf()){
+                    if(player.isOperater()){
+                        player.setOperateNode(true)
+                        player.setClock(true,30)
+                        player.getPlayerEvent().showOperateByIndex(1,[
+                            {name:'bjButton',visible:true},
+                            {name:'bqButton',visible:false},
+                            {name:'jdzButton',visible:true},
+                            {name:'qdzButton',visible:false},
+                        ])
+                    }else{
+                        player.setOperateNode(false)
+                        player.setClock(false)
+                    }
+                }else{
+                    if(player.isOperater()){
+                        player.setOperateNode(false)
+                        player.setClock(true,30)
+                    }else{
+                        player.setOperateNode(false)
+                        player.setClock(false)
+                    }
+                }
+            }
+        } 
     },
 
     //更换场景

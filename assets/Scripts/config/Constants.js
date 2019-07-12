@@ -26,6 +26,11 @@ const FRAMEEVENT = {//帧事件名 target 0为发送给自己的节点   1为发
     POKERFLIPEND:'POKERFILPEND',
 }
 
+const LOCALEVENT = {//本地事件名
+    DISPATCHER_SOCKET_MSG:'dispatcherSocketMsg',
+    POKER_FILP_END:'pokerFilpEnd',
+}
+
 const HTTP_NET_EVENT = {//http网络事件名
     GET_APP_WEB:'get_app_web',
 	GUEST_LOGIN:'/guest',
@@ -46,6 +51,8 @@ const SOCKET_EVENT_c2s = {//socket网络事件名
     DISSOLVE_REQUEST:       'dissolve_request',
     DISSOLVE_AGREE:         'dissolve_agree',
     DISSOLVE_REJECT:        'dissolve_reject',
+    JIAO_DI_ZHU:            'jiaodizhu',
+    QIANG_DI_ZHU:            'qiangdizhu',
 }
 
 const SOCKET_EVENT_s2c = {//socket网络事件名
@@ -75,6 +82,7 @@ module.exports = {
     THIRTINFO:THIRTINFO,
     CARD_STATUS:CARD_STATUS,
     FRAMEEVENT:FRAMEEVENT,
+    LOCALEVENT:LOCALEVENT,
     HTTP_NET_EVENT:HTTP_NET_EVENT,
     SOCKET_EVENT_c2s:SOCKET_EVENT_c2s,
     SOCKET_EVENT_s2c:SOCKET_EVENT_s2c,
