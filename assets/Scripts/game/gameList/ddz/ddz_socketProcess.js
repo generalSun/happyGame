@@ -2,194 +2,335 @@ var Constants = require('../../../config/Constants')
 var config = require('./config')
 var handCard = require('./handCard')
 var disCard = require('./disCard')
+var TAG = 'ddz_socketProcess.js'
+var Base64 = require("./../../../utils/Base64");
+var ddz_logic = require('./ddz_logic')
 cc.Class({
-    init:function(handler){
-        var self = this
-        self.m_handler = handler
+    extends: cc.Component,
 
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.EXIT_RESULT,self.exitRoom,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH,self.exitRoomPush,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH,self.dissolveNoticePush,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH,self.dissolveCancelPush,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_OVER_PUSH,self.gameOverPush,self)
+    onLoad(){
+        console.log(TAG,'onLoad')
+        var self = this
+        self.m_handler = self.node.getComponent('ddz')
+        self.m_event = self.node.getComponent('ddz_event')
+        self.m_eventsInfo = {
+            [Constants.SOCKET_EVENT_s2c.JOIN_ROOM]:self.createRoom,
+            [Constants.SOCKET_EVENT_s2c.PLAYER_JOIN]:self.playerJoin,
+            [Constants.SOCKET_EVENT_s2c.ROOM_READY]:self.roomReady,
+            [Constants.SOCKET_EVENT_s2c.PLAYER_READY]:self.playerReady,
+            [Constants.SOCKET_EVENT_s2c.BANKER]:self.banker,
+            [Constants.SOCKET_EVENT_s2c.PLAYING_GAME]:self.gameBegin,
+            [Constants.SOCKET_EVENT_s2c.CATCH_SIGN]:self.catchSign,
+            [Constants.SOCKET_EVENT_s2c.CATCHRESULT]:self.catchResult,
+            [Constants.SOCKET_EVENT_s2c.LAST_HANDS]:self.showYuCards,
+            [Constants.SOCKET_EVENT_s2c.CATCH_FAIL]:self.flowBureau,
+            [Constants.SOCKET_EVENT_s2c.TAKE_CARDS]:self.takeCards,
+            [Constants.SOCKET_EVENT_s2c.RECOVERY]:self.recovery,
+        }
+        for(var key in self.m_eventsInfo){
+            G.eventManager.listenEvent(key,self.m_eventsInfo[key],self)
+        }
+    },
+
+    banker:function(msg){
+        console.log(TAG,'banker',msg)
+        if(!msg)return;
+        var userid = msg.userid
+        var self = this
+        var player = self.m_handler.getPlayerByUserId(userid)
+        if(player){
+            player.setOwnerSprite(true)
+        }
+    },
+
+    recovery:function(msg){
+        console.log(TAG,'recovery',msg)
+        if(!msg)return;
+        
+    },
+
+    takeCards:function(msg){
+        console.log(TAG,'takeCards',msg)
+        if(!msg)return;
+        var allow = msg.allow//符合出牌规则
+        var automic = msg.automic//是否允许不出牌过
+        var bomb = msg.bomb//炸
+        var card = msg.card//麻将
+        var cardType = msg.cardType//出牌的牌型
+        var cards = ddz_logic.analysisServerPokers(msg.cards?Base64.decode(msg.cards):[])
+        var cardsnum = msg.cardsnum//当前出牌的人 剩下多少张 牌
+        var donot = msg.donot//出 OR 不出
+        var nextplayer = msg.nextplayer
+        var nextplayercard = msg.nextplayercard//下一个玩家翻到的新牌
+        var over = msg.over//已结束
+        var sameside = msg.sameside//同伙
+        var time = msg.time
+        var type = msg.type//出牌类型 ： 1:单张 | 2:对子 | 3:三张 | 4:四张（炸） | 5:单张连 | 6:连对 | 7:飞机 : 8:4带2 | 9:王炸
+        var userid = msg.userid
+        var self = this
+        if(allow){
+            self.m_handler.clearOperate()
+            self.m_handler.clearClock()
+            if(!over){
+                var next_player = self.m_handler.getPlayerByUserId(nextplayer)
+                if(next_player){
+                    next_player.setClock(true,30)
+                    if(next_player.isSelf()){
+                        next_player.setOperateNode(true)
+                        next_player.getPlayerEvent().showOperateByIndex(0,[
+                            {name:'outCardButton',visible:true},
+                            {name:'tipButton',visible:true},
+                            {name:'ybqButton',visible:false},
+                            {name:'buchuButton',visible:true},
+                        ])
+                    }
+                    var dis = next_player.getDisCardNode()
+                    if(dis){
+                        dis.hide()
+                    }
+                }
+                var currentPlayer = self.m_handler.getPlayerByUserId(userid)
+                if(currentPlayer){
+                    currentPlayer.setOperateNode(false)
+                    var dis = currentPlayer.getDisCardNode()
+                    var hand = currentPlayer.getHandCardNode()
+                    if(dis && hand){
+                        dis.hide()
+                        hand.outCards(cards,function(outCardsInfo){
+                            dis.showCards(outCardsInfo,true)
+                        })
+                    }
+                }
+            }
+        }else{
+            G.alterMgr.showMsgBox({content:'出牌不符规则！'})
+        }
+    },
+
+    flowBureau:function(msg){
+        console.log(TAG,'flowBureau',msg)
+        var self = this
+        self.m_handler.clearOperate()
+        self.m_handler.clearClock()
+        self.m_handler.clearDis()
+        self.m_handler.getCardBottomScript().hide()
+    },
+
+    showYuCards:function(msg){
+        console.log(TAG,'showYuCards',msg)
+        if(!msg)return;
+        var userid = msg.userid
+        var ratio = msg.ratio//当前是处在抢庄还是叫庄中
+        var docatch = msg.docatch
+        var grab = msg.grab//当前玩家有没有操作过
+        var lasthands = ddz_logic.analysisServerPokers(Base64.decode(msg.lasthands))
+        console.log(TAG,'showYuCards lasthands',lasthands)
+        var self = this
+        self.m_handler.getCardBottomScript().setRatio(ratio)
+        self.m_handler.getCardBottomScript().showYuCards()
+        self.m_handler.getCardBottomScript().addYuCards(lasthands,true)
+        self.m_handler.clearOperate()
+        self.m_handler.clearClock()
+        self.m_handler.clearDis()
+        var player = self.m_handler.getPlayerByUserId(userid)
+        if(player){
+            player.setClock(true,30)
+            var hand = player.getHandCardNode()
+            if(hand){
+                hand.addLastCards(lasthands,true)
+            }
+            if(player.isSelf()){
+                player.setOperateNode(true)
+                player.getPlayerEvent().showOperateByIndex(0,[
+                    {name:'outCardButton',visible:true},
+                    {name:'tipButton',visible:true},
+                    {name:'ybqButton',visible:false},
+                    {name:'buchuButton',visible:true},
+                ])
+            }
+        }
+    },
+
+    catchResult:function(msg){
+        console.log(TAG,'catchResult',msg)
+        if(!msg)return;
+        var userid = msg.userid
+        var ratio = msg.ratio//倍率
+        var docatch = msg.docatch//当前有没有人操作过
+        var grab = msg.grab//当前玩家叫地主（抢地主）或不叫（不抢）
+        var self = this
+        self.m_handler.getCardBottomScript().setRatio(ratio)
+        self.m_handler.clearOperate()
+        self.m_handler.clearClock()
+        var player = self.m_handler.getPlayerByUserId(userid)
+        if(player){
+            var dis = player.getDisCardNode()
+            if(dis){
+                var name = ''
+                if(grab){
+                    if(docatch){
+                        name = 'imgq_2'
+                    }else{
+                        name = 'imgj_1'
+                    }
+                }else{
+                    if(docatch){
+                        name = 'imgq_0'
+                    }else{
+                        name = 'imgj_0'
+                    }
+                }
+                dis.hideEffects()
+                dis.showEffect(name)
+            }
+        }
+    },
+
+    catchSign:function(msg){
+        console.log(TAG,'catchSign',msg)
+        if(!msg)return;
+        var userid = msg.userid
+        var ratio = msg.ratio//倍率
+        var docatch = msg.docatch
+        var grab = msg.grab
+        var self = this
+        self.m_handler.clearOperate()
+        self.m_handler.clearClock()
+        self.m_handler.getCardBottomScript().showRatio()
+        self.m_handler.getCardBottomScript().setRatio(ratio)
+        var player = self.m_handler.getPlayerByUserId(userid)
+        if(player){
+            player.getDisCardNode().hide()
+            player.setClock(true,15)
+            if(player.isSelf()){
+                player.setOperateNode(true)
+                if(docatch){
+                    player.getPlayerEvent().showOperateByIndex(1,[
+                        {name:'bjButton',visible:false},
+                        {name:'bqButton',visible:true},
+                        {name:'jdzButton',visible:false},
+                        {name:'qdzButton',visible:true},
+                    ])
+                }else{
+                    player.getPlayerEvent().showOperateByIndex(1,[
+                        {name:'bjButton',visible:true},
+                        {name:'bqButton',visible:false},
+                        {name:'jdzButton',visible:true},
+                        {name:'qdzButton',visible:false},
+                    ])
+                }
+            }
+        }
+    },
+
+    createRoom:function(msg){
+        console.log(TAG,'createRoom',msg)
+        G.globalLoading.setLoadingVisible(false)
+        if(!msg)return;
+        var self = this;
+        var index = msg.index
+        var maxplayers = msg.maxplayers
+        var player = msg.player
+        var gameRoom = msg.gameRoom
+        G.selfUserData.setUserRoomID(gameRoom.roomid)
+        config.maxPlayerNum = maxplayers
+        var selfId = G.selfUserData.getUserId()
+        if(player.id == selfId){
+            self.m_handler.setMyServerID(index)
+        }
+        G.selfUserData.setUserRoomInfo(gameRoom.extparams)
+        var creater = gameRoom.creater
+        var numofgames = gameRoom.numofgames
+        var currentnum = gameRoom.currentnum
+        self.m_handler.loadPrefab(player,index,creater);
+        self.m_handler.getDeskScript().setRoomNum(gameRoom.roomid)
+        self.m_handler.getDeskScript().setGameRoundNum(currentnum,numofgames)
+        self.m_handler.getRuleScript().analysisRule(gameRoom.extparams)
+        self.m_handler.getRuleScript().setAdditional(maxplayers,2)
     },
     
-    gameBegin:function(event){
+    gameBegin:function(msg){
+        console.log(TAG,'gameBegin',msg)
+        if(!msg)return;
         G.gameInfo.isGamePlay = true
         var self = this
-        var num_of_turns = event.num_of_turns
-        var yuCards = event.yuCards
-        var currentPlayingIndex = event.currentPlayingIndex
-        var seatsInfo = event.seatsInfo
-        self.m_handler.m_deskScript.setGameRoundNum(num_of_turns)
+        var roundInfo = self.m_handler.getDeskScript().getGameRoundNum()
+        self.m_handler.getDeskScript().setGameRoundNum(roundInfo.round+1)
+        var yuCardsNum = msg.deskcards
+        var player = msg.player
+        var players = msg.players
         var pokerInfo = {}
-        for(var i = 0; i < seatsInfo.length; i++){
-            var seatInfo = seatsInfo[i]
-            var player = self.m_handler.getPlayerByUserId(seatInfo.userId)
+        self.m_handler.getCardBottomScript().show()
+        self.m_handler.getCardBottomScript().showYuCards()
+        self.m_handler.getCardBottomScript().addYuCards(yuCardsNum,true)
+        self.m_handler.clearReady()
+        var seat = self.m_handler.getPlayerByUserId(player.playuser)
+        if(seat){
+            var info = {}
+            info.pokers = ddz_logic.analysisServerPokers(Base64.decode(player.cards))
+            pokerInfo[seat.getChair()] = info
+        }
+        
+        for(var i = 0; i < players.length; i++){
+            var seatInfo = players[i]
+            var player = self.m_handler.getPlayerByUserId(seatInfo.playuser)
             if(player){
                 var info = {}
-                if(seatInfo.holds){
-                    info.pokers = seatInfo.holds
+                if(seatInfo.cards){
+                    info.pokers = ddz_logic.analysisServerPokers(Base64.decode(seatInfo.cards))
                 }else{
-                    info.pokers = new Array(seatInfo.holdsNum).fill(0)
+                    info.pokers = new Array(seatInfo.deskcards).fill(0)
                 }
                 pokerInfo[player.getChair()] = info
             }
         } 
-        var player = self.m_handler.getPlayerByServerChair(currentPlayingIndex)
-        if(player){
-            player.setIsOperater(true)
-        }
         self.m_handler.dealPoker(pokerInfo,true)
-        self.m_handler.addYuCards(yuCards,true)
     },
     
-    playerJoin:function(event){
+    playerJoin:function(msg){
+        console.log(TAG,'playerJoin',msg)
+        if(!msg)return;
         var self = this
-        var player = self.m_handler.getPlayerByServerChair(event.seatindex)
-        if(player){
-            var info = G.selfUserData.getUserRoomInfo()
-            player.seatDown({
-                config:config,
-                headUrl:event.headUrl,
-                isOwner:event.userId == info.conf.creator,
-                gold:event.score,
-                isOffLine:!event.online,
-                isReady:event.ready,
-                name:event.name,
-                ip:event.ip,
-                userId:event.userId
-            })
-            player.setHandCardNode(true,new handCard(),self.m_handler.pokerAtlas)
-            player.setDisCardNode(true,new disCard(),self.m_handler.pokerAtlas)
-        }
-    },
-    
-    gameReconnect:function(event){
-        G.gameInfo.isGamePlay = true
-        var self = this
-        var num_of_turns = event.num_of_turns
-        var yuCards = event.yuCards
-        var currentPlayingIndex = event.currentPlayingIndex
-        var seatsInfo = event.seatsInfo
-        var state = event.state
-        self.m_handler.m_deskScript.setGameRoundNum(num_of_turns)
-        var pokerInfo = {}
-        for(var i = 0; i < seatsInfo.length; i++){
-            var seatInfo = seatsInfo[i]
-            var player = self.m_handler.getPlayerByUserId(seatInfo.userId)
-            if(player){
-                var info = {}
-                if(seatInfo.holds){
-                    info.pokers = seatInfo.holds
-                }else{
-                    info.pokers = new Array(seatInfo.holdsNum).fill(0)
-                }
-                info.folds = seatInfo.folds
-                pokerInfo[player.getChair()] = info
-            }
-        } 
-        var player = self.m_handler.getPlayerByServerChair(currentPlayingIndex)
-        if(player){
-            player.setIsOperater(true)
-        }
-        self.m_handler.dealPoker(pokerInfo,true)
-        self.m_handler.addYuCards(yuCards,true)
-    },
-    
-    playerStateChange:function(event){
-        var self = this
-        var player = self.m_handler.getPlayerByUserId(event.userId)
-        if(player){
-            player.setOffLineSprite(!event.online)
+        var players = msg.player
+        for(var i = 0; i < players.length; i++){
+            var player = players[i]
+            self.m_handler.playerSeatDown(player)
         }
     },
 
-    exitRoom:function(event){
+    playerReady:function(msg){
+        console.log(TAG,'playerReady',msg)
+        if(!msg)return;
         var self = this
-        self.m_handler.changeScene()
-    },
-
-    exitRoomPush:function(event){
-        var self = this
-        var userId = event.userId
-        var player = self.m_handler.getPlayerByUserId(userId)
+        var userid = msg.userid
+        var player = self.m_handler.getPlayerByUserId(userid)
         if(player){
-            player.seatUp()
-        }
-    },
-
-    dissolveNoticePush:function(event){
-        var self = this
-        var time = Math.ceil(event.time)
-        var states = event.states
-        var originator = event.originator
-        var player = self.m_handler.getPlayerByUserId(originator)
-        if(!player){
-            return
-        }
-        var info = {
-            time:time,
-            originator:player.getNickName(),
-            playerInfo:[],
-            hasChose:false
-        }
-        for(var i = 0; i < self.m_handler.m_player.length; i++){
-            var state = states[i]
-            var player = self.m_handler.getPlayerByServerChair(i)
-            var seatInfo = {
-                state:state,
-                name:player.getNickName()
-            } 
-            info.playerInfo.push(seatInfo)
-            if(state != 0 && player.isSelf()){
-                info.hasChose = true
+            player.setReadySprite(true)
+            if(player.isSelf()){
+                self.m_event.setStartButtonVisible(false)
+                self.m_event.setOpendealButtonVisible(false)
+                self.m_event.setReadyButtonVisible(false)
+                self.m_event.setInviteButtonVisible(false)
             }
         }
-        var dissolveNode = self.m_handler.parentNode.node.getChildByName('dissolveNode')
-        if(dissolveNode){
-            dissolveNode.getComponent('dissolve').show(info)
-            return;
-        }
-        console.log('thert is not the node set')
-        cc.loader.loadRes('prefabs/dissolveNode', cc.Prefab, function(err, prefab) {
-            if (err) {
-                cc.log(err.message || err);
-                return;
-            }
-            var node = cc.instantiate(prefab);
-            node.getComponent('dissolve').show(info)
-            self.m_handler.parentNode.node.addChild(node);
-        });
     },
 
-    dissolveCancelPush(){
+    roomReady:function(msg){
+        console.log(TAG,'roomReady',msg)
+        if(!msg)return;
         var self = this
-        var dissolveNode = self.m_handler.parentNode.node.getChildByName('dissolveNode')
-        if(dissolveNode){
-            dissolveNode.getComponent('dissolve').hide()
+        if(self.m_event.getInviteButtonVisible()){
+            self.m_event.setStartButtonVisible(true)
+            self.m_event.setOpendealButtonVisible(true)
+            self.m_event.setReadyButtonVisible(false)
+            self.m_event.setInviteButtonVisible(false)
         }
-    },
-
-    gameOverPush(){
-        var self = this
-        self.m_handler.changeScene()
     },
 
     onDestroy(){
         var self = this
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_BEGIN_PUSH,self.gameBegin,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.NEW_USER_COMES_PUSH,self.playerJoin,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_SYNC_PUSH,self.gameReconnect,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.USER_STATE_PUSH,self.playerStateChange,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.EXIT_RESULT,self.exitRoom,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.EXIT_NOTIFY_PUSH,self.exitRoomPush,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_NOTICE_PUSH,self.dissolveNoticePush,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.DISSOLVE_CANCEL_PUSH,self.dissolveCancelPush,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.GAME_OVER_PUSH,self.gameOverPush,self)
+        for(var key in self.m_eventsInfo){
+            G.eventManager.cancelEvent(key,self.m_eventsInfo[key],self)
+        }
     }
 })

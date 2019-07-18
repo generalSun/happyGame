@@ -2,6 +2,7 @@ var config = require('./config')
 var handCardTouch = require('./handCardTouch')
 var Constants = require('./../../../config/Constants')
 var ddz_logic = require('./ddz_logic')
+var TAG = 'handCard.js'
 cc.Class({
     ctor(){
         var self = this
@@ -10,11 +11,19 @@ cc.Class({
         self.m_object = null
         self.m_objectEvent = null
         self.m_cards = new Array()
+        self.m_cardsPool = new cc.NodePool()
         self.m_pokerAtlas = null
+        self.m_cardPrefab = null
     },
 
-    initWidget(handCardNode,chair,atlas,objectEvent,object){
+    getNode(){
         var self = this
+        return self.m_cardNode
+    },
+
+    initWidget(handCardNode,chair,atlas,cardPrefab,objectEvent,object){
+        var self = this
+        self.m_cardPrefab = cardPrefab
         self.m_chair = chair
         self.m_cardNode = handCardNode
         self.m_pokerAtlas = atlas
@@ -46,73 +55,180 @@ cc.Class({
         self.m_handCardTouch = new handCardTouch(self.m_cardNode,self)
     },
 
+    getTouchNode(){
+        var self = this
+        return self.m_handCardTouch
+    },
+
     getTouchedCardInfo(pos){
         var self = this
         for(var i = self.m_cards.length - 1; i >= 0; i--){
             var card = self.m_cards[i]
-            if(cc.isValid(card) && card.isClicked(pos)){
-                return {index:i,card:card}
+            if(cc.isValid(card)){
+                card = card.getComponent('poker')
+                if(card.isClicked(pos)){
+                    return {index:i,card:card}
+                }
             }
         }
         return null;
     },
 
-    addCards(info,ani){
+    show(info,ani){
         var self = this
         info = info || []
-        var ps = new Array()
-        for(var i = 0; i < info.length; i++){
-            var p = null
-            if(self.m_chair == config.chair.home){
-                p = G.tools.loadResPromise('prefabs/bigPoker', cc.Prefab,info[i])
-            }else{
-                p = G.tools.loadResPromise('prefabs/midPoker', cc.Prefab,info[i])
-            }
-            ps.push(p)
+        if(!self.m_cardNode.active){
+            self.m_cardNode.active = true
         }
-        Promise.all(ps).then(function(args){
-            for(var i = 0; i < args.length; i++){
-                var arg = args[i]
-                var prefab = arg.resource
-                var value = arg.parameter
-                var node = cc.instantiate(prefab);
-                node.active = true;
-                self.m_cardNode.addChild(node);
-                var cardScript = node.getComponent('poker')
-                self.m_cards.push(cardScript)
-                var scale = config.handCardScale[self.m_chair]
-                cardScript.setPokerScale(scale)
-                cardScript.setLogic(ddz_logic)
-                cardScript.setAtlas(self.m_pokerAtlas)
-                cardScript.setPokerType(0)
-                if(self.m_chair != config.chair.home){
-                    cardScript.setPokerType(1)
-                }
-                cardScript.setCard(value)
-                if(self.m_chair == config.chair.home){
-                    cardScript.setPokerCurrentPosition(
-                        cc.v2(self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,
-                            -1 * self.m_cardNode.height/2 + config.normalHandPokerSize[self.m_chair].height*scale.y/2)
-                    )
-                }else if(self.m_chair == config.chair.nextDoor){
-                    cardScript.setPokerCurrentPosition(cc.v2(config.normalHandPokerSize[self.m_chair].width*scale.x/2 - self.m_cardNode.width/2,0))
-                }else{
-                    cardScript.setPokerCurrentPosition(cc.v2(self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,0))
-                }
-            }
-            if(self.m_handCardTouch){
-                self.m_handCardTouch.canTouched(false)
-            }
+        console.log(TAG,'show',info)
+        self.addCards(info)
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            var cardScript = card.getComponent('poker')
+            var scale = config.handCardScale[self.m_chair]
             if(self.m_chair == config.chair.home){
-                self.addCardTypeOne(ani)
+                cardScript.setPokerCurrentPosition(
+                    cc.v2(self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,
+                        -1 * self.m_cardNode.height/2 + config.normalHandPokerSize[self.m_chair].height*scale.y/2)
+                )
+            }else if(self.m_chair == config.chair.nextDoor){
+                cardScript.setPokerCurrentPosition(cc.v2(config.normalHandPokerSize[self.m_chair].width*scale.x/2 - self.m_cardNode.width/2,0))
             }else{
-                self.m_object.setCardNumSprite(true)
-                self.addCardTypeTwo(ani)
+                cardScript.setPokerCurrentPosition(cc.v2(self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,0))
             }
-        })
-        .catch(function(err){
-            cc.log(err.message || err);
-        })
+        }
+        if(self.m_handCardTouch){
+            self.m_handCardTouch.canTouched(false)
+        }
+        if(self.m_chair == config.chair.home){
+            self.addCardTypeOne(ani)
+        }else{
+            self.m_object.setCardNumSprite(true)
+            self.addCardTypeTwo(ani)
+        }
+    },
+
+    addCards(info){
+        console.log(TAG,'addCards',info)
+        var self = this
+        for(var i = 0; i < info.length; i++){
+            var value = info[i]
+            if(self.m_cardsPool.size() <= 0){
+                var card = cc.instantiate(self.m_cardPrefab);
+                self.m_cardsPool.put(card); 
+            }
+            var node = self.m_cardsPool.get();
+            node.active = true;
+            self.m_cardNode.addChild(node);
+            self.m_cards.push(node)
+            var cardScript = node.getComponent('poker')
+            
+            var scale = config.handCardScale[self.m_chair]
+            cardScript.setPokerScale(scale)
+            cardScript.setLogic(ddz_logic)
+            cardScript.setAtlas(self.m_pokerAtlas)
+            cardScript.setPokerType(0)
+            if(self.m_chair != config.chair.home){
+                cardScript.setPokerType(1)
+            }
+            cardScript.setCard(value)
+        }
+    },
+
+    getCardsInfo(info){
+        console.log(TAG,'getCardsInfo',info)
+        if(!info){
+            return
+        }
+        info = info || []
+        var self = this
+        var cards = ddz_logic.sortCardsByType(info)
+        var cards_info = new Array()
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            if(cc.isValid(card)){
+                var poker = card.getComponent('poker')
+                for(var j = 0; j < cards.length; j++){
+                    var value = cards[j]
+                    if(value == poker.getValue() || poker.getValue() == -1){
+                        poker.setCard(value)
+                        var data = {
+                            index:i,
+                            card:card
+                        }
+                        cards_info.push(data)
+                        cards.splice(j,1)
+                        break
+                    }
+                }
+                if(cards.length <= 0){
+                    break
+                }
+            }
+        }
+        return cards_info
+    },
+
+    outCards(info,callBack){
+        console.log(TAG,'outCards',info)
+        if(!info){
+            return
+        }
+        info = info || []
+        var self = this
+        var cards_info = self.getCardsInfo(info)
+        console.log(TAG,'outCards cards_info',cards_info)
+        var outCardsInfo = new Array()
+
+        var call = function(target,data){
+            var card_node = data.card_node
+            var card_index = data.card_index
+            var index = data.index
+            var value = data.value
+            var pos = data.pos
+            outCardsInfo.push({value:value,pos:pos})
+            self.m_cards.splice(card_index,1)
+            self.m_cardsPool.put(card_node)
+            if(index <= 0){
+                self.refreshCards(true)
+                if(callBack){
+                    callBack(outCardsInfo)
+                }
+            }
+        }
+        for(var i = cards_info.length - 1; i >= 0; i--){
+            var card_info = cards_info[i]
+            var card_node = card_info.card
+            var card_index = card_info.index
+            if(cc.isValid(card_node)){
+                card_node.active = true
+                var card = card_node.getComponent('poker')
+                call(card_node,{
+                    card_node:card_node,
+                    card_index:card_index,
+                    index:i,
+                    value:card.getValue(),
+                    pos:card.getPokerCurrentPosition()
+                })
+            }
+        }
+    },
+
+    addLastCards(info,ani){
+        var self = this
+        info = info || []
+        if(!self.m_cardNode.active){
+            throw '添加牌时，手牌节点处于隐藏状态'
+        }
+        console.log(TAG,'addLastCards',info)
+        self.addCards(info)
+        if(self.m_chair == config.chair.home){
+            self.sortCards()
+            self.refreshCards(ani)
+        }else{
+            self.m_object.setCardNumSprite(true)
+            self.addCardTypeTwo(ani)
+        }
     },
 
     addCardTypeOne(ani){
@@ -126,9 +242,11 @@ cc.Class({
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             if(cc.isValid(card)){
+                card = card.getComponent('poker')
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
                 card.setPokerCurrentPosition({x:self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,y:startPos.y})
                 if(ani){
+                    G.audioManager.playSFX('deal.mp3')
                     if(i + 1 == self.m_cards.length){
                         card.node.runAction(
                             cc.sequence(
@@ -175,6 +293,7 @@ cc.Class({
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             if(cc.isValid(card)){
+                card = card.getComponent('poker')
                 card.setPokerNormalPosition({x:endPos.x,y:endPos.y})
                 if(self.m_chair == config.chair.nextDoor){
                     card.setPokerCurrentPosition({x:config.normalHandPokerSize[self.m_chair].width*scale.x/2 - self.m_cardNode.width/2,y:endPos.y})
@@ -182,6 +301,7 @@ cc.Class({
                     card.setPokerCurrentPosition({x:self.m_cardNode.width/2 - config.normalHandPokerSize[self.m_chair].width*scale.x/2,y:endPos.y})
                 }
                 if(ani){
+                    G.audioManager.playSFX('deal.mp3')
                     card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,endPos.x,endPos.y),cc.callFunc(callBack,card,{index:i})))
                 }else{
                     card.setPokerCurrentPosition(endPos.x)
@@ -198,22 +318,28 @@ cc.Class({
         for(var i = 0; i < self.m_cards.length; i++){
             var poker = self.m_cards[i]
             if(cc.isValid(poker)){
+                poker = poker.getComponent('poker')
                 valueArray.push(poker.getValue())
             }
         }
         valueArray.sort(function(a,b){
-            return a - b
+            var value_a = ddz_logic.getcardlogicvalue(a)
+            var value_b = ddz_logic.getcardlogicvalue(b)
+            return value_a - value_b
         })
         for(var i = 0; i < self.m_cards.length; i++){
             var poker = self.m_cards[i]
             if(cc.isValid(poker)){
+                poker = poker.getComponent('poker')
                 poker.setValue(valueArray[i])
             }
         }
+        console.log(TAG,'sortCards',valueArray)
     },
 
     //自己发牌结束
     dealPokerEnd(target,args){
+        if(!args)return
         args = args || {}
         var self = this
         if(self.m_chair != config.chair.home)return
@@ -222,6 +348,7 @@ cc.Class({
         for(var i = 0; i < self.m_cards.length; i++){
             var poker = self.m_cards[i]
             if(cc.isValid(poker)){
+                poker = poker.getComponent('poker')
                 if(ani){
                     poker.playAnimationFilp()
                     var data = [
@@ -245,28 +372,46 @@ cc.Class({
     },
 
     pokerFilpEnd(){
-        console.log('pokerFilpEnd')
+        console.log(TAG,'pokerFilpEnd')
         var self = this
         if(self.m_chair != config.chair.home)return
-        self.refreshCards()
+        self.refreshCards(false)
         if(self.m_handCardTouch){
             self.m_handCardTouch.canTouched(true)
         }
         G.eventManager.emitEvent(Constants.LOCALEVENT.POKER_FILP_END)
     },
 
-    refreshCards(){
+    refreshCards(ani){
+        ani = ani || false
         var self = this
+        if(self.m_chair != config.chair.home)return
+        console.log(TAG,'refreshCards',self.m_cards.length)
         var space = self.getSpace()
         var startPos = self.getStartPos(space)
         var scale = config.handCardScale[self.m_chair]
+        var duation = 0.05
+        var delay = 0.01
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             if(cc.isValid(card)){
+                card.stopAllActions()
+                card = card.getComponent('poker')
                 card.setPokerScale(scale)
                 card.setCard()
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
-                card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
+                // card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y + 50})
+                if(ani){
+                    G.audioManager.playSFX('deal.mp3')
+                    card.node.runAction(
+                        cc.sequence(
+                            cc.delayTime(i*delay),
+                            cc.moveTo(duation,startPos.x + i*space,startPos.y)
+                        )
+                    )
+                }else{
+                    card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
+                }
             }
         }
     },
@@ -312,16 +457,27 @@ cc.Class({
         return currSpace
     },
 
+    hide(){
+        var self = this
+        for(var i = 0; i < self.m_cards.length; i++){
+            var item = self.m_cards[i]
+            self.m_cardsPool.put(item)
+        }
+        self.m_cards.splice(0,self.m_cards.length)
+        self.m_cardNode.removeAllChildren()
+        self.m_cardNode.active = false
+        if(self.m_handCardTouch){
+            self.m_handCardTouch.clear()
+        }
+    },
+
     clear(){
         var self = this
-        for(var i = self.m_cards.length - 1; i >= 0; i--){
-            var poker = self.m_cards[i]
-            if(cc.isValid(poker) && poker.clear){
-                poker.clear()
-            }
-            self.m_cards.splice(i,1);
+        self.m_cardsPool.clear();
+        self.m_cards.splice(0,self.m_cards.length)
+        if(cc.isValid(self.m_cardNode)){
+            self.m_cardNode.removeAllChildren()
         }
-        self.m_cardNode.removeAllChildren()
         if(self.m_handCardTouch){
             self.m_handCardTouch.clear()
         }
@@ -330,17 +486,6 @@ cc.Class({
 
     onDestroy(){
         var self = this
-        G.eventManager.cancelEvent(Constants.FRAMEEVENT.POKERFLIPEND,self.pokerFilpEnd,self)
-        for(var i = self.m_cards.length - 1; i >= 0; i--){
-            var poker = self.m_cards[i]
-            if(cc.isValid(poker) && poker.clear){
-                poker.clear()
-            }
-            self.m_cards.splice(i,1);
-        }
-        self.m_cardNode.removeAllChildren()
-        if(self.m_handCardTouch){
-            self.m_handCardTouch.onDestory()
-        }
+        self.clear()
     },
 })

@@ -10,16 +10,25 @@ var config = {
         rightHome:2,//对家
         upperHouse:3,//上家
     },
-    playerPos:[
-        cc.v2(-570,-255),
-        cc.v2(570,30),
-        cc.v2(-310,245),
-        cc.v2(-570,30)
-    ],
+    playerPos:{
+        [3]:[
+            cc.v2(-570,-255),
+            cc.v2(570,70),
+            cc.v2(-310,245),
+            cc.v2(-570,70)
+        ],
+        [4]:[
+            cc.v2(-570,-255),
+            cc.v2(570,50),
+            cc.v2(-310,245),
+            cc.v2(-570,50)
+        ],
+    },
     sceneZOrder:{
         player:[1,2,3,4],
         buttonNode:5,
         moreNode:6,
+        wxInviteNode:7
     },
     handNodeSize:[
         cc.size(cc.winSize.width,cc.winSize.height),
@@ -68,10 +77,10 @@ var config = {
         cc.size(450,100),
     ],
     disNodeOffset:[
-        cc.v2(0,120),
-        cc.v2(120,-30),
-        cc.v2(120,-30),
-        cc.v2(120,-30),
+        cc.v2(0,200),
+        cc.v2(120,0),
+        cc.v2(120,0),
+        cc.v2(120,0),
     ],
     disCardOffset:[//改变节点的中心点
         cc.v2(0,0),
@@ -86,14 +95,14 @@ var config = {
         cc.v2(0,0),
     ],
     disCardScale:[
-        cc.v2(0.5,0.5),
-        cc.v2(0.5,0.5),
-        cc.v2(0.5,0.5),
-        cc.v2(0.5,0.5),
+        cc.v2(1,1),
+        cc.v2(1,1),
+        cc.v2(1,1),
+        cc.v2(1,1),
     ],
     disCardSpace:[30,30,30,30],
     normalDisPokerSize:[
-        cc.size(142,185),
+        cc.size(78,103),
         cc.size(78,103),
         cc.size(78,103),
         cc.size(78,103),

@@ -11,11 +11,98 @@ cc.Class({
 		coins:0,//金币
 		gems:0,//房卡
 		sign:0,
-        ip:"",
+		city:0,//城市
+		province:0,//省份
+		ip:"",
+		orgi:null,
 		sex:0,
+		fans:0,			//粉丝
+		follows:0,		//关注
+		integral:0,		//积分
+		headimage:false,
 		roomID:null,
-		oldRoomId:null,
-		roomInfo:null
+		roomInfo:null,
+		hallInfo:null
+	},
+
+	setUserProvince (province) {
+		var self = this
+    	self.province = province;
+	},
+
+	getUserProvince () {
+		var self = this
+    	return self.province
+	},
+
+	setUserCity (city) {
+		var self = this
+    	self.city = city;
+	},
+
+	getUserCity () {
+		var self = this
+    	return self.city
+	},
+
+	setUserIntegral (integral) {
+		var self = this
+    	self.integral = integral;
+	},
+
+	getUserIntegral () {
+		var self = this
+    	return self.integral
+	},
+
+	setUserFollows (follows) {
+		var self = this
+    	self.follows = follows;
+	},
+
+	getUserFollows () {
+		var self = this
+    	return self.follows
+	},
+
+	setUserFans (fans) {
+		var self = this
+    	self.fans = fans;
+	},
+
+	getUserFans () {
+		var self = this
+    	return self.fans
+	},
+
+	setUserHeadImage (flag) {
+		var self = this
+    	self.headimage = flag;
+	},
+
+	getUserHeadImage () {
+		var self = this
+    	return self.headimage
+	},
+
+	setUserHallInfo (hallInfo) {
+		var self = this
+    	self.hallInfo = hallInfo;
+	},
+
+	getUserHallInfo () {
+		var self = this
+    	return self.hallInfo
+	},
+
+	setUserOrgi (orgi) {
+		var self = this
+    	self.orgi = orgi;
+	},
+
+	getUserOrgi () {
+		var self = this
+    	return self.orgi
 	},
 
 	setUserToken (token) {
@@ -166,15 +253,5 @@ cc.Class({
 	getUserRoomID () {
 		var self = this
     	return self.roomID
-	},
-
-	setUserOldRoomId (oldRoomId) {
-		var self = this
-    	self.oldRoomId = oldRoomId
-	},
-
-	getUserOldRoomId () {
-		var self = this
-    	return self.oldRoomId
 	},
 });

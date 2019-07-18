@@ -11,10 +11,6 @@ cc.Class({
 
     onLoad () {
         var self = this
-        var info = G.selfUserData.getUserRoomInfo()
-        var roomId = G.selfUserData.getUserRoomID()
-        self.setGameRoundNum(info.num_of_turns,info.conf.maxGames)
-        self.setRoomNum(roomId)
         self.scheduleCallBack()
         self.schedule(self.scheduleCallBack.bind(self), 5)
     },
@@ -74,7 +70,8 @@ cc.Class({
     getGameRoundNum(){
         var self = this
         var gameRoundNum = self.gameRoundNum.getComponent(cc.Label)
-        var round = total = 1
+        var round = 1
+        var total = 1
         if(gameRoundNum){
             total = gameRoundNum.customData?(gameRoundNum.customData.total?gameRoundNum.customData.total:round):round
             round = gameRoundNum.customData?(gameRoundNum.customData.round?gameRoundNum.customData.round:round):round

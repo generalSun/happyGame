@@ -1,28 +1,48 @@
 var Constants = require('../../../config/Constants')
+var TAG = 'hall_socketProcess.js'
 cc.Class({
-    
-    init:function(handler){
-        var self = this
-        self.m_handler = handler
+    extends: cc.Component,
 
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
-        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
-    },
-    
-    login_result:function(data){
+    onLoad(){
+        console.log(TAG,'onLoad')
         var self = this
-        if(data.errcode === 0){
-            var data = data.data;
-            G.selfUserData.setUserRoomInfo(data)
-        }else{
-            console.log(data.errmsg);   
-        }
+        self.m_handler = self.node.getComponent('hall')
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.GAME_STATUS,self.gameStatus,self)
+        G.eventManager.listenEvent(Constants.SOCKET_EVENT_s2c.SEARCH_ROOM,self.joinRoom,self)
     },
-            
-    login_finished:function(data){
-        var self = this
-        if(self.m_handler.changeScene){
-            self.m_handler.changeScene()
+
+    gameStatus:function(msg){
+        if(!msg)return;
+        var gameStatus = msg.gamestatus
+        var gametype = msg.gametype
+        var playway = msg.playway
+        var cardroom = msg.cardroom || false
+        if(gameStatus == 'playing' && gametype != null){
+            var info = {
+                gametype:gametype,
+                playway:playway,
+                gamemodel:cardroom == true?'room':'hall'
+            }
+            G.selfUserData.setUserRoomInfo(info)
+            var type = null
+            if(gametype == 'dizhu'){
+                type = 'ddz'
+            }
+            self.m_handler.changeScene(type)
+            G.gameInfo.isGamePlay = true
+        }else if(gameStatus == 'timeout'){
+            G.selfUserData.setUserRoomID(null)
+            G.msgBoxMgr.showMsgBox({
+                content:'登录已过期，请重新登录！',
+                sureClickEventCallBack:function(){
+                    if(cc.director.getScene().name != 'LoginScene'){
+                        cc.director.loadScene('LoginScene')
+                    }
+                },
+                cancelClickEventCallBack:function(){
+                    cc.game.end();//退出游戏
+                }
+            })
         }
     },
 
@@ -49,74 +69,40 @@ cc.Class({
         },null,G.httpManage.accountServerUrl);
     },
 
-    requestEnterRoom:function(roomId,callBack){
+    joinRoom:function(msg){
+        if(!msg)return;
         var self = this;
-        var data = {
-            account: G.selfUserData.getUserAccount(),
-            sign: G.selfUserData.getUserSign(),
-            roomId: roomId
-        }
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.ENTER_PRIVATE_ROOM,data,function(event){
-            console.log('ENTER_PRIVATE_ROOM :',event)
-            if (event.errcode !== 0) {
-                if(event.errcode == -1){
-                    G.globalLoading.setLoadingVisible(true,'正在进入房间...')
-                    setTimeout(function(){
-                        self.requestEnterRoom(roomId,callBack);
-                    },5000);
-                }else{
-                    var content = "房间["+ roomId +"]不存在，请重新输入!";
-                    if(event.errcode == 1){
-                        content = "房间["+ roomId + "]已满!";
-                    }else if(event.errcode == 2){
-                        content = "已在房间中!";
-                    }
-                    G.msgBoxMgr.showMsgBox({content:content})
-                    if(callBack){
-                        callBack(event)
-                    }
-                }
-            }else {
-                G.selfUserData.setUserRoomID(event.roomId)
-                G.globalSocket.setIp(event.ip)
-                G.globalSocket.setPort(event.port)
-                G.globalSocket.connectSocket(event)
+        var result = msg.result
+        if(result == "ok"){
+            var hallInfo = G.selfUserData.getUserHallInfo()
+            var info = {
+                gametype : msg.code,
+                playway :  msg.id,
+                gamemodel : hallInfo.gametype,
+                automatch : false
+            } ;
+            G.selfUserData.setUserRoomInfo(info)
+            var type = null
+            if(info.gametype == 'dizhu'){
+                type = 'ddz'
             }
-        },function(msg){
-            console.log('ENTER_PRIVATE_ROOM :'+msg.errmsg)
-        },G.httpManage.hallServerUrl,'正在进入房间...');
-    },
-
-    requestCreatorRoom:function(conf,message){
-        var self = this;
-        var data = {
-            account: G.selfUserData.getUserAccount(),
-            sign: G.selfUserData.getUserSign(),
-            conf: JSON.stringify(conf)
+            self.m_handler.changeScene(type)
+            G.selfUserData.setUserRoomID(msg.roomid)
+            return
         }
-        G.httpManage.sendRequest(Constants.HTTP_NET_EVENT.CREATE_PRIVATE_ROOM, data, function(event){
-            console.log('CREATE_PRIVATE_ROOM :',event)
-            if (event.errcode !== 0) {
-                if (event.errcode == 2222) {
-                    G.msgBoxMgr.showMsgBox({content:'钻石不足，创建房间失败!'})
-                }else {
-                    G.msgBoxMgr.showMsgBox({content:'创建房间失败,错误码:'+ event.errcode})
-                }
-            }else {
-                G.selfUserData.setUserRoomID(event.roomId)
-                G.globalSocket.setIp(event.ip)
-                G.globalSocket.setPort(event.port)
-                G.globalSocket.connectSocket(event)
-            }
-        },function(msg){
-            console.log('CREATE_PRIVATE_ROOM :'+msg.errmsg)
-        },G.httpManage.hallServerUrl,message || '正在创建房间...');
+        if(result == "notexist"){
+            G.alterMgr.showMsgBox({content:'输入的房间号不存在'})
+        }else if(result == "full"){
+            G.alterMgr.showMsgBox({content:'输入的房间号已满员'})
+        }
+        G.selfUserData.setUserRoomID(null)
+        self.m_handler.getEnterRoom().deleteLabel(false)
     },
 
     onDestroy(){
         var self = this
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.LOGIN_RESULT,self.login_result,self)
-        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.LOGIN_FINISHED,self.login_finished,self)
+        G.eventManager.cancelEvent(Constants.LOCALEVENT.GAME_STATUS,self.gameStatus,self)
+        G.eventManager.cancelEvent(Constants.SOCKET_EVENT_s2c.SEARCH_ROOM,self.joinRoom,self)
     }
 })
 

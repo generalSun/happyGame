@@ -2,120 +2,166 @@ var config = require('./config')
 var handCard = require('./handCard')
 var disCard = require('./disCard')
 var Constants = require('./../../../config/Constants')
-var socketProcess = require('./ddz_socketProcess')
-
+var TAG = 'ddz.js'
 cc.Class({
     extends: cc.Component,
 
     properties: {
-        parentNode:cc.Sprite,
-        buttonNode:cc.Node,
         desktopInfo:cc.Node,
         playerPrefab: cc.Prefab,
         ruleInfo:cc.Node,
-        morePrefab:cc.Prefab,
         pokerAtlas:[cc.SpriteAtlas],
-        cardBottomSprite:cc.Sprite
+        cardBottomNode:cc.Node,
     },
 
     onDestroy(){
         var self = this
-        self.m_socketProcess.onDestroy()
+        G.eventManager.cancelEvent(Constants.LOCALEVENT.POKER_FILP_END,self.pokerFilpEnd,self)
     },
 
     onLoad () {
         G.audioManager.playBGM('bgFight.mp3')
         var self = this
-        self.m_socketProcess = new socketProcess()
-        self.m_socketProcess.init(self)
+        self.m_bg = cc.find('Canvas/bg')
+        self.m_socketProcess = self.node.getComponent('ddz_socketProcess')
         self.m_deskScript = self.desktopInfo.getComponent('desktopInfo');
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
-        self.m_yuCardsScript = self.cardBottomSprite.getComponent('yuCards');
+        self.m_cardBottomScript = self.cardBottomNode.getComponent('cardBottom');
         self.m_player = new Array();
         self.m_meChairID = config.INVALID_CHAIR;
+        self.m_creator = null
         // self.m_gameState = 
+
+        self.init()
     },
 
-    start(){
+    getDeskScript(){
         var self = this
-        self.m_yuCardsScript.init(self.pokerAtlas)
-        var info = G.selfUserData.getUserRoomInfo()
-        config.maxPlayerNum = info.conf.playerMaxNum
-        self.setMyServerID(info.seats)
-        self.loadPrefab(info);
-        self.initZorder()
-        G.eventManager.emitEvent(Constants.LOCALEVENT.DISPATCHER_SOCKET_MSG,{})
+        return self.m_deskScript
+    },
 
+    getRuleScript(){
+        var self = this
+        return self.m_ruleScript
+    },
+
+    getCardBottomScript(){
+        var self = this
+        return self.m_cardBottomScript
+    },
+
+    init(){
+        var self = this
+        self.m_cardBottomScript.init(self.pokerAtlas)
+        var info = G.selfUserData.getUserRoomInfo()
+        var data = {
+            playway:info.playway,
+            extparams:info,
+            data:G.selfUserData.getUserRoomID()
+        }
+        console.log(TAG,'init',info)
+        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.JOIN_ROOM,data)
+        if(G.gameInfo.isGamePlay){
+            G.globalLoading.setLoadingVisible(true,'正在恢复数据中...')
+        }
         G.eventManager.listenEvent(Constants.LOCALEVENT.POKER_FILP_END,self.pokerFilpEnd,self)
     },
 
-    setMyServerID(arr){
+    setMyServerID(id){
         var self = this
-        var selfId = G.selfUserData.getUserId()
-        for(var i = 0; i < arr.length; i++){
-            var user = arr[i]
-            if(user.userId == selfId){
-                self.m_meChairID = i
-                return
-            }
+        self.m_meChairID = id
+    },
+
+    loadPrefab (seat,index,creator) {
+        var self = this
+        if(creator){
+            self.m_creator = creator
         }
-    },
-
-    initZorder(){
-        var self = this
-        self.buttonNode.zIndex = config.sceneZOrder.buttonNode
-        self.m_moreNode.zIndex = config.sceneZOrder.moreNode
-    },
-
-    loadPrefab (info) {
-        var self = this
-        var arr = info.seats
         console.log('我自己的服务器位置：'+self.m_meChairID)
-        for(var i = 0; i < arr.length; i++){
-            var user = arr[i]
+        for(var i = 0; i < config.maxPlayerNum; i++){
+            var user = (i == index)?seat:null
             var localtionID = self.convertServerIDtoLocalID(i)
-            var pos = config.playerPos[localtionID]
+            var pos = config.playerPos[config.maxPlayerNum][localtionID]
             var player = cc.instantiate(self.playerPrefab);
             player.setPosition(pos.x,pos.y)
             var playerScript = player.getComponent('player')
             self.m_player.push(playerScript)
-            self.parentNode.node.addChild(player);
+            self.m_bg.addChild(player);
 
             playerScript.setChair(localtionID)
 
-            if(user.userId > 0){
+            if(user){
                 playerScript.seatDown({
                     config:config,
-                    headUrl:user.headUrl,
-                    isOwner:user.userId == info.conf.creator,
-                    gold:user.score,
+                    headimg:user.headimg,//是否上传头像
+                    isOwner:user.id == (creator?creator:-1),
+                    gold:user.integral,
                     isOffLine:!user.online,
-                    isReady:user.ready,
-                    name:user.name,
-                    ip:user.ip,
-                    userId:user.userId
+                    isReady:user.roomready,
+                    name:user.username,
+                    city:user.city,
+                    province:user.province,
+                    userId:user.id,
+                    diamonds:user.diamonds,
+                    experience:user.experience,
+                    fans:user.fans,
+                    follows:user.follows,
+                    goldcoins:user.goldcoins,
+                    opendeal:user.opendeal,
+                    roomCards:user.cards,
                 })
                 playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
                 playerScript.setDisCardNode(true,new disCard(),self.pokerAtlas)
             }
         }
+    },
 
-        self.m_moreNode = cc.instantiate(self.morePrefab);
-        self.m_moreNode.pointScene = self
-        self.parentNode.node.addChild(self.m_moreNode);
+    playerSeatDown(player){
+        if(!player)return
+        var self = this
+        if(self.getPlayerByUserId(player.id) == null){
+            for(var i = 0; i < self.m_player.length; i++){
+                var seat = self.m_player[i]
+                var id = seat.getUserId()
+                if(id == null){
+                    seat.seatDown({
+                        config:config,
+                        headimg:player.headimg,//是否上传头像
+                        isOwner:player.id == (self.m_creator?self.m_creator:-1),
+                        gold:player.integral,
+                        isOffLine:!player.online,
+                        isReady:player.roomready,
+                        name:player.username,
+                        city:player.city,
+                        province:player.province,
+                        userId:player.id,
+                        diamonds:player.diamonds,
+                        experience:player.experience,
+                        fans:player.fans,
+                        follows:player.follows,
+                        goldcoins:player.goldcoins,
+                        opendeal:player.opendeal,
+                        roomCards:player.cards,
+                    })
+                    seat.setHandCardNode(true,new handCard(),self.pokerAtlas)
+                    seat.setDisCardNode(true,new disCard(),self.pokerAtlas)
+                    return
+                }
+            }
+        }
     },
 
     dealPoker(pokerInfo,ani){
         ani = ani || false
         pokerInfo = pokerInfo || [
             {
-                pokers:[1,2,3,4,5,6,7,8,9,10,65,66,11,12,13,17,18]
+                pokers:[1,52,3,44,5,6,33,8,9,10,11,12,13,17,18]
             },
             {
-                pokers:[1,2,3,4,5,65,66,0,0,0]
+                pokers:[1,2,3,4,5,0,0,0,0,0]
             },
             {
-                pokers:[1,3,65,66,3,0,0,0,0,0]
+                pokers:[1,3,4,1,3,0,0,0,0,0]
             },
             {
                 pokers:[0,2,3,2,13,0,0,0,0,0]
@@ -126,59 +172,23 @@ cc.Class({
             var player = self.m_player[i]
             var chair = player.getChair()
             var pokers = pokerInfo[chair].pokers
-            player.setReadySprite(false)
             var dis = player.getDisCardNode()
             if(dis){
-                dis.clear()
+                dis.hide()
             }
             
             var hand = player.getHandCardNode()
             if(hand){
-                hand.clear()
-                hand.addCards(pokers,ani)
+                hand.hide()
+                hand.show(pokers,ani)
             }
         }
-    },
-
-    addYuCards(cards,ani){
-        ani = ani || false
-        cards = cards || [1,2,3]
-        var self = this
-        self.m_yuCardsScript.clear()
-        self.m_yuCardsScript.addCards(cards,ani)
+        G.globalSocket.setMsgBlock(true)
     },
 
     pokerFilpEnd(){
         var self = this
-        self.m_yuCardsScript.showCards(true)
-        for(var i = 0; i < self.m_player.length; i++){
-            var player = self.m_player[i]
-            if(player){
-                if(player.isSelf()){
-                    if(player.isOperater()){
-                        player.setOperateNode(true)
-                        player.setClock(true,30)
-                        player.getPlayerEvent().showOperateByIndex(1,[
-                            {name:'bjButton',visible:true},
-                            {name:'bqButton',visible:false},
-                            {name:'jdzButton',visible:true},
-                            {name:'qdzButton',visible:false},
-                        ])
-                    }else{
-                        player.setOperateNode(false)
-                        player.setClock(false)
-                    }
-                }else{
-                    if(player.isOperater()){
-                        player.setOperateNode(false)
-                        player.setClock(true,30)
-                    }else{
-                        player.setOperateNode(false)
-                        player.setClock(false)
-                    }
-                }
-            }
-        } 
+        G.globalSocket.setMsgBlock(false)
     },
 
     //更换场景
@@ -188,7 +198,6 @@ cc.Class({
         G.gameInfo.isInGame = false
         G.gameInfo.isGamePlay = false
         G.selfUserData.setUserRoomID(null)
-        G.globalSocket.close()
         if(cc.director.getScene().name != 'HallScene'){
             cc.director.loadScene('HallScene')
         }
@@ -240,43 +249,46 @@ cc.Class({
         return self.getPlayerByLocalChair(localChair)
     },
 
-    onChatClickCallBack(event, customEventData){
+    clearOperate(){
         var self = this
-        //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
-        var node = event.target;
-        var button = node.getComponent(cc.Button);
-        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
-        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        self.dealPoker(null,true)
-        self.addYuCards(null,true)
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(player){
+                player.setOperateNode(false)
+            }
+        }
     },
 
-    onVoiceClickCallBack(event, customEventData){
+    clearClock(){
         var self = this
-        //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
-        var node = event.target;
-        var button = node.getComponent(cc.Button);
-        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
-        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(player){
+                player.setClock(false)
+            }
+        }
     },
 
-    onPositionClickCallBack(event, customEventData){
+    clearDis(){
         var self = this
-        //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
-        var node = event.target;
-        var button = node.getComponent(cc.Button);
-        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
-        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(player){
+                var dis = player.getDisCardNode()
+                if(dis){
+                    dis.hide()
+                }
+            }
+        }
     },
 
-    onMoreClickCallBack(event, customEventData){
+    clearReady(){
         var self = this
-        //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
-        var node = event.target;
-        var button = node.getComponent(cc.Button);
-        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
-        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        if(self.m_moreNode.active)return;
-        self.m_moreNode.active = true
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(player){
+                player.setReadySprite(false)
+            }
+        }
     },
 });

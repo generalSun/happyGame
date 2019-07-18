@@ -1,3 +1,4 @@
+var TAG = 'ruleInfo.js'
 cc.Class({
     extends: cc.Component,
 
@@ -8,17 +9,51 @@ cc.Class({
 
     onLoad () {
         var self = this
-        var info = G.selfUserData.getUserRoomInfo()
-        var rule = info.conf.rule
-        var str = {}
-        if((rule & 0x00000008) > 0){
-            str.mode = '癞子模式'
-        }else{
-            str.mode = '经典模式'
-        }
+        
+    },
 
-        self.setDescrible(str)
-        self.setAdditional(info.conf.playerMaxNum,info.conf.baseScore)
+    analysisRule(infos){
+        console.log(TAG,'analysisRule',infos)
+        if(!infos)return
+        var self = this
+        var rules = {}
+        for(var key in infos){
+            if(key != 'playway' && key != 'gamemodel' && key != 'gametype'){
+                var info = infos[key]
+                var str = ''
+                if(key == 'dizhu'){
+                    if(info == 'qiang'){
+                        str = '抢地主'
+                    }else{
+                        str = '叫分'
+                    }
+                }else if(key == 'game'){
+                    if(info == 'dizhu'){
+                        str = '经典玩法'
+                    }else{
+                        str = '癞子玩法'
+                    }
+                }else if(key == 'games'){
+                    if(info == '8'){
+                        str = '8局（房卡x1）'
+                    }else if(info == '16'){
+                        str = '16局（房卡x2）'
+                    }else if(info == '25'){
+                        str = '25局（房卡x3）'
+                    }
+                }else if(key == 'limit'){
+                    if(info == '64'){
+                        str = '64分封顶'
+                    }else if(info == '128'){
+                        str = '128分封顶'
+                    }else if(info == '256'){
+                        str = '256分封顶'
+                    }
+                }
+                rules[key] = str
+            }
+        }
+        self.setDescrible(rules)
     },
 
     setDescrible(rules){
@@ -28,7 +63,7 @@ cc.Class({
         if(describle){
             var str = ''
             for(var key in rules){
-                str = str + rules[key] + ','
+                str = str + rules[key] + ' '
             }
             describle.string = str
             describle.customData = rules

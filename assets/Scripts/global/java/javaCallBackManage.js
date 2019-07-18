@@ -1,25 +1,21 @@
-var javaCallBackManage = class{
-    constructor(handler){
-        this.handler = handler;
-    }
-
+var javaCallBackManage = {
     setHandler(handler){
         this.handler = handler;
-    }
+    },
 
     wxLoginSuccessCallBack(resp){
         console.log('微信登陆成功返回数据:'+JSON.parse(resp))
         if(this.handler.wxLoginSuccessCallBack){
             this.handler.wxLoginSuccessCallBack(resp)
         }
-    }
+    },
 
     wxLoginFailCallBack(resp){
         console.log('微信登陆失败返回数据:'+JSON.parse(resp))
         if(this.handler.wxLoginFailCallBack){
             this.handler.wxLoginFailCallBack(resp)
         }
-    }
+    },
 
     wxLoginGetTokenCallBack(code){
     //     private void getAccessToken(String code) {

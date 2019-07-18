@@ -1,14 +1,17 @@
 var Constants = require('./../config/Constants')
+var TAG = 'playerEvent.js'
 cc.Class({
     extends: cc.Component,
 
     properties: {
-        operateLayer:[cc.Node]
+        operateLayer:[cc.Node],
+        playerInfoNode:cc.Prefab
     },
 
     onLoad () {
         var self = this
         self.m_chair = 0
+        self.m_config = null
         self.m_playerScript = self.node.getComponent('player')
 
         var showOperateByInfo = function(args){
@@ -82,6 +85,19 @@ cc.Class({
         return self.m_chair
     },
 
+    setConfig (config) {
+        var self = this
+        self.m_config = config
+    },
+
+    isSelf(){
+        var self = this
+        if(self.m_chair == self.m_config.chair.home){
+            return true
+        }
+        return false
+    },
+
     showPlayerInfo(event,customEventData){
         var self = this
         //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
@@ -91,34 +107,17 @@ cc.Class({
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         var scene = cc.find('Canvas')
         var playerInfoNode = scene.getChildByName('playerInfoNode')
-        if(playerInfoNode){
-            playerInfoNode.active = true;
-            var playerInfoScript = playerInfoNode.getComponent('playerInfo')
-            var data = {
-                name:self.m_playerScript.getNickName(),
-                userId:G.selfUserData.getUserId(),
-                gold:self.m_playerScript.getGold(),
-            }
-            playerInfoScript.show(data)
-            return;
+        if(!playerInfoNode){
+            playerInfoNode = cc.instantiate(self.playerInfoNode);
+            scene.addChild(playerInfoNode);
         }
-        console.log('thert is not the node set')
-        cc.loader.loadRes('prefabs/playerInfoNode', cc.Prefab, function(err, prefab) {
-            if (err) {
-                cc.log(err.message || err);
-                return;
-            }
-            var node = cc.instantiate(prefab);
-            node.active = true;
-            scene.addChild(node);
-            var playerInfoScript = node.getComponent('playerInfo')
-            var data = {
-                name:self.m_playerScript.getNickName(),
-                userId:G.selfUserData.getUserId(),
-                gold:self.m_playerScript.getGold(),
-            }
-            playerInfoScript.show(data)
-        });
+        var playerInfoScript = playerInfoNode.getComponent('playerInfo')
+        var data = {
+            name:self.m_playerScript.getNickName(),
+            userId:G.selfUserData.getUserId(),
+            gold:self.m_playerScript.getGold(),
+        }
+        playerInfoScript.show(data)
     },
 
     outCardButtonCallBack(event,customEventData){
@@ -128,7 +127,11 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        
+        if(self.isSelf()){
+            var cards = self.m_playerScript.getHandCardNode().getTouchNode().getSelectedServerCards()
+            console.log(TAG,'outCardButtonCallBack',cards)
+            G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.DOPLAY_CARDS,cards.join())
+        }
     },
 
     tipButtonCallBack(event,customEventData){
@@ -147,6 +150,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.NO_CARDS,"nocards")
     },
 
     buchuButtonCallBack(event,customEventData){
@@ -156,6 +160,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
+        G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.NO_CARDS,"nocards")
     },
 
     bjButtonCallBack(event,customEventData){
@@ -165,7 +170,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.JIAO_DI_ZHU,{state:0})
+        G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.GIVE_UP,'giveup')
     },
 
     bqButtonCallBack(event,customEventData){
@@ -175,7 +180,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.QIANG_DI_ZHU,{state:0})
+        G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.GIVE_UP,'giveup')
     },
 
     jdzButtonCallBack(event,customEventData){
@@ -185,7 +190,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.JIAO_DI_ZHU,{state:1})
+        G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.DO_CATCH,'docatch')
     },
 
     qdzButtonCallBack(event,customEventData){
@@ -195,7 +200,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.QIANG_DI_ZHU,{state:1})
+        G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.DO_CATCH,'docatch')
     },
 
     oneButtonCallBack(event,customEventData){
@@ -217,15 +222,6 @@ cc.Class({
     },
 
     threeButtonCallBack(event,customEventData){
-        var self = this
-        //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
-        var node = event.target;
-        var button = node.getComponent(cc.Button);
-        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
-        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-    },
-
-    readyButtonCallBack(event,customEventData){
         var self = this
         //这里 event 是一个 Touch Event 对象，你可以通过 event.target 取到事件的发送节点
         var node = event.target;

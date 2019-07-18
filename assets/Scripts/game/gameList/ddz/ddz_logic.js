@@ -1,7 +1,8 @@
+var TAG = 'gamelogic.js'
 var gamelogic = {}
 //数值掩码
 gamelogic.VALUE_MASK = {
-    COLOR :	240	,							                 //花色掩码
+    COLOR :	255	,							                 //花色掩码
     VALUE :	15	,							                 //数值掩码
 }
 
@@ -53,15 +54,66 @@ gamelogic.getcardcolor = function(card){
 gamelogic.getcardlogicvalue = function(card){
     var value = gamelogic.getcardvalue(card);//获取牌值
     var color = gamelogic.getcardcolor(card);//获取花色
-    if(value == 0x01){
-        value = 14
-    }else if(value == 0x01){
-        value = 15
-    }else if(color == 0x04 && value == 0x01){
+    if(color == 0x04 && value == 0x01){
         value = 16
     }else if(color == 0x04 && value == 0x02){
         value = 17
+    }else if(value == 0x01){
+        value = 14
+    }else if(value == 0x02){
+        value = 15
     }
 	return value
 }
+
+gamelogic.restoreServerPoker = function(card){//复原本地牌为服务器牌
+    for(var i = 0; i < gamelogic.CARD_DATA_ARRAY.length; i++){
+        var poker = gamelogic.CARD_DATA_ARRAY[i]
+        if(poker == card){
+            return i
+        }
+    }
+    return -1
+}
+
+gamelogic.analysisServerPoker = function(card){//解析服务器牌为本地牌
+    var value = gamelogic.CARD_DATA_ARRAY[card]
+    if(value){
+        return value
+    }
+    return -1
+}
+
+gamelogic.analysisServerPokers = function(cards){
+    cards = cards || []
+    var clientCards = new Array()
+    for(var i = 0; i < cards.length; i++){
+        var card = cards[i]
+        clientCards.push(gamelogic.analysisServerPoker(card))
+    }
+    return clientCards
+}
+
+gamelogic.sortCardsByType = function(cards,sortType,revorder){
+    if(!cards)return
+    cards = cards || []
+    sortType = sortType || gamelogic.SORT_TYPE.LOGIC
+    revorder = revorder || false
+    var sort_cards = cards.slice(0)
+    sort_cards.sort(function(a,b){
+        var value_a = gamelogic.getcardlogicvalue(a)
+        var value_b = gamelogic.getcardlogicvalue(b)
+        if(sortType == gamelogic.SORT_TYPE.VALUE_POINT){
+            value_a = gamelogic.getcardvalue(a)
+            value_b = gamelogic.getcardvalue(b)
+        }
+        if(revorder){
+            return value_b - value_a
+        }else{
+            return value_a - value_b
+        }
+    })
+    return sort_cards
+}
+
 module.exports = gamelogic

@@ -1,4 +1,5 @@
 var Constants = require('./../config/Constants')
+var TAG = 'poker.js'
 var pokerAtlas = {
     back:['big_back','mid_back','small_back'],
     bottom:['big_bottom','mid_bottom','small_bottom'],
@@ -141,7 +142,7 @@ cc.Class({
         self.m_value = cbCard
         var cardType = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.CARDTYPE) || 1
         var atlas = self.m_pokerAtlas[0]
-        if(!cbCard || cbCard <= 0 || cbCard >= 80){
+        if(cbCard == null || cbCard <= 0 || cbCard >= 80){
             self.backSprite.node.active = false
             self.back.node.active = true 
             var backFrame = atlas.getSpriteFrame(pokerAtlas.back[self.m_pokerType]);

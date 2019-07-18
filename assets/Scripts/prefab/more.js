@@ -3,18 +3,21 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-
+        setNodePrefab:cc.Prefab
     },
 
     onLoad () {
         var self = this
         self.node.active = false
         self.pointScene = self.node.pointScene || self;
-        self.node.on('touchend',function(event){
-            if(self.node.active){
-                self.node.active = false
-            }
-        },self)
+        self.node.on('touchend',self.hide,self)
+    },
+
+    hide(){
+        var self = this
+        if(self.node.active){
+            self.node.active = false
+        }
     },
 
     onDissolveClickCallBack(event, customEventData){
@@ -53,21 +56,12 @@ cc.Class({
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         self.node.active = false
         var setNode = self.pointScene.node.getChildByName('setNode')
-        if(setNode){
-            setNode.active = true;
-            return;
+        if(!setNode){
+            setNode = cc.instantiate(self.setNodePrefab);
+            setNode.pointScene = self
+            self.pointScene.node.addChild(setNode);
         }
-        console.log('thert is not the node set')
-        cc.loader.loadRes('prefabs/setNode', cc.Prefab, function(err, prefab) {
-            if (err) {
-                cc.log(err.message || err);
-                return;
-            }
-            var node = cc.instantiate(prefab);
-            node.pointScene = self
-            node.active = true;
-            self.pointScene.node.addChild(node);
-        });
+        setNode.active = true;
     },
 
     onBackClickCallBack(event, customEventData){
@@ -83,4 +77,9 @@ cc.Class({
             G.globalSocket.send(Constants.SOCKET_EVENT_c2s.EXIT_GAME)
         }
     },
+
+    onDestroy(){
+        var self = this
+        self.node.off('touchend',self.hide,self)
+    }
 })

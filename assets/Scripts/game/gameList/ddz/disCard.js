@@ -1,4 +1,7 @@
 var config = require('./config')
+var Constants = require('./../../../config/Constants')
+var ddz_logic = require('./ddz_logic')
+var TAG = 'disCard.js'
 cc.Class({
     ctor(){
         var self = this
@@ -7,10 +10,14 @@ cc.Class({
         self.m_object = null
         self.m_pokerAtlas = null
         self.m_cards = new Array()
+        self.m_cardsPool = new cc.NodePool()
+        self.m_effects = new Array()
+        self.m_cardPrefab = null
     },
 
-    initWidget(disCardNode,chair,atlas,object){
+    initWidget(disCardNode,chair,atlas,cardPrefab,object){
         var self = this
+        self.m_cardPrefab = cardPrefab
         self.m_chair = chair
         self.m_cardNode = disCardNode
         self.m_pokerAtlas = atlas
@@ -31,34 +38,137 @@ cc.Class({
         self.m_cardNode.y = nodeOffest.y
     },
 
-    addCards(info,ani){
+    showEffect(name){
+        console.log(TAG,'showEffect',name)
         var self = this
-        info = info || {}
-        var ps = new Array()
-        for(var i = 0; i < info.length; i++){
-            var p = G.tools.loadResPromise('prefabs/cardNode', cc.Prefab,info[i])
-            ps.push(p)
+        if(!self.m_cardNode.active){
+            self.m_cardNode.active = true
         }
-        Promise.all(ps).then(function(args){
-            for(var i = 0; i < args.length; i++){
-                var arg = args[i]
-                var prefab = arg.resource
-                var value = arg.parameter
-                var node = cc.instantiate(prefab);
-                node.active = true;
-                self.m_cardNode.addChild(node);
-
-                var cardScript = node.getComponent('poker')
-                self.m_cards.push(cardScript)
-                var scale = config.disCardScale[self.m_chair]
-                cardScript.setPokerScale(scale)
-                cardScript.setAtlas(self.m_pokerAtlas)
-                cardScript.setCard(value)
+        var path = 'image/ddzEffects/'+ name
+        cc.loader.loadRes(path, cc.SpriteFrame, (err, spriteFrame) => {
+            if (err) {
+                throw(err)
+            } else {
+                var effect = new cc.Node()
+                var effectSprite = effect.addComponent(cc.Sprite);
+                effectSprite.spriteFrame = spriteFrame
+                self.m_cardNode.addChild(effect);
+                self.m_effects.push(effect)
             }
         })
-        .catch(function(err){
-            cc.log(err.message || err);
-        })
+    },
+
+    showCards(info,ani){
+        var self = this
+        info = info || []
+        if(info.length <= 0){
+            self.showEffect('pass'+Math.floor(Math.random()*4+1))
+            return
+        }
+        if(!self.m_cardNode.active){
+            self.m_cardNode.active = true
+        }
+        console.log(TAG,'showCards',info)
+        var handNode = self.m_object.getHandCardNode().getNode()
+        for(var i = 0; i < info.length; i++){
+            var value = info[i].value
+            if(self.m_cardsPool.size() <= 0){
+                var card = cc.instantiate(self.m_cardPrefab);
+                self.m_cardsPool.put(card); 
+            }
+            var node = self.m_cardsPool.get();
+            node.active = true;
+            self.m_cardNode.addChild(node);
+            self.m_cards.push(node)
+            var cardScript = node.getComponent('poker')
+            
+            var scale = config.disCardScale[self.m_chair]
+            cardScript.setPokerScale(scale)
+            cardScript.setAtlas(self.m_pokerAtlas)
+            cardScript.setLogic(ddz_logic)
+            cardScript.setPokerType(1)
+            cardScript.setCard(value)
+            var pos = info[i].pos
+            if(!pos){
+                if(self.m_chair == config.chair.home){
+                    pos = cc.v2(self.m_cardNode.width/2 - config.normalDisPokerSize[self.m_chair].width*scale.x/2,
+                            -1 * self.m_cardNode.height/2 + config.normalDisPokerSize[self.m_chair].height*scale.y/2)
+                }else if(self.m_chair == config.chair.nextDoor){
+                    pos = cc.v2(config.normalDisPokerSize[self.m_chair].width*scale.x/2 - self.m_cardNode.width/2,0)
+                }else{
+                    pos = cc.v2(self.m_cardNode.width/2 - config.normalDisPokerSize[self.m_chair].width*scale.x/2,0)
+                }
+            }else{
+                var worldPos = handNode.convertToWorldSpace(pos)
+                pos = self.m_cardNode.convertToNodeSpace(worldPos)
+            }
+            cardScript.setPokerCurrentPosition(pos)
+        }
+        if(self.m_chair == config.chair.home){
+            self.addCardTypeOne(ani)
+        }else{
+            self.addCardTypeTwo(ani)
+        }
+    },
+
+    addCardTypeOne(ani){
+        ani = ani || false
+        var self = this
+        var space = self.getSpace()
+        var startPos = self.getStartPos(space)
+        var delay = 0.05
+        var duation = 0.1
+        var scale = config.disCardScale[self.m_chair]
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            if(cc.isValid(card)){
+                card = card.getComponent('poker')
+                card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
+                if(ani){
+                    card.node.runAction(
+                        cc.sequence(
+                            cc.delayTime(i*delay),
+                            cc.moveTo(duation,startPos.x + i*space,startPos.y)
+                        )
+                    )
+                }else{
+                    card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
+                }
+            }
+        }
+    },
+
+    addCardTypeTwo(ani){
+        ani = ani || false
+        var self = this
+        var space = self.getSpace()
+        var startPos = self.getStartPos(space)
+        var delay = 0.05
+        var duation = 0.1
+        var scale = config.disCardScale[self.m_chair]
+        var call = function(target,data){
+            var numInfo = self.m_object.getCardNum()
+            self.m_object.setCardNumSprite(true,numInfo.describle - 1)
+        }
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            if(cc.isValid(card)){
+                card = card.getComponent('poker')
+                card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
+                if(ani){
+                    card.node.runAction(
+                        cc.sequence(
+                            cc.delayTime(i*delay),
+                            cc.moveTo(duation,startPos.x + i*space,startPos.y),
+                            cc.callFunc(call,card.node)
+                        )
+                    )
+                }else{
+                    card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
+                    call(card.node)
+                }
+            }
+        }
     },
 
     getStartPos(space){
@@ -99,27 +209,44 @@ cc.Class({
         return currSpace
     },
 
+    hideCards(){
+        var self = this
+        for(var i = 0; i < self.m_cards.length; i++){
+            var item = self.m_cards[i]
+            self.m_cardsPool.put(item)
+            self.m_cardNode.removeChild(item)
+        }
+        self.m_cards.splice(0,self.m_cards.length)
+    },
+
+    hideEffects(){
+        var self = this
+        for(var i = 0; i < self.m_effects.length; i++){
+            var item = self.m_effects[i]
+            self.m_cardNode.removeChild(item)
+        }
+        self.m_effects.splice(0,self.m_effects.length)
+    },
+
+    hide(){
+        var self = this
+        self.m_cardNode.active = false
+        self.hideCards()
+        self.hideEffects()
+    },
+
     clear(){
         var self = this
-        for(var i = self.m_cards.length - 1; i >= 0; i--){
-            var poker = self.m_cards[i]
-            if(cc.isValid(poker) && poker.clear){
-                poker.clear()
-            }
-            self.m_cards.splice(i,1);
+        self.m_cardsPool.clear();
+        self.m_cards.splice(0,self.m_cards.length)
+        self.m_effects.splice(0,self.m_effects.length)
+        if(cc.isValid(self.m_cardNode)){
+            self.m_cardNode.removeAllChildren()
         }
-        self.m_cardNode.removeAllChildren()
     },
 
     onDestroy(){
         var self = this
-        for(var i = self.m_cards.length - 1; i >= 0; i--){
-            var poker = self.m_cards[i]
-            if(cc.isValid(poker) && poker.onDestroy){
-                poker.onDestroy()
-            }
-            self.m_cards.splice(i,1);
-        }
-        self.m_cardNode.removeAllChildren()
+        self.clear()
     }
 })

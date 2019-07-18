@@ -18,6 +18,8 @@ cc.Class({
         handCardNode:cc.Node,
         disCardNode:cc.Node,
         operateNode:cc.Node,
+        bigPokerPrefab:cc.Prefab,
+        midPokerPrefab:cc.Prefab,
     },
 
     onLoad () {
@@ -25,11 +27,89 @@ cc.Class({
         self.m_chair = 0
         self.m_nickname = null
         self.m_config = null
-        self.m_ip = null
+        self.m_city = null
+        self.m_province = null
         self.m_userId = null
+        self.m_diamonds = 0
+        self.m_experience = 0
+        self.m_fans = 0
+        self.m_follows = 0
+        self.m_goldcoins = 0
+        self.m_roomCards = 0
+        self.m_opendeal = false
         self.m_isOperater = false
         self.m_playerEventScript = self.node.getComponent('playerEvent')
         self.seatUp()
+    },
+
+    setOpendeal(opendeal){
+        var self = this
+        self.m_opendeal = opendeal
+    },
+
+    getOpendeal(){
+        var self = this
+        return self.m_opendeal
+    },
+
+    setRoomCards(cards){
+        var self = this
+        self.m_roomCards = cards
+    },
+
+    getRoomCards(){
+        var self = this
+        return self.m_roomCards
+    },
+
+    setGoldCoins(coins){
+        var self = this
+        self.m_goldcoins = coins
+    },
+
+    getGoldCoins(){
+        var self = this
+        return self.m_goldcoins
+    },
+
+    setFollows(follows){
+        var self = this
+        self.m_follows = follows
+    },
+
+    getFollows(){
+        var self = this
+        return self.m_follows
+    },
+
+    setFans(fans){
+        var self = this
+        self.m_fans = fans
+    },
+
+    getFans(){
+        var self = this
+        return self.m_fans
+    },
+
+    setExperience(experience){
+        var self = this
+        self.m_experience = experience
+    },
+
+    getExperience(){
+        var self = this
+        return self.m_experience
+    },
+
+    setDiamonds(diamonds){
+        var self = this
+        self.m_diamonds = diamonds
+    },
+
+    getDiamonds(){
+        var self = this
+        return self.m_diamonds
     },
 
     setIsOperater(isOperate){
@@ -61,14 +141,24 @@ cc.Class({
         return self.m_userId
     },
 
-    setIP(ip){
+    setCity(ip){
         var self = this
-        self.m_ip = ip
+        self.m_city = ip
     },
 
-    getIP(){
+    getCity(){
         var self = this
-        return self.m_ip
+        return self.m_city
+    },
+
+    setProvince(ip){
+        var self = this
+        self.m_province = ip
+    },
+
+    getProvince(){
+        var self = this
+        return self.m_province
     },
 
     setNickName(name){
@@ -122,7 +212,16 @@ cc.Class({
 
     init (args) {
         var self = this
-        self.setHeadSprite(true,args.headUrl)
+        self.setDiamonds(args.diamonds)
+        self.setExperience(args.experience)
+        self.setFans(args.fans)
+        self.setFollows(args.follows)
+        self.setGoldCoins(args.goldcoins)
+        self.setRoomCards(args.roomCards)
+        self.setOpendeal(args.opendeal)
+
+
+        self.setHeadSprite(true,args.headimg)
         self.setOffLineSprite(args.isOffLine)
         self.setResultSprite(false)
         self.setSignSprite(false)
@@ -135,17 +234,21 @@ cc.Class({
         self.setJiabeiSprite(false)
         self.setOperateNode(false)
         self.setNickName(args.name)
-        self.setIP(args.ip)
+        self.setCity(args.city)
+        self.setProvince(args.province)
         self.setUserId(args.userId)
         self.setIsOperater(false)
         self.m_playerEventScript.setChair(self.m_chair)
-        if(self.m_chair == 1){
+        self.m_playerEventScript.setConfig(self.m_config)
+        if(self.m_chair == self.m_config.chair.nextDoor){
             self.signSprite.node.x = -1*self.signSprite.node.x;
             self.baodanSprite.node.x = -1*self.baodanSprite.node.x;
             self.readySprite.node.x = -1*self.readySprite.node.x;
             self.ownerSprite.node.x = -1*self.ownerSprite.node.x;
             self.clock.node.x = -1*self.clock.node.x;
             self.cardNumSprite.node.x = -1*self.cardNumSprite.node.x;
+        }else if(self.m_chair == self.m_config.chair.home){
+            self.clock.node.y = 150
         }
     },
 
@@ -278,7 +381,7 @@ cc.Class({
         return self.ownerSprite.node.active
     },
 
-    setClock (visible,num) {
+    setClock (visible,num,callBack) {
         var self = this
         if(!self.isSeat())return;
         visible = visible || false
@@ -290,22 +393,31 @@ cc.Class({
             }
             return;
         }
+        self.clock.node.stopAllActions()
         var describle = self.clock.node.getChildByName('describle')
         if(!describle)return;
         var label = describle.getComponent(cc.Label)
         if(label){
             label.string = num
         }
+        var alarm = false
         self.clock.scheduleId = setInterval(function(){
             if(cc.isValid(label)){
                 label.string = label.string - 1
                 if(label.string <= 3){
-                    self.clock.node.runAction(cc.blink(1,3))
+                    self.clock.node.runAction(cc.blink(1,2))
+                    if(!alarm){
+                        G.audioManager.playSFX('timeup_alarm.mp3')
+                        alarm = true
+                    }
                 }
                 if(label.string <= 0){
                     clearInterval(self.clock.scheduleId);
                     self.clock.scheduleId = null
                     self.clock.node.active = false
+                    if(callBack){
+                        callBack()
+                    }
                 }
             }
         }, 1000)
@@ -381,7 +493,11 @@ cc.Class({
         self.handCardNode.active = visible
         if(!instance)return;
         if(instance.initWidget){
-            instance.initWidget(self.handCardNode,self.m_chair,atlas,self.m_playerEventScript,self)
+            if(self.m_chair == self.m_config.chair.home){
+                instance.initWidget(self.handCardNode,self.m_chair,atlas,self.bigPokerPrefab,self.m_playerEventScript,self)
+            }else{
+                instance.initWidget(self.handCardNode,self.m_chair,atlas,self.midPokerPrefab,self.m_playerEventScript,self)
+            }
         }
         self.handCardNode.bindInstance = instance
     },
@@ -399,7 +515,7 @@ cc.Class({
         self.disCardNode.active = visible
         if(!instance)return;
         if(instance.initWidget){
-            instance.initWidget(self.disCardNode,self.m_chair,atlas,self)
+            instance.initWidget(self.disCardNode,self.m_chair,atlas,self.midPokerPrefab,self)
         }
         self.disCardNode.bindInstance = instance
     },

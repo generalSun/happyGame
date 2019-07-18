@@ -1,5 +1,6 @@
 var config = require('./config')
 var Constants = require('./../../../config/Constants')
+var ddz_logic = require('./ddz_logic')
 var touch = class{
     constructor(cardNode,bindObject){
         var self = this
@@ -22,9 +23,28 @@ var touch = class{
         self.m_canTouch = flag
     }
 
-    getTouchCardsInfo(){
+    getSelectedServerCards(){
         var self = this
-        return self.m_touchCardsInfo
+        var selectedCards = new Array()
+        for(var i = 0; i < self.m_touchCardsInfo.length; i++){
+            var cardInfo = self.m_touchCardsInfo[i]
+            var card = cardInfo.card
+            var value = card.getValue()
+            selectedCards.push(ddz_logic.restoreServerPoker(value))
+        }
+        return selectedCards
+    }
+
+    getSelectedClientCards(){
+        var self = this
+        var selectedCards = new Array()
+        for(var i = 0; i < self.m_touchCardsInfo.length; i++){
+            var cardInfo = self.m_touchCardsInfo[i]
+            var card = cardInfo.card
+            var value = card.getValue()
+            selectedCards.push(value)
+        }
+        return selectedCards
     }
 
     touchBegin(event){
@@ -184,8 +204,10 @@ var touch = class{
             if(event.type == 'touchstart' || event.type == 'touchmove'){
                 if(status == Constants.CARD_STATUS.STATUS_NORMAL){
                     card.setStatus(Constants.CARD_STATUS.STATUS_NORMAL_SELECT)
+                    G.audioManager.playSFX('ui_click.mp3')
                 }else if(status == Constants.CARD_STATUS.STATUS_POP){
                     card.setStatus(Constants.CARD_STATUS.STATUS_POP_SELECT)
+                    G.audioManager.playSFX('ui_click.mp3')
                 }
             }
             return cardInfo

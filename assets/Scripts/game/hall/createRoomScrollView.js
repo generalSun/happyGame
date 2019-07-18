@@ -1,3 +1,4 @@
+var TAG = 'createRoomScrollView.js'
 cc.Class({
     extends: cc.Component,
 
@@ -7,40 +8,62 @@ cc.Class({
         item_prefab:cc.Prefab,
     },
 
-    init(infos,callBack){
+    init(){
+        console.log(TAG,'init')
         var self = this
-        infos = infos || []
-        self.m_items.splice(0,self.m_items.length)
-        self.content.removeAllChildren()
-        for(var i = 0; i < infos.length; i++){
-            var info = infos[i]
-            if(info){
-                var item = cc.instantiate(self.item_prefab);
-                self.content.addChild(item);
-                self.m_items.push(item);
-                item.getComponent('scrollViewItem').init(info,i,self.notifyItemClicked.bind(self))
-                if(i == 0){
-                    item.getComponent('scrollViewItem').updateItem(true)
+        self.m_items = new cc.NodePool()
+        self.m_playWay = new Array()
+    },
+
+    show(){
+        var self = this
+        self.hide()
+        self.node.active = true
+        var gameListInfo = G.gameListInfo || {}
+        console.log(TAG,'show',gameListInfo)
+        for(var i = 0; i < gameListInfo.length; i++){
+            var gameModel = gameListInfo[i]
+            for(var j = 0; j < gameModel.types.length; j++){
+                var type = gameModel.types[j] 
+                if(type.code == 'createroom'){
+                    for(var inx = 0; inx < type.playways.length; inx++){
+                        if(self.m_items.size() <= 0){
+                            var item = cc.instantiate(self.item_prefab);
+                            self.m_items.put(item); 
+                        }
+                        var playway = self.m_items.get();
+                        var script = playway.getComponent("playWay");
+                        script.init(type.playways[inx]);
+                        playway.parent = self.content
+                        self.m_playWay.push(playway)
+                    }
                 }
             }
         }
-        self.m_notifyCallBack = callBack
     },
 
-    onLoad () {
+    hide(){
         var self = this
-        self.m_items = new Array();
-        self.m_notifyCallBack = null
+        for(var i = 0; i < self.m_playWay.length; i++){
+            var item = self.m_playWay[i]
+            self.m_items.put(item)
+        }
+        self.content.removeAllChildren()
+        self.m_playWay.splice(0,self.m_playWay.length)
+        self.node.active = false
     },
 
-    notifyItemClicked(index){
+    clear(){
         var self = this
-        for(var i = 0; i < self.m_items.length; i++){
-            var item = self.m_items[i]
-            item.getComponent('scrollViewItem').updateItem(index == i)
+        self.m_items.clear();
+        if(cc.isValid(self.content)){
+            self.content.removeAllChildren()
         }
-        if(self.m_notifyCallBack){
-            self.m_notifyCallBack(index)
-        }
+        self.m_playWay.splice(0,self.m_playWay.length)
+    },
+
+    onDestroy(){
+        var self = this
+        self.clear()
     }
 });

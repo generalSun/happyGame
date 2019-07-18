@@ -6,6 +6,19 @@ const LOCALLSTORAGEKEY = {//本地存储
     CARDTYPE:'cardType'
 }
 
+const UPDATE_CODE = {//热更 
+    OK:'更新好了',
+    CHECK_UPDATE_ERR: '检测更新出错',
+    HOT_UPDATE_ERR: '更新出错',
+    DECOMPRESS_ERR: '解压出错',
+    ASSET_UPDATE_ERR: '资源更新出错',
+    LOCAL_MANIFEST_LOAD_ERR: '本地manifest加载失败',
+    UPDATEING_ASSETS: '更新资源中',
+    UPDATE_FINISHED: '更新完成',
+    NEW_VERSION_FOUND:'发现新版本',
+    UPDATE_FAILED:'更新失败'
+}
+
 const THIRTINFO = {//第三方信息
     WX:{
         appkey: "wxafc956f84f22788f",
@@ -27,54 +40,44 @@ const FRAMEEVENT = {//帧事件名 target 0为发送给自己的节点   1为发
 }
 
 const LOCALEVENT = {//本地事件名
-    DISPATCHER_SOCKET_MSG:'dispatcherSocketMsg',
+    CONNECT_SUCCES:'connect_Succes',
+    SHOW_CREATE_ROOM_VIEW:'showCreateRoomView',
     POKER_FILP_END:'pokerFilpEnd',
 }
 
 const HTTP_NET_EVENT = {//http网络事件名
-    GET_APP_WEB:'get_app_web',
-	GUEST_LOGIN:'/guest',
-    HALLLOGIN:'/login',//大厅登陆
-    REGISTER:'/register',
-    LOGIN:'/auth',//登陆
-    CREATE_USER:'/create_user',
-    BASE_INFO:'/base_info',
-    GET_GAMELIST:'/get_gameList',
-    CREATE_PRIVATE_ROOM:'/create_private_room',
-    ENTER_PRIVATE_ROOM:'/enter_private_room',
+	GUEST_LOGIN:'/api/guest',
 }
 
 const SOCKET_EVENT_c2s = {//socket网络事件名
-    LOGIN:                  'login',
-    EXIT_GAME:              'exit',
-    DISPRESS_ROOM:          'dispress',
-    DISSOLVE_REQUEST:       'dissolve_request',
-    DISSOLVE_AGREE:         'dissolve_agree',
-    DISSOLVE_REJECT:        'dissolve_reject',
-    JIAO_DI_ZHU:            'jiaodizhu',
-    QIANG_DI_ZHU:            'qiangdizhu',
+    HEARTBEAT:              'ping',
+    GAME_STATUS:            'gamestatus',
+    SEARCH_ROOM:            'searchroom',
+    JOIN_ROOM:              'joinroom',
+    START_GAME:             'start',
+    DO_CATCH:               'docatch',//叫地主
+    GIVE_UP:                'giveup',//不叫
+    DOPLAY_CARDS:           'doplaycards',//出牌
+    NO_CARDS:               'nocards',//不出
+    RECOVERY:               'recovery',//重连
 }
 
 const SOCKET_EVENT_s2c = {//socket网络事件名
-    RECONNECTING:           'reconnecting',
-    RECONNECT:              'reconnect',
-    // CONNECT_ERROR:          'connect_error',
-    // CONNECT_TIMEOUT:        'connect_timeout',
-    // RECONNECT_ATTEMPT:      'reconnect_attempt',
-    // RECONNECT_ERROR:        'reconnect_error',
-    // RECONNECT_FAILED:       'reconnect_failed',
-    LOGIN_RESULT:           'login_result',
-    LOGIN_FINISHED:         'login_finished',
-    GAME_BEGIN_PUSH:        'game_begin_push',//游戏开始
-    GAME_SYNC_PUSH:         'game_sync_push',//玩家重连
-    NEW_USER_COMES_PUSH:    'new_user_comes_push',//新玩家进入
-    USER_STATE_PUSH:        'user_state_push',
-    EXIT_RESULT:            'exit_result',
-    EXIT_NOTIFY_PUSH:       'exit_notify_push',
-    DISPRESS_PUSH:          'dispress_push',
-    DISSOLVE_NOTICE_PUSH:   'dissolve_notice_push',
-    DISSOLVE_CANCEL_PUSH:   'dissolve_cancel_push',
-    GAME_OVER_PUSH:         'game_over_push'
+    HEARTBEAT:              'pong',
+    GAME_STATUS:            'gamestatus',
+    SEARCH_ROOM:            'searchroom',
+    JOIN_ROOM:              'joinroom',
+    PLAYER_JOIN:            'players',
+    ROOM_READY:             'roomready',//房间准备好了
+    PLAYER_READY:           'playeready',//玩家点击了开始游戏
+    BANKER:                 'banker',
+    PLAYING_GAME:           'play',
+    CATCH_SIGN:             'catch',
+    CATCHRESULT:            'catchresult',
+    LAST_HANDS:             'lasthands',
+    CATCH_FAIL:             'catchfail',//流局了
+    TAKE_CARDS:             'takecards',
+    RECOVERY:               'recovery',//重连
 }
 
 module.exports = {
@@ -86,4 +89,5 @@ module.exports = {
     HTTP_NET_EVENT:HTTP_NET_EVENT,
     SOCKET_EVENT_c2s:SOCKET_EVENT_c2s,
     SOCKET_EVENT_s2c:SOCKET_EVENT_s2c,
+    UPDATE_CODE:UPDATE_CODE
 };

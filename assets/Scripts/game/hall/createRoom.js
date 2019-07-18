@@ -1,34 +1,37 @@
+var TAG = 'createRoom.js'
 cc.Class({
     extends: cc.Component,
 
     properties: {
         gameScrollView:cc.ScrollView,
-        descPageView:cc.PageView,
+        playway:cc.Prefab
     },
 
-    onLoad () {
+    init(){
+        console.log(TAG,'init')
         var self = this
-        self.node.on(cc.Node.EventType.TOUCH_START, function (event) {
-            self.node.active = false
-        }, self)
+        self.m_scrollViewScript = self.gameScrollView.getComponent('createRoomScrollView')
+        self.m_scrollViewScript.init()
+        self.hide()
     },
 
-    init(info,socketProcess){//name,describle,state(0开放、1维护),rule
+    show(){
         var self = this
-        self.gameScrollView.getComponent('createRoomScrollView').init(info,self.notifyPageTurn.bind(self))
-        self.descPageView.getComponent('createRoomPageView').init(info,socketProcess)
+        self.node.active = true
+        self.node.x = cc.winSize.width/2
+        self.node.runAction(cc.moveTo(0.5,cc.v2(180,0)))
+        self.m_scrollViewScript.show()
     },
 
-    notifyPageTurn(index){
+    hide(){
         var self = this
-        self.descPageView.scrollToPage(index,0)
-    },
-
-    closeCallBack(event,customEventData){
-        var self = this
-        var node = event.target;
-        //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
-        cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
         self.node.active = false
+        self.node.x = cc.winSize.width/2
+        self.node.stopAllActions()
+        self.m_scrollViewScript.hide()
+    },
+
+    onDestroy(){
+        var self = this
     }
 });
