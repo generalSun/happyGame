@@ -28,10 +28,10 @@ cc.Class({
         self.m_ruleScript = self.ruleInfo.getComponent('ruleInfo');
         self.m_cardBottomScript = self.cardBottomNode.getComponent('cardBottom');
         self.m_player = new Array();
+        self.m_playerPool = new cc.NodePool()
         self.m_meChairID = config.INVALID_CHAIR;
         self.m_creator = null
         // self.m_gameState = 
-
         self.init()
     },
 
@@ -72,82 +72,99 @@ cc.Class({
         self.m_meChairID = id
     },
 
-    loadPrefab (seat,index,creator) {
+    setRoomCreator(creator){
         var self = this
-        if(creator){
-            self.m_creator = creator
-        }
-        console.log('我自己的服务器位置：'+self.m_meChairID)
-        for(var i = 0; i < config.maxPlayerNum; i++){
-            var user = (i == index)?seat:null
-            var localtionID = self.convertServerIDtoLocalID(i)
-            var pos = config.playerPos[config.maxPlayerNum][localtionID]
-            var player = cc.instantiate(self.playerPrefab);
-            player.setPosition(pos.x,pos.y)
+        self.m_creator = creator
+    },
+
+    clearSeats(){
+        console.log(TAG,'clearSeats')
+        var self = this
+        for(var key in self.m_player){
+            var player = self.m_player[key]
             var playerScript = player.getComponent('player')
-            self.m_player.push(playerScript)
-            self.m_bg.addChild(player);
+            playerScript.setUserId(null)
+            playerScript.seatUp()
+            self.m_playerPool.put(player)
+            self.m_bg.removeChild(player)
+        }
+        self.m_player.splice(0,self.m_player.length)
+    },
 
-            playerScript.setChair(localtionID)
-
-            if(user){
-                playerScript.seatDown({
-                    config:config,
-                    headimg:user.headimg,//是否上传头像
-                    isOwner:user.id == (creator?creator:-1),
-                    gold:user.integral,
-                    isOffLine:!user.online,
-                    isReady:user.roomready,
-                    name:user.username,
-                    city:user.city,
-                    province:user.province,
-                    userId:user.id,
-                    diamonds:user.diamonds,
-                    experience:user.experience,
-                    fans:user.fans,
-                    follows:user.follows,
-                    goldcoins:user.goldcoins,
-                    opendeal:user.opendeal,
-                    roomCards:user.cards,
-                })
-                playerScript.setHandCardNode(true,new handCard(),self.pokerAtlas)
-                playerScript.setDisCardNode(true,new disCard(),self.pokerAtlas)
+    createSeats(){
+        console.log(TAG,'createSeats')
+        var self = this
+        for(var i = self.m_meChairID; i < self.m_meChairID + config.maxPlayerNum; i++){
+            var j = i%config.maxPlayerNum
+            var localtionID = self.convertServerIDtoLocalID(j)
+            var pos = config.playerPos[config.maxPlayerNum][localtionID]
+            if(self.m_playerPool.size() <= 0){
+                var seat = cc.instantiate(self.playerPrefab);
+                self.m_playerPool.put(seat); 
             }
+            var player = self.m_playerPool.get();
+            player.setPosition(pos.x,pos.y)
+            self.m_bg.addChild(player);
+            self.m_player.push(player)
+            var playerScript = player.getComponent('player')
+            playerScript.setChair(localtionID)
+            playerScript.setUserId(null)
+            playerScript.seatUp()
         }
     },
 
     playerSeatDown(player){
         if(!player)return
         var self = this
-        if(self.getPlayerByUserId(player.id) == null){
-            for(var i = 0; i < self.m_player.length; i++){
-                var seat = self.m_player[i]
-                var id = seat.getUserId()
-                if(id == null){
-                    seat.seatDown({
-                        config:config,
-                        headimg:player.headimg,//是否上传头像
-                        isOwner:player.id == (self.m_creator?self.m_creator:-1),
-                        gold:player.integral,
-                        isOffLine:!player.online,
-                        isReady:player.roomready,
-                        name:player.username,
-                        city:player.city,
-                        province:player.province,
-                        userId:player.id,
-                        diamonds:player.diamonds,
-                        experience:player.experience,
-                        fans:player.fans,
-                        follows:player.follows,
-                        goldcoins:player.goldcoins,
-                        opendeal:player.opendeal,
-                        roomCards:player.cards,
-                    })
-                    seat.setHandCardNode(true,new handCard(),self.pokerAtlas)
-                    seat.setDisCardNode(true,new disCard(),self.pokerAtlas)
-                    return
-                }
+        var updatePlayer = self.getPlayerByUserId(player.id)
+        console.log(TAG,'playerSeatDown updatePlayer',updatePlayer)
+        if(updatePlayer == null){
+            var seatPlayer = self.getPlayerByServerChair(player.serverIndex)
+            if(seatPlayer != null){
+                seatPlayer.seatDown()
+                seatPlayer.init({
+                    config:config,
+                    headimg:player.headimg,//是否上传头像
+                    isOwner:player.id == (self.m_creator?self.m_creator:-1),
+                    gold:player.integral,
+                    isOffLine:!player.online,
+                    isReady:player.roomready,
+                    name:player.username,
+                    city:player.city,
+                    province:player.province,
+                    userId:player.id,
+                    diamonds:player.diamonds,
+                    experience:player.experience,
+                    fans:player.fans,
+                    follows:player.follows,
+                    goldcoins:player.goldcoins,
+                    opendeal:player.opendeal,
+                    roomCards:player.cards,
+                    playerindex:player.playerindex,
+                })
+                seatPlayer.setHandCardNode(true,new handCard(),self.pokerAtlas)
+                seatPlayer.setDisCardNode(true,new disCard(),self.pokerAtlas)
             }
+        }else{
+            updatePlayer.updateSeat({
+                headimg:player.headimg,//是否上传头像
+                isOwner:player.id == (self.m_creator?self.m_creator:-1),
+                gold:player.integral,
+                isOffLine:!player.online,
+                isReady:player.roomready,
+                name:player.username,
+                city:player.city,
+                province:player.province,
+                userId:player.id,
+                diamonds:player.diamonds,
+                experience:player.experience,
+                fans:player.fans,
+                follows:player.follows,
+                goldcoins:player.goldcoins,
+                opendeal:player.opendeal,
+                roomCards:player.cards,
+                playerindex:player.playerindex,
+            })
         }
     },
 
@@ -170,17 +187,20 @@ cc.Class({
         var self = this
         for(var i = 0; i < self.m_player.length; i++){
             var player = self.m_player[i]
-            var chair = player.getChair()
-            var pokers = pokerInfo[chair].pokers
-            var dis = player.getDisCardNode()
-            if(dis){
-                dis.hide()
-            }
-            
-            var hand = player.getHandCardNode()
-            if(hand){
-                hand.hide()
-                hand.show(pokers,ani)
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player')
+                var chair = playerScript.getChair()
+                var pokers = pokerInfo[chair].pokers
+                var dis = playerScript.getDisCardNode()
+                if(dis){
+                    dis.hide()
+                }
+                
+                var hand = playerScript.getHandCardNode()
+                if(hand){
+                    hand.hide()
+                    hand.show(pokers,ani)
+                }
             }
         }
         G.globalSocket.setMsgBlock(true)
@@ -226,9 +246,13 @@ cc.Class({
     getPlayerByUserId(userId){
         var self = this
         for(var key in self.m_player){
-            var id = self.m_player[key].getUserId()
-            if(id == userId){
-                return self.m_player[key]
+            var player = self.m_player[key]
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player')
+                var id = playerScript.getUserId()
+                if(id == userId){
+                    return playerScript
+                }
             }
         }
     },
@@ -236,9 +260,13 @@ cc.Class({
     getPlayerByLocalChair(localChair){
         var self = this
         for(var key in self.m_player){
-            var chair = self.m_player[key].getChair()
-            if(chair == localChair){
-                return self.m_player[key]
+            var player = self.m_player[key]
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player')
+                var chair = playerScript.getChair()
+                if(chair == localChair){
+                    return playerScript
+                }
             }
         }
     },
@@ -253,8 +281,9 @@ cc.Class({
         var self = this
         for(var key in self.m_player){
             var player = self.m_player[key]
-            if(player){
-                player.setOperateNode(false)
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                playerScript.setOperateNode(false)
             }
         }
     },
@@ -263,8 +292,9 @@ cc.Class({
         var self = this
         for(var key in self.m_player){
             var player = self.m_player[key]
-            if(player){
-                player.setClock(false)
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                playerScript.setClock(false)
             }
         }
     },
@@ -273,8 +303,9 @@ cc.Class({
         var self = this
         for(var key in self.m_player){
             var player = self.m_player[key]
-            if(player){
-                var dis = player.getDisCardNode()
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                var dis = playerScript.getDisCardNode()
                 if(dis){
                     dis.hide()
                 }
@@ -286,8 +317,34 @@ cc.Class({
         var self = this
         for(var key in self.m_player){
             var player = self.m_player[key]
-            if(player){
-                player.setReadySprite(false)
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                playerScript.setReadySprite(false)
+            }
+        }
+    },
+
+    clearHands(){
+        var self = this
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                var hand = playerScript.getHandCardNode()
+                if(hand){
+                    hand.hide()
+                }
+            }
+        }
+    },
+
+    clearPlayersCards(){
+        var self = this
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                playerScript.setCardNumSprite(false)
             }
         }
     },

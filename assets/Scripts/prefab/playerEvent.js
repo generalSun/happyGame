@@ -114,8 +114,10 @@ cc.Class({
         var playerInfoScript = playerInfoNode.getComponent('playerInfo')
         var data = {
             name:self.m_playerScript.getNickName(),
-            userId:G.selfUserData.getUserId(),
+            userId:self.m_playerScript.getUserId(),
             gold:self.m_playerScript.getGold(),
+            diamond:self.m_playerScript.getDiamonds(),
+            roomCard:self.m_playerScript.getRoomCards(),
         }
         playerInfoScript.show(data)
     },

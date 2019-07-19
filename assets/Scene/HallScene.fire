@@ -2118,7 +2118,7 @@
       "__id__": 2
     },
     "component": "",
-    "_componentId": "f0212z2G+xGq5a/+HPFea7d",
+    "_componentId": "12fbb7SPUhKxoOu979w+01w",
     "handler": "showPlayerInfo",
     "customEventData": ""
   },
@@ -2247,6 +2247,12 @@
       "__id__": 22
     },
     "_enabled": true,
+    "gold": {
+      "__id__": 25
+    },
+    "nickName": {
+      "__id__": 44
+    },
     "_id": "f4a2Fu9wBJa44SkdzaUWbN"
   },
   {

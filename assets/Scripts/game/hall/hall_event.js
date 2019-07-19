@@ -68,6 +68,8 @@ cc.Class({
             name:G.selfUserData.getUserName(),
             userId:G.selfUserData.getUserId(),
             gold:G.selfUserData.getUserCoins(),
+            diamond:G.selfUserData.getUserDiamond(),
+            roomCard:G.selfUserData.getUserGems(),
         }
         playerInfoScript.show(data)
     },

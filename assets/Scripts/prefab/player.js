@@ -1,3 +1,4 @@
+var TAG = 'player.js'
 cc.Class({
     extends: cc.Component,
 
@@ -35,11 +36,22 @@ cc.Class({
         self.m_fans = 0
         self.m_follows = 0
         self.m_goldcoins = 0
-        self.m_roomCards = 0
+        self.m_roomCards = 0//房卡数量
         self.m_opendeal = false
         self.m_isOperater = false
+        self.m_serverIndex = 0
         self.m_playerEventScript = self.node.getComponent('playerEvent')
         self.seatUp()
+    },
+
+    setServerIndex(index){
+        var self = this
+        self.m_serverIndex = index
+    },
+
+    getServerIndex(){
+        var self = this
+        return self.m_serverIndex
     },
 
     setOpendeal(opendeal){
@@ -200,18 +212,17 @@ cc.Class({
         self.seatSprite.node.active = true
     },
 
-    seatDown (args) {
-        args = args || {}
+    seatDown () {
         var self = this
         self.seatNode.active = true
         self.seatSprite.node.active = false
-        self.m_config = args.config
-        self.node.zIndex = self.m_config.sceneZOrder.player[self.m_chair]
-        self.init(args)
     },
 
     init (args) {
         var self = this
+        self.m_config = args.config
+        self.node.zIndex = self.m_config.sceneZOrder.player[self.m_chair]
+
         self.setDiamonds(args.diamonds)
         self.setExperience(args.experience)
         self.setFans(args.fans)
@@ -219,6 +230,7 @@ cc.Class({
         self.setGoldCoins(args.goldcoins)
         self.setRoomCards(args.roomCards)
         self.setOpendeal(args.opendeal)
+        self.setServerIndex(args.playerindex)
 
 
         self.setHeadSprite(true,args.headimg)
@@ -250,6 +262,29 @@ cc.Class({
         }else if(self.m_chair == self.m_config.chair.home){
             self.clock.node.y = 150
         }
+    },
+
+    updateSeat(args){
+        args = args || {}
+        var self = this
+        self.setDiamonds(args.diamonds)
+        self.setExperience(args.experience)
+        self.setFans(args.fans)
+        self.setFollows(args.follows)
+        self.setGoldCoins(args.goldcoins)
+        self.setRoomCards(args.roomCards)
+        self.setOpendeal(args.opendeal)
+
+        self.setHeadSprite(true,args.headimg)
+        self.setOffLineSprite(args.isOffLine)
+        self.setReadySprite(args.isReady)
+        self.setOwnerSprite(args.isOwner)
+        self.setGoldDescrible(true,args.gold)
+        self.setNickName(args.name)
+        self.setCity(args.city)
+        self.setProvince(args.province)
+        self.setUserId(args.userId)
+        self.setServerIndex(args.playerindex)
     },
 
     isSeat () {
@@ -305,7 +340,8 @@ cc.Class({
         visible = visible || false
         self.resultSprite.node.active = visible
         if(!visible)return;
-        if(!self.resultSprite.result || (self.resultSprite.result && self.resultSprite.result != win)){
+        win = win || false
+        if(!self.resultSprite.result || self.resultSprite.result != win){
             var imgPath = 'image/playerRes01'
             cc.loader.loadRes(imgPath, cc.SpriteAtlas, function (err, atlas) {
                 if(err){
@@ -395,7 +431,8 @@ cc.Class({
         }
         self.clock.node.stopAllActions()
         var describle = self.clock.node.getChildByName('describle')
-        if(!describle)return;
+        if(!cc.isValid(describle))return;
+        num = num || 0
         var label = describle.getComponent(cc.Label)
         if(label){
             label.string = num
@@ -419,6 +456,9 @@ cc.Class({
                         callBack()
                     }
                 }
+            }else{
+                clearInterval(self.clock.scheduleId);
+                self.clock.scheduleId = null
             }
         }, 1000)
     },
@@ -439,7 +479,7 @@ cc.Class({
         if(!self.isSeat())return;
         visible = visible || false
         self.cardNumSprite.node.active = visible
-        if(!num)return;
+        if(num == null)return;
         var describle = self.cardNumSprite.node.getChildByName('describle')
         if(!describle)return;
         var label = describle.getComponent(cc.Label)
@@ -465,6 +505,7 @@ cc.Class({
         visible = visible || false
         self.goldDescrible.node.active = visible
         if(!visible)return;
+        num = num || 0
         var label = self.goldDescrible.node.getComponent(cc.Label)
         if(label){
             label.string = num

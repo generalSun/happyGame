@@ -46,6 +46,45 @@ cc.Class({
     recovery:function(msg){
         console.log(TAG,'recovery',msg)
         if(!msg)return;
+        var self = thie
+        self.m_handler.clearOperate()
+        self.m_handler.clearClock()
+        self.m_handler.clearDis()
+        self.m_handler.clearHands()
+        self.m_handler.clearPlayersCards()
+        self.m_handler.getCardBottomScript().hide()
+        var banker = msg.banker
+        var automic = msg.automic
+        var cardsnum = msg.cardsnum
+        var data = msg.data
+        var hiscards = msg.hiscards
+        var last = msg.last
+        var lasthands = ddz_logic.analysisServerPokers(Base64.decode(msg.lasthands || []))
+        var nextplayer = msg.nextplayer
+        var player = msg.player
+        var ratio = msg.ratio
+        var selectcolor = msg.selectcolor
+        var userboard = msg.userboard
+        if(userboard){
+            self.gameBegin(userboard)
+        }
+
+        if(ratio){
+            self.m_handler.getCardBottomScript().show()
+            self.m_handler.getCardBottomScript().showYuCards()
+            self.m_handler.getCardBottomScript().showRatio()
+            self.m_handler.getCardBottomScript().setRatio(ratio)
+            self.m_handler.getCardBottomScript().addYuCards(lasthands,true)
+        }
+
+        var bankerPlayer = self.m_handler.getPlayerByUserId(banker.userid)
+        if(bankerPlayer){
+            bankerPlayer.setSignSprite(true)
+        }
+        
+        if(last){
+            self.takeCards(last)
+        }
         
     },
 
@@ -72,6 +111,17 @@ cc.Class({
             self.m_handler.clearOperate()
             self.m_handler.clearClock()
             if(!over){
+                var currentPlayer = self.m_handler.getPlayerByUserId(userid)
+                if(currentPlayer){
+                    var dis = currentPlayer.getDisCardNode()
+                    var hand = currentPlayer.getHandCardNode()
+                    if(dis && hand){
+                        dis.hide()
+                        hand.outCards(cards,function(outCardsInfo){
+                            dis.showCards(outCardsInfo,true)
+                        })
+                    }
+                }
                 var next_player = self.m_handler.getPlayerByUserId(nextplayer)
                 if(next_player){
                     next_player.setClock(true,30)
@@ -89,18 +139,6 @@ cc.Class({
                         dis.hide()
                     }
                 }
-                var currentPlayer = self.m_handler.getPlayerByUserId(userid)
-                if(currentPlayer){
-                    currentPlayer.setOperateNode(false)
-                    var dis = currentPlayer.getDisCardNode()
-                    var hand = currentPlayer.getHandCardNode()
-                    if(dis && hand){
-                        dis.hide()
-                        hand.outCards(cards,function(outCardsInfo){
-                            dis.showCards(outCardsInfo,true)
-                        })
-                    }
-                }
             }
         }else{
             G.alterMgr.showMsgBox({content:'出牌不符规则！'})
@@ -113,7 +151,10 @@ cc.Class({
         self.m_handler.clearOperate()
         self.m_handler.clearClock()
         self.m_handler.clearDis()
+        self.m_handler.clearHands()
+        self.m_handler.clearPlayersCards()
         self.m_handler.getCardBottomScript().hide()
+        self.m_handler.clearReady()
     },
 
     showYuCards:function(msg){
@@ -126,8 +167,8 @@ cc.Class({
         var lasthands = ddz_logic.analysisServerPokers(Base64.decode(msg.lasthands))
         console.log(TAG,'showYuCards lasthands',lasthands)
         var self = this
-        self.m_handler.getCardBottomScript().setRatio(ratio)
         self.m_handler.getCardBottomScript().showYuCards()
+        self.m_handler.getCardBottomScript().setRatio(ratio)
         self.m_handler.getCardBottomScript().addYuCards(lasthands,true)
         self.m_handler.clearOperate()
         self.m_handler.clearClock()
@@ -228,6 +269,9 @@ cc.Class({
         G.globalLoading.setLoadingVisible(false)
         if(!msg)return;
         var self = this;
+        self.m_handler.getCardBottomScript().hide()
+        self.m_handler.clearSeats()
+
         var index = msg.index
         var maxplayers = msg.maxplayers
         var player = msg.player
@@ -242,11 +286,14 @@ cc.Class({
         var creater = gameRoom.creater
         var numofgames = gameRoom.numofgames
         var currentnum = gameRoom.currentnum
-        self.m_handler.loadPrefab(player,index,creater);
+        self.m_handler.setRoomCreator(creater)
+        self.m_handler.createSeats()
+        self.m_handler.playerSeatDown(player)
         self.m_handler.getDeskScript().setRoomNum(gameRoom.roomid)
         self.m_handler.getDeskScript().setGameRoundNum(currentnum,numofgames)
         self.m_handler.getRuleScript().analysisRule(gameRoom.extparams)
         self.m_handler.getRuleScript().setAdditional(maxplayers,2)
+        self.m_handler.getCardBottomScript().hide()
     },
     
     gameBegin:function(msg){
@@ -254,16 +301,22 @@ cc.Class({
         if(!msg)return;
         G.gameInfo.isGamePlay = true
         var self = this
-        var roundInfo = self.m_handler.getDeskScript().getGameRoundNum()
-        self.m_handler.getDeskScript().setGameRoundNum(roundInfo.round+1)
         var yuCardsNum = msg.deskcards
+        var numofgames = msg.numofgames
         var player = msg.player
         var players = msg.players
         var pokerInfo = {}
+        self.m_handler.clearReady()
+        self.m_handler.clearOperate()
+        self.m_handler.clearClock()
+        self.m_handler.clearDis()
+        self.m_handler.clearHands()
+        self.m_handler.clearPlayersCards()
+
+        self.m_handler.getDeskScript().setGameRoundNum(numofgames)
         self.m_handler.getCardBottomScript().show()
         self.m_handler.getCardBottomScript().showYuCards()
         self.m_handler.getCardBottomScript().addYuCards(yuCardsNum,true)
-        self.m_handler.clearReady()
         var seat = self.m_handler.getPlayerByUserId(player.playuser)
         if(seat){
             var info = {}

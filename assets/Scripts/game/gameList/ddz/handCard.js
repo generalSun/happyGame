@@ -76,6 +76,9 @@ cc.Class({
 
     show(info,ani){
         var self = this
+        if(!info || info.length <= 0){
+            return
+        }
         info = info || []
         if(!self.m_cardNode.active){
             self.m_cardNode.active = true
@@ -110,6 +113,10 @@ cc.Class({
 
     addCards(info){
         console.log(TAG,'addCards',info)
+        if(!info || info.length <= 0){
+            return
+        }
+        info = info || []
         var self = this
         for(var i = 0; i < info.length; i++){
             var value = info[i]
@@ -137,7 +144,7 @@ cc.Class({
 
     getCardsInfo(info){
         console.log(TAG,'getCardsInfo',info)
-        if(!info){
+        if(!info || info.length <= 0){
             return
         }
         info = info || []
@@ -150,7 +157,7 @@ cc.Class({
                 var poker = card.getComponent('poker')
                 for(var j = 0; j < cards.length; j++){
                     var value = cards[j]
-                    if(value == poker.getValue() || poker.getValue() == -1){
+                    if(value == poker.getValue() || poker.getValue() == 0){
                         poker.setCard(value)
                         var data = {
                             index:i,
@@ -171,7 +178,7 @@ cc.Class({
 
     outCards(info,callBack){
         console.log(TAG,'outCards',info)
-        if(!info){
+        if(!info || info.length <= 0){
             return
         }
         info = info || []
@@ -215,8 +222,11 @@ cc.Class({
     },
 
     addLastCards(info,ani){
-        var self = this
+        if(!info || info.length <= 0){
+            return
+        }
         info = info || []
+        var self = this
         if(!self.m_cardNode.active){
             throw '添加牌时，手牌节点处于隐藏状态'
         }

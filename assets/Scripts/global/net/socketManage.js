@@ -39,9 +39,9 @@ cc.Class({
             self.m_socket = m_socket
             self.m_heartbeatTimes = 0
             G.globalLoading.setLoadingVisible(false)
-            self.m_heartbeatTimeId = setInterval(()=>{
-                self.ping();
-            }, self.heartbeatSpace*1000);
+            // self.m_heartbeatTimeId = setInterval(()=>{
+            //     self.ping();
+            // }, self.heartbeatSpace*1000);
             self.m_dispatchMsgTimeId = setInterval(()=>{
                 if(self.m_msgList.length > 0 && self.m_msgBlock == false){
                     var msg = self.m_msgList[0]
@@ -58,7 +58,7 @@ cc.Class({
                         playway:info.playway,
                         extparams:info
                     }
-                    console.log(TAG,'reconnect',info)
+                    console.log(TAG,'发送 reconnect',info)
                     G.globalSocket.send(Constants.SOCKET_EVENT_c2s.RECOVERY,data)
                 }
             }

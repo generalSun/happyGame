@@ -59,16 +59,16 @@ cc.Class({
     },
 
     showCards(info,ani){
+        console.log(TAG,'showCards',info)
         var self = this
-        info = info || []
-        if(info.length <= 0){
+        if(!info || info.length <= 0){
             self.showEffect('pass'+Math.floor(Math.random()*4+1))
             return
         }
+        info = info || []
         if(!self.m_cardNode.active){
             self.m_cardNode.active = true
         }
-        console.log(TAG,'showCards',info)
         var handNode = self.m_object.getHandCardNode().getNode()
         for(var i = 0; i < info.length; i++){
             var value = info[i].value

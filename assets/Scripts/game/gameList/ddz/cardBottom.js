@@ -55,7 +55,7 @@ cc.Class({
 
     addYuCards(info,ani){
         var self = this
-        if(!info){
+        if(!info || info.length <= 0){
             self.cardBottomSprite.node.active = false
             return
         }
