@@ -2,6 +2,7 @@ var config = require('./config')
 var handCard = require('./handCard')
 var disCard = require('./disCard')
 var Constants = require('./../../../config/Constants')
+var ddz_logic = require('./ddz_logic')
 var TAG = 'ddz.js'
 cc.Class({
     extends: cc.Component,
@@ -12,6 +13,10 @@ cc.Class({
         ruleInfo:cc.Node,
         pokerAtlas:[cc.SpriteAtlas],
         cardBottomNode:cc.Node,
+        settlementPrefab:cc.Prefab,
+        bigPokerPrefab:cc.Prefab,
+        midPokerPrefab:cc.Prefab,
+        smallPokerPrefab:cc.Prefab,
     },
 
     onDestroy(){
@@ -31,8 +36,10 @@ cc.Class({
         self.m_playerPool = new cc.NodePool()
         self.m_meChairID = config.INVALID_CHAIR;
         self.m_creator = null
+        self.m_settlementScript = null
         // self.m_gameState = 
         self.init()
+        self.loadPrefab()
     },
 
     getDeskScript(){
@@ -50,9 +57,14 @@ cc.Class({
         return self.m_cardBottomScript
     },
 
+    getSettlementScript(){
+        var self = this
+        return self.m_settlementScript
+    },
+
     init(){
         var self = this
-        self.m_cardBottomScript.init(self.pokerAtlas)
+        self.m_cardBottomScript.init(self.pokerAtlas,self.smallPokerPrefab)
         var info = G.selfUserData.getUserRoomInfo()
         var data = {
             playway:info.playway,
@@ -65,6 +77,15 @@ cc.Class({
             G.globalLoading.setLoadingVisible(true,'正在恢复数据中...')
         }
         G.eventManager.listenEvent(Constants.LOCALEVENT.POKER_FILP_END,self.pokerFilpEnd,self)
+    },
+
+    loadPrefab(){
+        var self = this
+        var settlement = cc.instantiate(self.settlementPrefab);
+        settlement.zIndex = config.sceneZOrder.settlement
+        self.m_bg.addChild(settlement);
+        self.m_settlementScript = settlement.getComponent('settlement')
+        self.m_settlementScript.init(self.pokerAtlas,self.smallPokerPrefab,ddz_logic)
     },
 
     setMyServerID(id){
@@ -141,9 +162,14 @@ cc.Class({
                     opendeal:player.opendeal,
                     roomCards:player.cards,
                     playerindex:player.playerindex,
+                    sex:player.sex
                 })
-                seatPlayer.setHandCardNode(true,new handCard(),self.pokerAtlas)
-                seatPlayer.setDisCardNode(true,new disCard(),self.pokerAtlas)
+                if(seatPlayer.getChair() == config.chair.home){
+                    seatPlayer.setHandCardNode(true,new handCard(),self.pokerAtlas,self.bigPokerPrefab)
+                }else{
+                    seatPlayer.setHandCardNode(true,new handCard(),self.pokerAtlas,self.midPokerPrefab)
+                }
+                seatPlayer.setDisCardNode(true,new disCard(),self.pokerAtlas,self.midPokerPrefab)
             }
         }else{
             updatePlayer.updateSeat({
@@ -164,6 +190,7 @@ cc.Class({
                 opendeal:player.opendeal,
                 roomCards:player.cards,
                 playerindex:player.playerindex,
+                sex:player.sex
             })
         }
     },
@@ -320,6 +347,17 @@ cc.Class({
             if(cc.isValid(player)){
                 var playerScript = player.getComponent('player') 
                 playerScript.setReadySprite(false)
+            }
+        }
+    },
+
+    clearPlayerResult(){
+        var self = this
+        for(var key in self.m_player){
+            var player = self.m_player[key]
+            if(cc.isValid(player)){
+                var playerScript = player.getComponent('player') 
+                playerScript.setResultSprite(false)
             }
         }
     },

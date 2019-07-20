@@ -150,6 +150,8 @@ cc.Class({
         info = info || []
         var self = this
         var cards = ddz_logic.sortCardsByType(info)
+        console.log(TAG,'getCardsInfo  self.m_cards',self.m_cards)
+        console.log(TAG,'getCardsInfo  cards',cards)
         var cards_info = new Array()
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
@@ -179,6 +181,9 @@ cc.Class({
     outCards(info,callBack){
         console.log(TAG,'outCards',info)
         if(!info || info.length <= 0){
+            if(callBack){
+                callBack()
+            }
             return
         }
         info = info || []
@@ -195,7 +200,14 @@ cc.Class({
             var pos = data.pos
             outCardsInfo.push({value:value,pos:pos})
             self.m_cards.splice(card_index,1)
+            self.getTouchNode()?self.getTouchNode().removeSelectedCard(card_index):null
             self.m_cardsPool.put(card_node)
+            
+            if(self.m_chair != config.chair.home){
+                var numInfo = self.m_object.getCardNum()
+                self.m_object.setCardNumSprite(true,numInfo.describle - 1)
+            }
+            
             if(index <= 0){
                 self.refreshCards(true)
                 if(callBack){

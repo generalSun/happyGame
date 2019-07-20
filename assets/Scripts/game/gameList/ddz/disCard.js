@@ -1,6 +1,7 @@
 var config = require('./config')
 var Constants = require('./../../../config/Constants')
 var ddz_logic = require('./ddz_logic')
+var ddz_sound = require('./ddz_sound')
 var TAG = 'disCard.js'
 cc.Class({
     ctor(){
@@ -38,13 +39,14 @@ cc.Class({
         self.m_cardNode.y = nodeOffest.y
     },
 
-    showEffect(name){
-        console.log(TAG,'showEffect',name)
+    showCatchEffect(name){
+        console.log(TAG,'showCatchEffect',name)
         var self = this
         if(!self.m_cardNode.active){
             self.m_cardNode.active = true
         }
         var path = 'image/ddzEffects/'+ name
+        ddz_sound.getInstance().playSound(self.m_object.getSex(),name)
         cc.loader.loadRes(path, cc.SpriteFrame, (err, spriteFrame) => {
             if (err) {
                 throw(err)
@@ -58,11 +60,51 @@ cc.Class({
         })
     },
 
+    showOutCardEffect(cardTypeInfo,ani){
+        var self = this
+        if(!self.m_cardNode.active){
+            self.m_cardNode.active = true
+        }
+        console.log(TAG,'showOutCardEffect',cardTypeInfo)
+        if(!cardTypeInfo || cardTypeInfo.cardtype == 0){
+            var rand = Math.floor(Math.random()*4+1)
+            ddz_sound.getInstance().playSound(self.m_object.getSex(),'pass'+rand)
+            var path = 'image/ddzEffects/pass' + rand
+            cc.loader.loadRes(path, cc.SpriteFrame, (err, spriteFrame) => {
+                if (err) {
+                    throw(err)
+                } else {
+                    var effect = new cc.Node()
+                    var effectSprite = effect.addComponent(cc.Sprite);
+                    effectSprite.spriteFrame = spriteFrame
+                    self.m_cardNode.addChild(effect);
+                    self.m_effects.push(effect)
+                }
+            })
+            return
+        }
+        var cardtype = cardTypeInfo.cardtype
+        if(cardtype > 0){
+            var maxcard = ddz_logic.analysisServerPoker(cardTypeInfo.maxcard)
+            if(cardTypeInfo.maxcard == 13){
+                maxcard = (cardTypeInfo.maxcardvalue == 52)?14:15
+            }
+            var path = null
+            for(var key in config.cardType){
+                var item = config.cardType[key]
+                if(item.serverIndex == cardtype){
+                    path = item.sound.format(maxcard)
+                    break
+                }
+            }
+            ddz_sound.getInstance().playSound(self.m_object.getSex(),path)
+        }
+    },
+
     showCards(info,ani){
         console.log(TAG,'showCards',info)
         var self = this
         if(!info || info.length <= 0){
-            self.showEffect('pass'+Math.floor(Math.random()*4+1))
             return
         }
         info = info || []
@@ -146,10 +188,6 @@ cc.Class({
         var delay = 0.05
         var duation = 0.1
         var scale = config.disCardScale[self.m_chair]
-        var call = function(target,data){
-            var numInfo = self.m_object.getCardNum()
-            self.m_object.setCardNumSprite(true,numInfo.describle - 1)
-        }
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             if(cc.isValid(card)){
@@ -160,12 +198,10 @@ cc.Class({
                         cc.sequence(
                             cc.delayTime(i*delay),
                             cc.moveTo(duation,startPos.x + i*space,startPos.y),
-                            cc.callFunc(call,card.node)
                         )
                     )
                 }else{
                     card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
-                    call(card.node)
                 }
             }
         }

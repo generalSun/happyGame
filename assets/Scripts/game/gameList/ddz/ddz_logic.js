@@ -1,5 +1,7 @@
 var TAG = 'gamelogic.js'
 var gamelogic = {}
+gamelogic.gameType = 'poker'
+gamelogic.gameName = 'ddz'
 //数值掩码
 gamelogic.VALUE_MASK = {
     COLOR :	255	,							                 //花色掩码
@@ -99,7 +101,10 @@ gamelogic.sortCardsByType = function(cards,sortType,revorder){
     cards = cards || []
     sortType = sortType || gamelogic.SORT_TYPE.LOGIC
     revorder = revorder || false
-    var sort_cards = cards.slice(0)
+    var sort_cards = new Array()
+    for(var i = 0; i < cards.length; i++){
+        sort_cards.push(cards[i])
+    }
     sort_cards.sort(function(a,b){
         var value_a = gamelogic.getcardlogicvalue(a)
         var value_b = gamelogic.getcardlogicvalue(b)

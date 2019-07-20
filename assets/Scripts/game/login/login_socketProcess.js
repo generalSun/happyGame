@@ -37,6 +37,7 @@ cc.Class({
                 G.selfUserData.setUserFans(event.data.fans)
                 G.selfUserData.setUserCity(event.data.city)
                 G.selfUserData.setUserProvince(event.data.province)
+                G.selfUserData.setUserSex(event.data.sex)
                 G.gameListInfo = event.games
                 
                 var userInfo = G.ioUtil.get(Constants.LOCALLSTORAGEKEY.USERINFO) || {}

@@ -26,9 +26,93 @@ cc.Class({
             [Constants.SOCKET_EVENT_s2c.CATCH_FAIL]:self.flowBureau,
             [Constants.SOCKET_EVENT_s2c.TAKE_CARDS]:self.takeCards,
             [Constants.SOCKET_EVENT_s2c.RECOVERY]:self.recovery,
+            [Constants.SOCKET_EVENT_s2c.ALLCARDS]:self.smallSettlement,//小结算
         }
         for(var key in self.m_eventsInfo){
             G.eventManager.listenEvent(key,self.m_eventsInfo[key],self)
+        }
+        self.m_clearDisTimeId = null
+        self.m_settlementTimeId = null
+    },
+
+    closeClearDisTime(){
+        var self = this
+        if(self.m_clearDisTimeId){
+            clearTimeout(self.m_clearDisTimeId)
+            self.m_clearDisTimeId = null
+            self.m_handler.clearDis()
+        }
+    },
+
+    closeSettlementTime(){
+        var self = this
+        if(self.m_settlementTimeId){
+            clearTimeout(self.m_settlementTimeId)
+            self.m_settlementTimeId = null
+            self.m_handler.getSettlementScript().hide()
+        }
+    },
+
+    smallSettlement:function(msg){
+        console.log(TAG,'smallSettlement',msg)
+        if(!msg)return;
+        var ratio = msg.ratio
+        var score = msg.score
+        var players = msg.players
+        var gameRoomOver = msg.gameRoomOver
+        var game = msg.game
+        var finished = msg.finished
+        var self = this
+        self.closeClearDisTime()
+        self.m_handler.clearDis()
+        self.m_handler.getCardBottomScript().setRatio(ratio)
+        if(gameRoomOver){
+
+        }else{
+            /**
+            balance: 5030
+            cards: ""
+            dizhu: false
+            gameover: false
+            ratio: 15
+            score: 30
+            userid: "50ee8ad8f8a24f42b25f5ca253969598"
+            username: "Guest_1h1EM0"
+            win
+             */
+            for(var i = 0; i < players.length; i++){
+                var playerInfo = players[i]
+                var player = self.m_handler.getPlayerByUserId(playerInfo.userid)
+                if(cc.isValid(player)){
+                    var cards = ddz_logic.analysisServerPokers(Base64.decode(playerInfo.cards))
+                    var win = playerInfo.win
+                    var score = playerInfo.score
+                    var balance = playerInfo.balance
+                    playerInfo.chair = player.getChair()
+                    playerInfo.single = player.isLandlord()
+                    playerInfo.jiabei = player.isJiabei()
+                    var hand = player.getHandCardNode()
+                    if(hand){
+                        hand.hide()
+                        hand.addCards(cards)
+                        hand.sortCards()
+                        hand.refreshCards(false)
+                    }
+                    player.setResultSprite(true,win)
+                    player.setGoldDescrible(true,score)
+                    player.setGoldCoins(true,balance)
+                    if(player.isSelf()){
+                        G.selfUserData.setUserCoins(balance)
+                    }
+                }
+            }
+            self.m_event.setStartButtonVisible(true)
+            self.m_event.setOpendealButtonVisible(true)
+            self.m_settlementTimeId = setTimeout(()=>{
+                self.m_settlementTimeId = null;
+                self.m_handler.getSettlementScript().show()
+                self.m_handler.getSettlementScript().showSmall(players)
+             }, 1000*0.5)
         }
     },
 
@@ -52,6 +136,7 @@ cc.Class({
         self.m_handler.clearDis()
         self.m_handler.clearHands()
         self.m_handler.clearPlayersCards()
+        self.m_handler.clearPlayerResult()
         self.m_handler.getCardBottomScript().hide()
         var banker = msg.banker
         var automic = msg.automic
@@ -92,7 +177,7 @@ cc.Class({
         console.log(TAG,'takeCards',msg)
         if(!msg)return;
         var allow = msg.allow//符合出牌规则
-        var automic = msg.automic//是否允许不出牌过
+        var newTurn = msg.newTurn//是否新的一轮
         var bomb = msg.bomb//炸
         var card = msg.card//麻将
         var cardType = msg.cardType//出牌的牌型
@@ -107,10 +192,17 @@ cc.Class({
         var type = msg.type//出牌类型 ： 1:单张 | 2:对子 | 3:三张 | 4:四张（炸） | 5:单张连 | 6:连对 | 7:飞机 : 8:4带2 | 9:王炸
         var userid = msg.userid
         var self = this
+        self.closeClearDisTime()
         if(allow){
             self.m_handler.clearOperate()
             self.m_handler.clearClock()
             if(!over){
+                if(newTurn){
+                     self.m_clearDisTimeId = setTimeout(()=>{
+                        self.m_clearDisTimeId = null;
+                        self.m_handler.clearDis()
+                     }, 1000*0.5);
+                }
                 var currentPlayer = self.m_handler.getPlayerByUserId(userid)
                 if(currentPlayer){
                     var dis = currentPlayer.getDisCardNode()
@@ -119,6 +211,7 @@ cc.Class({
                         dis.hide()
                         hand.outCards(cards,function(outCardsInfo){
                             dis.showCards(outCardsInfo,true)
+                            dis.showOutCardEffect(cardType,true)
                         })
                     }
                 }
@@ -139,6 +232,8 @@ cc.Class({
                         dis.hide()
                     }
                 }
+            }else{
+
             }
         }else{
             G.alterMgr.showMsgBox({content:'出牌不符规则！'})
@@ -155,6 +250,7 @@ cc.Class({
         self.m_handler.clearPlayersCards()
         self.m_handler.getCardBottomScript().hide()
         self.m_handler.clearReady()
+        self.m_handler.clearPlayerResult()
     },
 
     showYuCards:function(msg){
@@ -222,7 +318,7 @@ cc.Class({
                     }
                 }
                 dis.hideEffects()
-                dis.showEffect(name)
+                dis.showCatchEffect(name)
             }
         }
     },
@@ -312,6 +408,7 @@ cc.Class({
         self.m_handler.clearDis()
         self.m_handler.clearHands()
         self.m_handler.clearPlayersCards()
+        self.m_handler.clearPlayerResult()
 
         self.m_handler.getDeskScript().setGameRoundNum(numofgames)
         self.m_handler.getCardBottomScript().show()

@@ -25,7 +25,7 @@
       }
     ],
     "_active": true,
-    "_level": 2,
+    "_level": 1,
     "_components": [
       {
         "__id__": 159
@@ -5973,12 +5973,6 @@
     },
     "operateNode": {
       "__id__": 60
-    },
-    "bigPokerPrefab": {
-      "__uuid__": "8723473b-1fb7-4c70-bbaf-e3326fd4bec2"
-    },
-    "midPokerPrefab": {
-      "__uuid__": "14936e4c-0a3b-412d-bb7a-8a20ccbc9510"
     },
     "_id": ""
   },

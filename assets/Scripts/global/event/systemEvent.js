@@ -53,12 +53,16 @@ cc.Class({
 
     gameHide () {
         console.log('游戏进入后台')
+        G.globalSocket.setMsgBlock(true)
         G.audioManager.pauseAll()
+        cc.game.pause()
     },
 
     gameShow () {
         console.log('游戏进入前台')
+        G.globalSocket.setMsgBlock(false)
         G.audioManager.resumeAll()
+        cc.game.resume()
     },
 
     listenEvent(name,callBack,target){

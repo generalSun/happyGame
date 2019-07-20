@@ -78,6 +78,7 @@ const SOCKET_EVENT_s2c = {//socket网络事件名
     CATCH_FAIL:             'catchfail',//流局了
     TAKE_CARDS:             'takecards',
     RECOVERY:               'recovery',//重连
+    ALLCARDS:               'allcards',
 }
 
 module.exports = {

@@ -19,8 +19,6 @@ cc.Class({
         handCardNode:cc.Node,
         disCardNode:cc.Node,
         operateNode:cc.Node,
-        bigPokerPrefab:cc.Prefab,
-        midPokerPrefab:cc.Prefab,
     },
 
     onLoad () {
@@ -40,8 +38,19 @@ cc.Class({
         self.m_opendeal = false
         self.m_isOperater = false
         self.m_serverIndex = 0
+        self.m_sex = 0
         self.m_playerEventScript = self.node.getComponent('playerEvent')
         self.seatUp()
+    },
+
+    setSex(sex){
+        var self = this
+        self.m_sex = sex
+    },
+
+    getSex(){
+        var self = this
+        return self.m_sex
     },
 
     setServerIndex(index){
@@ -250,6 +259,7 @@ cc.Class({
         self.setProvince(args.province)
         self.setUserId(args.userId)
         self.setIsOperater(false)
+        self.setSex(args.sex)
         self.m_playerEventScript.setChair(self.m_chair)
         self.m_playerEventScript.setConfig(self.m_config)
         if(self.m_chair == self.m_config.chair.nextDoor){
@@ -285,6 +295,7 @@ cc.Class({
         self.setProvince(args.province)
         self.setUserId(args.userId)
         self.setServerIndex(args.playerindex)
+        self.setSex(args.sex)
     },
 
     isSeat () {
@@ -329,7 +340,7 @@ cc.Class({
     },
 
     isJiabei () {
-        var self = thiss
+        var self = this
         if(!self.isSeat())return false;
         return self.jiabeiSprite.node.active
     },
@@ -341,15 +352,15 @@ cc.Class({
         self.resultSprite.node.active = visible
         if(!visible)return;
         win = win || false
-        if(!self.resultSprite.result || self.resultSprite.result != win){
-            var imgPath = 'image/playerRes01'
+        if(self.resultSprite.result == null || self.resultSprite.result != win){
+            var imgPath = 'image/playerRes'
             cc.loader.loadRes(imgPath, cc.SpriteAtlas, function (err, atlas) {
                 if(err){
                     cc.log(err.message || err);
                     return;
                 }
                 if(!cc.isValid(self.resultSprite))return;
-                var frame = atlas.getSpriteFrame(win);
+                var frame = atlas.getSpriteFrame((win == true)?'win':'lose');
                 var sprite = self.resultSprite.node.getComponent(cc.Sprite)
                 if(sprite){
                     sprite.spriteFrame = frame;
@@ -527,18 +538,14 @@ cc.Class({
         return self.m_playerEventScript
     },
 
-    setHandCardNode (visible,instance,atlas) {
+    setHandCardNode (visible,instance,atlas,pokerPrefab) {
         var self = this
         if(!self.isSeat())return;
         visible = visible || false
         self.handCardNode.active = visible
         if(!instance)return;
         if(instance.initWidget){
-            if(self.m_chair == self.m_config.chair.home){
-                instance.initWidget(self.handCardNode,self.m_chair,atlas,self.bigPokerPrefab,self.m_playerEventScript,self)
-            }else{
-                instance.initWidget(self.handCardNode,self.m_chair,atlas,self.midPokerPrefab,self.m_playerEventScript,self)
-            }
+            instance.initWidget(self.handCardNode,self.m_chair,atlas,pokerPrefab,self.m_playerEventScript,self)
         }
         self.handCardNode.bindInstance = instance
     },
@@ -549,14 +556,14 @@ cc.Class({
         return self.handCardNode.bindInstance
     },
 
-    setDisCardNode (visible,instance,atlas) {
+    setDisCardNode (visible,instance,atlas,pokerPrefab) {
         var self = this
         if(!self.isSeat())return;
         visible = visible || false
         self.disCardNode.active = visible
         if(!instance)return;
         if(instance.initWidget){
-            instance.initWidget(self.disCardNode,self.m_chair,atlas,self.midPokerPrefab,self)
+            instance.initWidget(self.disCardNode,self.m_chair,atlas,pokerPrefab,self)
         }
         self.disCardNode.bindInstance = instance
     },

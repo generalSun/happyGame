@@ -28,7 +28,8 @@ var config = {
         player:[1,2,3,4],
         buttonNode:5,
         moreNode:6,
-        wxInviteNode:7
+        wxInviteNode:7,
+        settlement:8
     },
     handNodeSize:[
         cc.size(cc.winSize.width,cc.winSize.height),
@@ -113,6 +114,23 @@ var config = {
     yuCardsSpace:22,
     yuCardsOffset:cc.v2(0,0),
     yuCardsMinOffset:cc.v2(0,0),
+
+    cardType:{
+        ONE:{serverIndex:1,sound:"card_Size{0}"},		//单张      K
+		TWO:{serverIndex:2,sound:"dui{0}"},		//一对	 kK
+		THREE:{serverIndex:3,sound:"tuple{0}"},	//三张	 kkk
+		FOUR:{serverIndex:4,sound:"3D1"},	//三带一	 AAA+K
+		FORMTWO:{serverIndex:41,sound:"3D2"},	//三带对	 AAA+K
+		FIVE:{serverIndex:5,sound:"ShunZi"},	//单顺	连子		10JQKA
+		SIX:{serverIndex:6,sound:"LianDui"},		//双顺	连对		JJQQKK
+		SEVEN:{serverIndex:7,sound:"FeiJi"},	//三顺	飞机		JJJQQQ
+		EIGHT:{serverIndex:8,sound:"FeiJi"},	//飞机	带翅膀	JJJ+QQQ+K+A
+		EIGHTONE:{serverIndex:81,sound:"FeiJi"},	//飞机	带翅膀	JJJ+QQQ+KK+AA
+		NINE:{serverIndex:9,sound:"4D2"},	//四带二			JJJJ+Q+K
+		NINEONE:{serverIndex:91,sound:"4D22"},	//四带二对			JJJJ+QQ+KK
+		TEN:{serverIndex:10,sound:"zhadan"},	//炸弹			JJJJ
+		ELEVEN:{serverIndex:11,sound:"wangzha"},	//王炸			0+0
+    }
 }
 
 module.exports = config

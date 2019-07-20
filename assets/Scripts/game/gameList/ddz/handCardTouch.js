@@ -226,6 +226,18 @@ var touch = class{
         return null
     }
 
+    removeSelectedCard(index){
+        var self = this
+        for(var i = 0; i < self.m_touchCardsInfo.length; i++){
+            var info = self.m_touchCardsInfo[i]
+            var currentIndex = info.index
+            if(currentIndex == index){
+                self.m_touchCardsInfo.splice(i,1)
+                break
+            }
+        }
+    }
+
     clear(){
         var self = this
         self.m_touchBeginIndex = null

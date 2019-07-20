@@ -5,16 +5,16 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        smallPokerPrefab:cc.Prefab,
         cardBottomSprite:cc.Sprite,
         ratioSprite:cc.Sprite
     },
 
-    init(atlas){
+    init(atlas,pokerPrefab){
         var self = this
         self.m_cardsPool = new cc.NodePool()
         self.m_cards = new Array()
         self.m_pokerAtlas = atlas
+        self.m_pokerPrefab = pokerPrefab
         self.m_ratio = cc.find('ratio/describle',self.ratioSprite.node)
         self.hide()
     },
@@ -80,7 +80,7 @@ cc.Class({
         for(var i = 0; i < info.length; i++){
             var value = info[i]
             if(self.m_cardsPool.size() <= 0){
-                var card = cc.instantiate(self.smallPokerPrefab);
+                var card = cc.instantiate(self.m_pokerPrefab);
                 self.m_cardsPool.put(card); 
             }
             var node = self.m_cardsPool.get();
