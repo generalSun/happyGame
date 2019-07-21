@@ -167,12 +167,22 @@ cc.Class({
                 card = card.getComponent('poker')
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
                 if(ani){
-                    card.node.runAction(
-                        cc.sequence(
-                            cc.delayTime(i*delay),
-                            cc.moveTo(duation,startPos.x + i*space,startPos.y)
+                    if(i + 1 == self.m_cards.length){
+                        card.node.runAction(
+                            cc.sequence(
+                                cc.delayTime(i*delay),
+                                cc.moveTo(duation,startPos.x + i*space,startPos.y),
+                                cc.callFunc(self.refreshCards,self)
+                            )
                         )
-                    )
+                    }else{
+                        card.node.runAction(
+                            cc.sequence(
+                                cc.delayTime(i*delay),
+                                cc.moveTo(duation,startPos.x + i*space,startPos.y)
+                            )
+                        )
+                    }
                 }else{
                     card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
                 }
@@ -194,15 +204,43 @@ cc.Class({
                 card = card.getComponent('poker')
                 card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
                 if(ani){
-                    card.node.runAction(
-                        cc.sequence(
-                            cc.delayTime(i*delay),
-                            cc.moveTo(duation,startPos.x + i*space,startPos.y),
+                    if(i + 1 == self.m_cards.length){
+                        card.node.runAction(
+                            cc.sequence(
+                                cc.delayTime(i*delay),
+                                cc.moveTo(duation,startPos.x + i*space,startPos.y),
+                                cc.callFunc(self.refreshCards,self)
+                            )
                         )
-                    )
+                    }else{
+                        card.node.runAction(
+                            cc.sequence(
+                                cc.delayTime(i*delay),
+                                cc.moveTo(duation,startPos.x + i*space,startPos.y)
+                            )
+                        )
+                    }
                 }else{
                     card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
                 }
+            }
+        }
+    },
+
+    refreshCards(){
+        var self = this
+        var space = self.getSpace()
+        var startPos = self.getStartPos(space)
+        var scale = config.disCardScale[self.m_chair]
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            if(cc.isValid(card)){
+                card.stopAllActions()
+                card = card.getComponent('poker')
+                card.setPokerScale(scale)
+                card.setCard()
+                card.setPokerNormalPosition({x:startPos.x + i*space,y:startPos.y})
+                card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
             }
         }
     },

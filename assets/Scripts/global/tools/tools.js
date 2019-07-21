@@ -240,8 +240,13 @@ Tools.isInBothNumber = function(num, num1,num2) {
     return false
 }
 
-Tools.interceptName = function(name){
-    var temp = name.substr(0,12)
-    temp = temp + '...'
+Tools.interceptName = function(name,end,start){
+    start = start || 0
+    end = end || name.length
+    var temp = name
+    if(end < name.length){
+        var temp = name.substr(start,end)
+        temp = temp + '...'
+    }
     return temp
 }

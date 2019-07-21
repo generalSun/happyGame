@@ -20,8 +20,7 @@ cc.Class({
         if(!info)return
         var self = this
         self.node.active = true
-        // self.m_nickName.string = G.tools.interceptName(info.name || "")
-        self.m_nickName.string = info.name || ""
+        self.m_nickName.string = G.tools.interceptName(info.name || "")
         self.m_gold.string = info.gold || ""
         self.m_diamond.string = info.diamond || ''
         self.m_userId.string = info.userId || ''

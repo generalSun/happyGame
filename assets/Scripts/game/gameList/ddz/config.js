@@ -39,9 +39,9 @@ var config = {
     ],
     handNodeOffset:[//与playerNode的偏差
         cc.v2(0,0),
-        cc.v2(120,-30),
-        cc.v2(120,-30),
-        cc.v2(120,-30),
+        cc.v2(120,-40),
+        cc.v2(120,-40),
+        cc.v2(120,-40),
     ],
     handCardOffset:[//改变节点的中心点
         cc.v2(0,0),

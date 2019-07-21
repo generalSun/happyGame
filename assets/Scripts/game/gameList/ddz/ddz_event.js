@@ -81,7 +81,7 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        self.m_handler.dealPoker()
+        
     },
 
     onVoiceClickCallBack(event, customEventData){

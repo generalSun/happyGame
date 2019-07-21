@@ -132,6 +132,10 @@ cc.Class({
         if(self.isSelf()){
             var cards = self.m_playerScript.getHandCardNode().getTouchNode().getSelectedServerCards()
             console.log(TAG,'outCardButtonCallBack',cards)
+            if(!cards || cards.length <=0){
+                G.alterMgr.showMsgBox({content:'请选择将要打出的牌！'})
+                return
+            }
             G.globalSocket.sendMsg(Constants.SOCKET_EVENT_c2s.DOPLAY_CARDS,cards.join())
         }
     },

@@ -460,16 +460,14 @@ cc.Class({
                     }
                 }
                 if(label.string <= 0){
-                    clearInterval(self.clock.scheduleId);
-                    self.clock.scheduleId = null
-                    self.clock.node.active = false
+                    self.setClock(false)
                     if(callBack){
                         callBack()
                     }
                 }
             }else{
-                clearInterval(self.clock.scheduleId);
-                self.clock.scheduleId = null
+                self.setClock(false)
+
             }
         }, 1000)
     },

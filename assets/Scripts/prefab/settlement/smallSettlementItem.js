@@ -46,15 +46,16 @@ cc.Class({
         var jiabei = info.jiabei
         var gametype = info.gametype
         var dizhu = info.dizhu
+        var win = info.win
         self.node.active = true
-        self.nickName.getComponent(cc.Label).string = G.tools.interceptName(username)
+        self.nickName.getComponent(cc.Label).string = G.tools.interceptName(username,7)
 
         if(gametype == 'ddz'){  
             self.picDescrible.active = true
-            self.score.getComponent(cc.Label).string = score
+            self.score.getComponent(cc.Label).string = (score>=0)?('+'+score):score
             self.ratio.getComponent(cc.Label).string = ratio
-            self.jiabei.node.active = jiabei
-            self.single.node.active = dizhu
+            self.jiabei.node.color = jiabei?cc.Color.WHITE:cc.Color.GRAY
+            self.single.node.color = dizhu?cc.Color.WHITE:cc.Color.GRAY
 
             var space = 25
             for(var i = 0; i < cards.length; i++){
@@ -78,7 +79,7 @@ cc.Class({
             }
         }else{
             self.textDescrible.node.active = true
-            self.textDescrible.getComponent(cc.Label).string = '得分：'+score+'     倍率：'+ratio
+            self.textDescrible.getComponent(cc.Label).string = '得分：'+((score>=0)?('+'+score):score)+'     倍率：'+ratio
         }
 
         self.bankruptcy.node.active = (balance <= 0)

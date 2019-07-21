@@ -83,7 +83,7 @@ gamelogic.analysisServerPoker = function(card){//解析服务器牌为本地牌
     if(value){
         return value
     }
-    return -1
+    return 0
 }
 
 gamelogic.analysisServerPokers = function(cards){
@@ -106,15 +106,26 @@ gamelogic.sortCardsByType = function(cards,sortType,revorder){
         sort_cards.push(cards[i])
     }
     sort_cards.sort(function(a,b){
+        if(a == b){
+            return -1
+        }
         var value_a = gamelogic.getcardlogicvalue(a)
         var value_b = gamelogic.getcardlogicvalue(b)
         if(sortType == gamelogic.SORT_TYPE.VALUE_POINT){
             value_a = gamelogic.getcardvalue(a)
             value_b = gamelogic.getcardvalue(b)
         }
+        var color_a = gamelogic.getcardcolor(a)
+        var color_b = gamelogic.getcardcolor(b)
         if(revorder){
+            if(value_b == value_a){
+                return color_b - color_a
+            }
             return value_b - value_a
         }else{
+            if(value_b == value_a){
+                return color_a - color_b
+            }
             return value_a - value_b
         }
     })

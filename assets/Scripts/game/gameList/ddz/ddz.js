@@ -227,8 +227,9 @@ cc.Class({
                 
                 var hand = playerScript.getHandCardNode()
                 if(hand){
-                    hand.hide()
-                    hand.show(pokers,ani)
+                    hand.show()
+                    hand.addCards(pokers)
+                    hand.dealCards(ani)
                 }
             }
         }

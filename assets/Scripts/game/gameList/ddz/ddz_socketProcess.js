@@ -64,39 +64,31 @@ cc.Class({
         var self = this
         self.closeClearDisTime()
         self.m_handler.clearDis()
+        self.m_handler.clearClock()
+        self.m_handler.clearOperate()
         self.m_handler.getCardBottomScript().setRatio(ratio)
         if(gameRoomOver){
 
         }else{
-            /**
-            balance: 5030
-            cards: ""
-            dizhu: false
-            gameover: false
-            ratio: 15
-            score: 30
-            userid: "50ee8ad8f8a24f42b25f5ca253969598"
-            username: "Guest_1h1EM0"
-            win
-             */
             for(var i = 0; i < players.length; i++){
                 var playerInfo = players[i]
                 var player = self.m_handler.getPlayerByUserId(playerInfo.userid)
                 if(cc.isValid(player)){
                     var cards = ddz_logic.analysisServerPokers(Base64.decode(playerInfo.cards))
                     var win = playerInfo.win
+                    playerInfo.score = win?playerInfo.score:(-1*playerInfo.score)
                     var score = playerInfo.score
                     var balance = playerInfo.balance
                     playerInfo.chair = player.getChair()
                     playerInfo.jiabei = player.isJiabei()
-                    playerInfo.cards = cards
+                    playerInfo.cards = ddz_logic.sortCardsByType(cards)
                     playerInfo.gametype = "ddz"
                     var hand = player.getHandCardNode()
                     if(hand){
-                        hand.hide()
+                        hand.show()
                         hand.addCards(cards)
                         hand.sortCards()
-                        hand.refreshCards(false)
+                        hand.refreshCardsOne(false)
                     }
                     player.setResultSprite(true,win)
                     player.setGoldDescrible(true,score)
@@ -185,30 +177,37 @@ cc.Class({
         if(allow){
             self.m_handler.clearOperate()
             self.m_handler.clearClock()
-            if(!over){
-                if(newTurn){
-                     self.m_clearDisTimeId = setTimeout(()=>{
-                        self.m_clearDisTimeId = null;
-                        self.m_handler.clearDis()
-                     }, 1000*0.5);
+            if(newTurn && !over){
+                self.m_clearDisTimeId = setTimeout(()=>{
+                self.m_clearDisTimeId = null;
+                self.m_handler.clearDis()
+                }, 1000*0.5);
+            }
+            var currentPlayer = self.m_handler.getPlayerByUserId(userid)
+            if(currentPlayer){
+                var dis = currentPlayer.getDisCardNode()
+                var hand = currentPlayer.getHandCardNode()
+                if(dis && hand){
+                    dis.hide()
+                    hand.outCards(cards,function(outCardsInfo){
+                        dis.showCards(outCardsInfo,true)
+                        dis.showOutCardEffect(cardType,true)
+                    })
                 }
-                var currentPlayer = self.m_handler.getPlayerByUserId(userid)
-                if(currentPlayer){
-                    var dis = currentPlayer.getDisCardNode()
-                    var hand = currentPlayer.getHandCardNode()
-                    if(dis && hand){
-                        dis.hide()
-                        hand.outCards(cards,function(outCardsInfo){
-                            dis.showCards(outCardsInfo,true)
-                            dis.showOutCardEffect(cardType,true)
-                        })
-                    }
-                }
-                var next_player = self.m_handler.getPlayerByUserId(nextplayer)
-                if(next_player){
-                    next_player.setClock(true,30)
-                    if(next_player.isSelf()){
-                        next_player.setOperateNode(true)
+            }
+            var next_player = self.m_handler.getPlayerByUserId(nextplayer)
+            if(next_player && !over){
+                next_player.setClock(true,30)
+                if(next_player.isSelf()){
+                    next_player.setOperateNode(true)
+                    if(newTurn){
+                        next_player.getPlayerEvent().showOperateByIndex(0,[
+                            {name:'outCardButton',visible:true},
+                            {name:'tipButton',visible:true},
+                            {name:'ybqButton',visible:false},
+                            {name:'buchuButton',visible:false},
+                        ])
+                    }else{
                         next_player.getPlayerEvent().showOperateByIndex(0,[
                             {name:'outCardButton',visible:true},
                             {name:'tipButton',visible:true},
@@ -216,13 +215,11 @@ cc.Class({
                             {name:'buchuButton',visible:true},
                         ])
                     }
-                    var dis = next_player.getDisCardNode()
-                    if(dis){
-                        dis.hide()
-                    }
                 }
-            }else{
-
+                var dis = next_player.getDisCardNode()
+                if(dis){
+                    dis.hide()
+                }
             }
         }else{
             G.alterMgr.showMsgBox({content:'出牌不符规则！'})

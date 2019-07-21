@@ -74,17 +74,17 @@ cc.Class({
         return null;
     },
 
-    show(info,ani){
+    show(){
         var self = this
-        if(!info || info.length <= 0){
-            return
-        }
-        info = info || []
+        self.hide()
         if(!self.m_cardNode.active){
             self.m_cardNode.active = true
         }
-        console.log(TAG,'show',info)
-        self.addCards(info)
+    },
+
+    dealCards(ani){
+        ani = ani || false
+        var self = this
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             var cardScript = card.getComponent('poker')
@@ -103,7 +103,9 @@ cc.Class({
         if(self.m_handCardTouch){
             self.m_handCardTouch.canTouched(false)
         }
+        
         if(self.m_chair == config.chair.home){
+            self.m_object.setCardNumSprite(false,0)
             self.addCardTypeOne(ani)
         }else{
             self.m_object.setCardNumSprite(true,0)
@@ -150,8 +152,6 @@ cc.Class({
         info = info || []
         var self = this
         var cards = ddz_logic.sortCardsByType(info)
-        console.log(TAG,'getCardsInfo  self.m_cards',self.m_cards)
-        console.log(TAG,'getCardsInfo  cards',cards)
         var cards_info = new Array()
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
@@ -189,7 +189,6 @@ cc.Class({
         info = info || []
         var self = this
         var cards_info = self.getCardsInfo(info)
-        console.log(TAG,'outCards cards_info',cards_info)
         var outCardsInfo = new Array()
 
         var call = function(target,data){
@@ -202,14 +201,15 @@ cc.Class({
             self.m_cards.splice(card_index,1)
             self.getTouchNode()?self.getTouchNode().removeSelectedCard(card_index):null
             self.m_cardsPool.put(card_node)
-            
-            if(self.m_chair != config.chair.home){
-                var numInfo = self.m_object.getCardNum()
-                self.m_object.setCardNumSprite(true,numInfo.describle - 1)
-            }
-            
+            self.m_cardNode.removeChild(card_node)
             if(index <= 0){
-                self.refreshCards(true)
+                if(self.m_chair == config.chair.home){
+                    self.m_object.setCardNumSprite(false,self.m_cards.length)
+                    self.refreshCardsOne(true)
+                }else{
+                    self.m_object.setCardNumSprite(true,self.m_cards.length)
+                    self.refreshCardsTwo(true)
+                }
                 if(callBack){
                     callBack(outCardsInfo)
                 }
@@ -245,11 +245,12 @@ cc.Class({
         console.log(TAG,'addLastCards',info)
         self.addCards(info)
         if(self.m_chair == config.chair.home){
+            self.m_object.setCardNumSprite(false)
             self.sortCards()
-            self.refreshCards(ani)
+            self.refreshCardsOne(ani)
         }else{
             self.m_object.setCardNumSprite(true)
-            self.addCardTypeTwo(ani)
+            self.refreshCardsTwo(ani)
         }
     },
 
@@ -310,6 +311,9 @@ cc.Class({
             var index = data.index
             self.m_object.setCardNumSprite(true,index+1)
             target.active = false
+            if(index + 1 >= self.m_cards.length){
+                self.refreshCardsTwo(false)
+            }
         }
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
@@ -323,7 +327,13 @@ cc.Class({
                 }
                 if(ani){
                     G.audioManager.playSFX('deal.mp3')
-                    card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,endPos.x,endPos.y),cc.callFunc(callBack,card,{index:i})))
+                    card.node.runAction(
+                        cc.sequence(
+                            cc.delayTime(i*delay),
+                            cc.moveTo(duation,endPos.x,endPos.y),
+                            cc.callFunc(callBack,card.node,{index:i})
+                        )
+                    )
                 }else{
                     card.setPokerCurrentPosition(endPos.x)
                     callBack(card.node,{index:i})
@@ -362,7 +372,6 @@ cc.Class({
         if(!args)return
         args = args || {}
         var self = this
-        if(self.m_chair != config.chair.home)return
         var ani = args.ani || false
         self.sortCards()
         for(var i = 0; i < self.m_cards.length; i++){
@@ -394,24 +403,77 @@ cc.Class({
     pokerFilpEnd(){
         console.log(TAG,'pokerFilpEnd')
         var self = this
-        if(self.m_chair != config.chair.home)return
-        self.refreshCards(false)
+        self.refreshCardsOne(false)
         if(self.m_handCardTouch){
             self.m_handCardTouch.canTouched(true)
         }
         G.eventManager.emitEvent(Constants.LOCALEVENT.POKER_FILP_END)
     },
 
-    refreshCards(ani){
+    refreshCardsTwo(ani){
         ani = ani || false
         var self = this
-        if(self.m_chair != config.chair.home)return
-        console.log(TAG,'refreshCards',self.m_cards.length)
+        console.log(TAG,'refreshCardsTwo',self.m_cards.length)
+        var cardObject = self.m_object.getCardNum()
+        var worldPos = cardObject.object.node.convertToWorldSpace(cc.v2(0,0))
+        var endPos = self.m_cardNode.convertToNodeSpaceAR(worldPos)
+        var scale = config.handCardScale[self.m_chair]
+        var duation = 0.05
+        var delay = 0.01
+
+        var callBack = function(target,data){
+            var index = data.index
+            self.m_object.setCardNumSprite(true,index+1)
+            target.active = false
+            if(index + 1 >= self.m_cards.length){
+                self.m_object.setCardNumSprite(true,self.m_cards.length)
+            }
+        }
+
+        for(var i = 0; i < self.m_cards.length; i++){
+            var card = self.m_cards[i]
+            if(cc.isValid(card)){
+                card.stopAllActions()
+                card = card.getComponent('poker')
+                card.setPokerScale(scale)
+                card.setCard()
+                card.setPokerNormalPosition({x:endPos.x,y:endPos.y})
+                if(ani){
+                    G.audioManager.playSFX('deal.mp3')
+                    card.node.runAction(
+                        cc.sequence(
+                            cc.delayTime(i*delay),
+                            cc.moveTo(duation,endPos.x,endPos.y),
+                            cc.callFunc(callBack,card.node,{index:i})
+                        )
+                    )
+                }else{
+                    card.setPokerCurrentPosition({x:endPos.x,y:endPos.y})
+                    callBack(card.node,{index:i})
+                }
+            }
+        }
+    },
+
+    refreshCardsOne(ani){
+        ani = ani || false
+        var self = this
+        console.log(TAG,'refreshCardsOne',self.m_cards.length)
         var space = self.getSpace()
         var startPos = self.getStartPos(space)
         var scale = config.handCardScale[self.m_chair]
         var duation = 0.05
         var delay = 0.01
+
+        var callBack = function(target,data){
+            var index = data.index
+            self.m_object.setCardNumSprite(false,index+1)
+            target.active = true
+            if(index + 1 >= self.m_cards.length){
+                self.m_object.setCardNumSprite(false,self.m_cards.length)
+            }
+        }
+
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             if(cc.isValid(card)){
@@ -426,11 +488,13 @@ cc.Class({
                     card.node.runAction(
                         cc.sequence(
                             cc.delayTime(i*delay),
-                            cc.moveTo(duation,startPos.x + i*space,startPos.y)
+                            cc.moveTo(duation,startPos.x + i*space,startPos.y),
+                            cc.callFunc(callBack,card.node,{index:i})
                         )
                     )
                 }else{
                     card.setPokerCurrentPosition({x:startPos.x + i*space,y:startPos.y})
+                    callBack(card.node,{index:i})
                 }
             }
         }

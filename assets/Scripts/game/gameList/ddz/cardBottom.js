@@ -94,7 +94,7 @@ cc.Class({
             cardScript.setLogic(ddz_logic)
             cardScript.setAtlas(self.m_pokerAtlas)
             cardScript.setPokerType(2)
-            cardScript.setCard(-1)
+            cardScript.setCard(0)
             cardScript.setValue(value)
             cardScript.setPokerCurrentPosition(cc.v2(config.normalBottomPokerSize.width*scale.x/2 - self.node.width/2,0))
         }

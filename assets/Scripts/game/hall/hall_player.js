@@ -11,6 +11,6 @@ cc.Class({
         console.log(TAG,'onLoad')
         var self = this
         self.gold.string = G.selfUserData.getUserCoins()
-        self.nickName.string = G.tools.interceptName(G.selfUserData.getUserName())
+        self.nickName.string = G.tools.interceptName(G.selfUserData.getUserName(),12)
     },
 });
