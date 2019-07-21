@@ -75,6 +75,8 @@ cc.Class({
         G.globalSocket.send(Constants.SOCKET_EVENT_c2s.JOIN_ROOM,data)
         if(G.gameInfo.isGamePlay){
             G.globalLoading.setLoadingVisible(true,'正在恢复数据中...')
+        }else{
+            G.globalLoading.setLoadingVisible(true,'正在创建房间中...')
         }
         G.eventManager.listenEvent(Constants.LOCALEVENT.POKER_FILP_END,self.pokerFilpEnd,self)
     },

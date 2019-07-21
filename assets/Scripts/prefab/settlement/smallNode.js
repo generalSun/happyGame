@@ -27,7 +27,7 @@ cc.Class({
         }
         
         self.node.active = true
-        var space = 150
+        var space = 120
         var startY = 183
         for(var i = 0; i < infos.length; i++){
             var info = infos[i]
@@ -49,6 +49,8 @@ cc.Class({
         var self = this
         for(var i = 0; i < self.m_infoItem.length; i++){
             var item = self.m_infoItem[i]
+            var script = item.getComponent("smallSettlementItem");
+            script.hide()
             self.m_infoPool.put(item)
         }
         self.playerInfo.removeAllChildren()

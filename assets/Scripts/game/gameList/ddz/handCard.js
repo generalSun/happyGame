@@ -106,7 +106,7 @@ cc.Class({
         if(self.m_chair == config.chair.home){
             self.addCardTypeOne(ani)
         }else{
-            self.m_object.setCardNumSprite(true)
+            self.m_object.setCardNumSprite(true,0)
             self.addCardTypeTwo(ani)
         }
     },
@@ -311,7 +311,6 @@ cc.Class({
             self.m_object.setCardNumSprite(true,index+1)
             target.active = false
         }
-
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
             if(cc.isValid(card)){
@@ -327,7 +326,7 @@ cc.Class({
                     card.node.runAction(cc.sequence(cc.delayTime(i*delay),cc.moveTo(duation,endPos.x,endPos.y),cc.callFunc(callBack,card,{index:i})))
                 }else{
                     card.setPokerCurrentPosition(endPos.x)
-                    callBack(card,{index:i})
+                    callBack(card.node,{index:i})
                 }
             }
         }
@@ -356,7 +355,6 @@ cc.Class({
                 poker.setValue(valueArray[i])
             }
         }
-        console.log(TAG,'sortCards',valueArray)
     },
 
     //自己发牌结束

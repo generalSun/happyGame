@@ -5,7 +5,7 @@ cc.Class({
     properties: {
         head:cc.Sprite,
         bankruptcy:cc.Sprite,
-        chair:cc.Sprite,
+        chairPos:cc.Sprite,
         chairRes:[cc.SpriteFrame],
         nickName:cc.Label,
         textDescrible:cc.Label,
@@ -26,11 +26,6 @@ cc.Class({
         self.m_logic = logic
         self.textDescrible.node.active = false
         self.picDescrible.active = false
-        if(logic.gameType == 'poker'){  
-            self.picDescrible.active = true
-        }else{
-            self.textDescrible.node.active = true
-        }
     },
 
     show(info){
@@ -49,39 +44,45 @@ cc.Class({
         var username = info.username
         var chair = info.chair
         var jiabei = info.jiabei
-        var single = info.single
+        var gametype = info.gametype
+        var dizhu = info.dizhu
         self.node.active = true
-        self.nickName.getComponent(cc.Label).string = username
-        if(self.picDescrible.active){
+        self.nickName.getComponent(cc.Label).string = G.tools.interceptName(username)
+
+        if(gametype == 'ddz'){  
+            self.picDescrible.active = true
             self.score.getComponent(cc.Label).string = score
             self.ratio.getComponent(cc.Label).string = ratio
             self.jiabei.node.active = jiabei
-            self.single.node.active = single
+            self.single.node.active = dizhu
+
+            var space = 25
+            for(var i = 0; i < cards.length; i++){
+                var value = cards[i]
+                if(self.m_cardsPool.size() <= 0){
+                    var card = cc.instantiate(self.m_pokerPrefab);
+                    self.m_cardsPool.put(card); 
+                }
+                var node = self.m_cardsPool.get();
+                node.active = true;
+                self.showNode.addChild(node);
+                self.m_cards.push(node)
+                var cardScript = node.getComponent('poker')
+                
+                cardScript.setPokerScale(1)
+                cardScript.setLogic(self.m_logic)
+                cardScript.setAtlas(self.m_pokerAtlas)
+                cardScript.setPokerType(2)
+                cardScript.setCard(value)
+                cardScript.setPokerCurrentPosition(i*space)
+            }
         }else{
+            self.textDescrible.node.active = true
             self.textDescrible.getComponent(cc.Label).string = '得分：'+score+'     倍率：'+ratio
         }
+
         self.bankruptcy.node.active = (balance <= 0)
-        
-        var space = 25
-        for(var i = 0; i < cards.length; i++){
-            var value = cards[i]
-            if(self.m_cardsPool.size() <= 0){
-                var card = cc.instantiate(self.m_pokerPrefab);
-                self.m_cardsPool.put(card); 
-            }
-            var node = self.m_cardsPool.get();
-            node.active = true;
-            self.showNode.addChild(node);
-            self.m_cards.push(node)
-            var cardScript = node.getComponent('poker')
-            
-            cardScript.setPokerScale(1)
-            cardScript.setLogic(self.m_logic)
-            cardScript.setAtlas(self.m_pokerAtlas)
-            cardScript.setPokerType(2)
-            cardScript.setCard(value)
-            cardScript.setPokerCurrentPosition(i*space)
-        }
+        self.chairPos.getComponent(cc.Sprite).spriteFrame = self.chairRes[chair]
     },
 
     hide(){

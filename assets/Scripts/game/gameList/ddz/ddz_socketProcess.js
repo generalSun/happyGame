@@ -18,7 +18,6 @@ cc.Class({
             [Constants.SOCKET_EVENT_s2c.PLAYER_JOIN]:self.playerJoin,
             [Constants.SOCKET_EVENT_s2c.ROOM_READY]:self.roomReady,
             [Constants.SOCKET_EVENT_s2c.PLAYER_READY]:self.playerReady,
-            [Constants.SOCKET_EVENT_s2c.BANKER]:self.banker,
             [Constants.SOCKET_EVENT_s2c.PLAYING_GAME]:self.gameBegin,
             [Constants.SOCKET_EVENT_s2c.CATCH_SIGN]:self.catchSign,
             [Constants.SOCKET_EVENT_s2c.CATCHRESULT]:self.catchResult,
@@ -89,8 +88,9 @@ cc.Class({
                     var score = playerInfo.score
                     var balance = playerInfo.balance
                     playerInfo.chair = player.getChair()
-                    playerInfo.single = player.isLandlord()
                     playerInfo.jiabei = player.isJiabei()
+                    playerInfo.cards = cards
+                    playerInfo.gametype = "ddz"
                     var hand = player.getHandCardNode()
                     if(hand){
                         hand.hide()
@@ -106,24 +106,13 @@ cc.Class({
                     }
                 }
             }
-            self.m_event.setStartButtonVisible(true)
+            self.m_event.setStartButtonVisible(true,true)
             self.m_event.setOpendealButtonVisible(true)
             self.m_settlementTimeId = setTimeout(()=>{
                 self.m_settlementTimeId = null;
                 self.m_handler.getSettlementScript().show()
                 self.m_handler.getSettlementScript().showSmall(players)
              }, 1000*0.5)
-        }
-    },
-
-    banker:function(msg){
-        console.log(TAG,'banker',msg)
-        if(!msg)return;
-        var userid = msg.userid
-        var self = this
-        var player = self.m_handler.getPlayerByUserId(userid)
-        if(player){
-            player.setOwnerSprite(true)
         }
     },
 

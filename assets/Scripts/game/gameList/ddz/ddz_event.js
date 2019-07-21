@@ -24,6 +24,7 @@ cc.Class({
 
     setReadyButtonVisible(visible){
         var self = this
+        visible = visible || false
         var readyButton = cc.find('readyButton',self.buttonNode)
         if(readyButton){
             readyButton.active = visible
@@ -32,22 +33,32 @@ cc.Class({
 
     setOpendealButtonVisible(visible){
         var self = this
+        visible = visible || false
         var opendealButton = cc.find('opendealButton',self.buttonNode)
         if(opendealButton){
             opendealButton.active = visible
         }
     },
 
-    setStartButtonVisible(visible){
+    setStartButtonVisible(visible,flag){
         var self = this
+        visible = visible || false
+        flag = flag || false
         var startButton = cc.find('startButton',self.buttonNode)
         if(startButton){
             startButton.active = visible
+            if(visible){
+                var continueSprite = cc.find('Background/continue',startButton)
+                var startSprite = cc.find('Background/describle',startButton)
+                continueSprite.active = flag
+                startSprite.active = !flag
+            }
         }
     },
 
     setInviteButtonVisible(visible){
         var self = this
+        visible = visible || false
         var inviteButton = cc.find('inviteButton',self.buttonNode)
         if(inviteButton){
             inviteButton.active = visible

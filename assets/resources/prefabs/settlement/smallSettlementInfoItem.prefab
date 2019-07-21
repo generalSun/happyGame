@@ -34,7 +34,7 @@
       }
     ],
     "_active": true,
-    "_level": 2,
+    "_level": 1,
     "_components": [
       {
         "__id__": 44
@@ -1567,7 +1567,7 @@
     "bankruptcy": {
       "__id__": 9
     },
-    "chair": {
+    "chairPos": {
       "__id__": 12
     },
     "chairRes": [
