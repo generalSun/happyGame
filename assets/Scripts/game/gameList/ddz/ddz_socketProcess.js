@@ -67,45 +67,41 @@ cc.Class({
         self.m_handler.clearClock()
         self.m_handler.clearOperate()
         self.m_handler.getCardBottomScript().setRatio(ratio)
-        if(gameRoomOver){
-
-        }else{
-            for(var i = 0; i < players.length; i++){
-                var playerInfo = players[i]
-                var player = self.m_handler.getPlayerByUserId(playerInfo.userid)
-                if(cc.isValid(player)){
-                    var cards = ddz_logic.analysisServerPokers(Base64.decode(playerInfo.cards))
-                    var win = playerInfo.win
-                    playerInfo.score = win?playerInfo.score:(-1*playerInfo.score)
-                    var score = playerInfo.score
-                    var balance = playerInfo.balance
-                    playerInfo.chair = player.getChair()
-                    playerInfo.jiabei = player.isJiabei()
-                    playerInfo.cards = ddz_logic.sortCardsByType(cards)
-                    playerInfo.gametype = "ddz"
-                    var hand = player.getHandCardNode()
-                    if(hand){
-                        hand.show()
-                        hand.addCards(cards)
-                        hand.sortCards()
-                        hand.refreshCardsOne(false)
-                    }
-                    player.setResultSprite(true,win)
-                    player.setGoldDescrible(true,score)
-                    player.setGoldCoins(true,balance)
-                    if(player.isSelf()){
-                        G.selfUserData.setUserCoins(balance)
-                    }
+        for(var i = 0; i < players.length; i++){
+            var playerInfo = players[i]
+            var player = self.m_handler.getPlayerByUserId(playerInfo.userid)
+            if(cc.isValid(player)){
+                var cards = ddz_logic.analysisServerPokers(Base64.decode(playerInfo.cards))
+                var win = playerInfo.win
+                playerInfo.score = win?playerInfo.score:(-1*playerInfo.score)
+                var score = playerInfo.score
+                var balance = playerInfo.balance
+                playerInfo.chair = player.getChair()
+                playerInfo.jiabei = player.isJiabei()
+                playerInfo.cards = ddz_logic.sortCardsByType(cards)
+                playerInfo.gametype = "ddz"
+                var hand = player.getHandCardNode()
+                if(hand){
+                    hand.show()
+                    hand.addCards(cards)
+                    hand.sortCards()
+                    hand.refreshCardsOne(false)
+                }
+                player.setResultSprite(true,win)
+                player.setGoldDescrible(true,score)
+                player.setGoldCoins(true,balance)
+                if(player.isSelf()){
+                    G.selfUserData.setUserCoins(balance)
                 }
             }
-            self.m_event.setStartButtonVisible(true,true)
-            self.m_event.setOpendealButtonVisible(true)
-            self.m_settlementTimeId = setTimeout(()=>{
-                self.m_settlementTimeId = null;
-                self.m_handler.getSettlementScript().show()
-                self.m_handler.getSettlementScript().showSmall(players)
-             }, 1000*0.5)
         }
+        self.m_event.setStartButtonVisible(!gameRoomOver,true)
+        self.m_event.setOpendealButtonVisible(!gameRoomOver)
+        self.m_settlementTimeId = setTimeout(()=>{
+            self.m_settlementTimeId = null;
+            self.m_handler.getSettlementScript().show(finished,gameRoomOver)
+            self.m_handler.getSettlementScript().showSmall(players)
+        }, 1000*0.5)
     },
 
     recovery:function(msg){

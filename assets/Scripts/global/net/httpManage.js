@@ -3,8 +3,8 @@ var Constants = require('./../../config/Constants')
  * Http 请求封装
  */
 var httpManage ={
-    // accountServerUrl:"http://127.0.0.1:8080",
-    accountServerUrl:"http://127.0.0.1",
+    // accountServerUrl:"https://127.0.0.1:8080",
+    accountServerUrl:"http://192.168.0.102",
     sendRequest:function (path, data, successHandler, errorHandler, extraUrl,desc) {
         G.globalLoading.setLoadingVisible(true,desc)
         var xhr = cc.loader.getXMLHttpRequest();

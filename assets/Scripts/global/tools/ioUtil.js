@@ -1,8 +1,13 @@
+"use strict";
 var IOUtil = {
     get:function(key){
         var value = cc.sys.localStorage.getItem(key);
-        if(typeof value == 'string'){
-            value = JSON.parse(value)
+        if(value != null && typeof value == 'string' && value.length > 0){
+            if(value.length > 0){
+                value = JSON.parse(value);
+            }else{
+                value = null
+            }
         }
         return value
     },

@@ -152,6 +152,8 @@ cc.Class({
         info = info || []
         var self = this
         var cards = ddz_logic.sortCardsByType(info)
+        console.log(TAG,'getCardsInfo cards',cards)
+        var infoLength = cards.length
         var cards_info = new Array()
         for(var i = 0; i < self.m_cards.length; i++){
             var card = self.m_cards[i]
@@ -170,11 +172,17 @@ cc.Class({
                         break
                     }
                 }
-                if(cards.length <= 0){
-                    break
-                }
             }
         }
+        if(cards_info.length != infoLength){
+            console.log(TAG,'已找出的牌信息',cards_info)
+            throw "未找出准备数目的牌"
+        }
+        console.log(TAG,'getCardsInfo cards_info',cards_info)
+        cards_info.sort(function(a,b){
+            return a.index - b.index
+        })
+        console.log(TAG,'getCardsInfo cards_info',cards_info)
         return cards_info
     },
 

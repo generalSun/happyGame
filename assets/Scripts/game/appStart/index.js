@@ -1,3 +1,4 @@
+"use strict";
 require('./../../global/tools/stringExtra')
 require('./../../global/tools/buttonExtra')
 var Constants = require('./../../config/Constants')

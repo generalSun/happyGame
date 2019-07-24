@@ -35,11 +35,11 @@
     "orientation": "portrait",
     "zip": false
   },
-  "startScene": "2adf7ed5-a205-4593-8798-2e855095057a",
-  "title": "ddz_client",
+  "startScene": "9a106cb7-1721-4004-a4bd-4bcfedb5922a",
+  "title": "happygame",
   "webOrientation": "auto",
   "wechatgame": {
-    "REMOTE_SERVER_ROOT": "",
+    "REMOTE_SERVER_ROOT": "http://192.168.0.102",
     "appid": "wxafc956f84f22788f",
     "orientation": "landscape",
     "subContext": ""

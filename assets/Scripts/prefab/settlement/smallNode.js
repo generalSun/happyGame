@@ -24,8 +24,8 @@ cc.Class({
         var self = this
         if(!infos || infos.length <= 0){
             self.hide()
+            return
         }
-        
         self.node.active = true
         var space = 120
         var startY = 183

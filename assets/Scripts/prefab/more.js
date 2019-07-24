@@ -76,6 +76,7 @@ cc.Class({
         }else{
             G.globalSocket.send(Constants.SOCKET_EVENT_c2s.EXIT_GAME)
         }
+        G.globalSocket.send(Constants.SOCKET_EVENT_c2s.EXIT_GAME)
     },
 
     onDestroy(){

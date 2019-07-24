@@ -33,8 +33,8 @@ cc.Class({
         var self = this
         if(!info || info.length <= 0){
             self.hide()
+            return
         }
-        
         var balance = info.balance
         var cards = info.cards
         var gameover = info.gameover

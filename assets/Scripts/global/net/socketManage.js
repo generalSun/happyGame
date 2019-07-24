@@ -19,7 +19,7 @@ cc.Class({
         self.m_dispatchMsgTimeId = null
         self.m_msgList = new Array()
         self.m_msgBlock = false
-        self.m_serverUrl = "ws://localhost:9081"
+        self.m_serverUrl = "ws://192.168.0.102:9081"
     },
 
     setUrl(url){

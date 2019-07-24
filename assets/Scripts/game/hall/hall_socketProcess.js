@@ -1,4 +1,4 @@
-var Constants = require('../../../config/Constants')
+var Constants = require('./../../config/Constants')
 var TAG = 'hall_socketProcess.js'
 cc.Class({
     extends: cc.Component,

@@ -13,26 +13,35 @@ cc.Class({
         self.m_smallScript = self.smallNode.getComponent('smallNode')
         self.m_smallScript.init(pokerAtlas,pokerPrefab,logic)
         self.m_totalScript = self.totalNode.getComponent('totalNode')
-        self.m_totalScript.init(pokerAtlas,pokerPrefab,logic)
+        self.m_totalScript.init()
+        self.m_finished = false
+        self.m_gameRoomOver = false
+        self.m_settlementInfo = null
         self.hide()
     },
 
-    show(){
+    show(finished,gameRoomOver){
         var self = this
         self.hide()
         if(!self.node.active){
             self.node.active = true
         }
+        self.m_finished = finished
+        self.m_gameRoomOver = gameRoomOver
     },
 
     showSmall(info){
         var self = this
         self.m_smallScript.hide()
         self.m_smallScript.show(info)
+        self.m_settlementInfo = info
     },
 
     showTotal(info){
         var self = this
+        if(!info || info.length <= 0){
+            info = self.m_settlementInfo
+        }
         self.m_totalScript.hide()
         self.m_totalScript.show(info)
     },
@@ -63,7 +72,11 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        self.hide()
+        if(self.m_gameRoomOver){
+            self.showTotal()
+        }else{
+            self.hide()
+        }
     },
 
     onShareClickCallBack(event, customEventData){
@@ -93,6 +106,6 @@ cc.Class({
         var button = node.getComponent(cc.Button);
         //这里的 customEventData 参数就等于你之前设置的 "click1 user data"
         cc.log("node=", node.name, " event=", event.type, " data=", customEventData);
-        
+        self.hide()
     },
 });

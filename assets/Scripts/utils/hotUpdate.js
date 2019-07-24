@@ -186,7 +186,7 @@ cc.Class({
         var searchPaths = jsb.fileUtils.getSearchPaths();
         var newPaths = self._am.getLocalManifest().getSearchPaths();
         Array.prototype.unshift.apply(searchPaths, newPaths);
-        G.ioUtil.set(Constants.LOCALLSTORAGEKEY.HOTUPDATESEARCHPATHS,JSON.stringify(searchPaths))
+        G.ioUtil.set(Constants.LOCALLSTORAGEKEY.HOTUPDATESEARCHPATHS,searchPaths)
         jsb.fileUtils.setSearchPaths(searchPaths);
         cc.audioEngine.stopAll();
         cc.game.restart();
